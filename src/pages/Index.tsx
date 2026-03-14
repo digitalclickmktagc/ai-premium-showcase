@@ -6,10 +6,12 @@ import BenefitsSection from "@/components/BenefitsSection";
 import QuoteSection from "@/components/QuoteSection";
 import TestimonialsSection from "@/components/TestimonialsSection";
 import Footer from "@/components/Footer";
+import FloatingParticles from "@/components/FloatingParticles";
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative">
+      <FloatingParticles />
       <Navbar />
       <main>
         <HeroSection />
