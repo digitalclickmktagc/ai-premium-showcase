@@ -2,11 +2,11 @@ import { Linkedin, Instagram, MessageCircle, Mail, Phone, MapPin } from "lucide-
 
 const Footer = () => {
   return (
-    <footer id="contato" className="border-t border-border/50 pt-16 pb-8">
+    <footer id="contato" className="border-t border-border/50 pt-16 pb-8 bg-card">
       <div className="container mx-auto px-4 lg:px-8">
         <div className="grid md:grid-cols-3 gap-12 mb-12">
           <div>
-            <h3 className="font-display text-xl font-extrabold mb-4">
+            <h3 className="font-display text-xl font-extrabold mb-4 text-foreground">
               NEXA<span className="text-gradient-nexa">.IA</span>
             </h3>
             <p className="text-sm text-muted-foreground font-body leading-relaxed mb-4">
@@ -16,7 +16,7 @@ const Footer = () => {
           </div>
 
           <div>
-            <h4 className="font-display font-bold text-sm tracking-widest uppercase mb-4">Contato</h4>
+            <h4 className="font-display font-bold text-sm tracking-widest uppercase mb-4 text-foreground">Contato</h4>
             <ul className="space-y-3 text-sm text-muted-foreground font-body">
               <li className="flex items-center gap-2">
                 <Mail size={14} className="text-primary" /> contato@nexaia.com.br
@@ -31,13 +31,13 @@ const Footer = () => {
           </div>
 
           <div>
-            <h4 className="font-display font-bold text-sm tracking-widest uppercase mb-4">Redes Sociais</h4>
+            <h4 className="font-display font-bold text-sm tracking-widest uppercase mb-4 text-foreground">Redes Sociais</h4>
             <div className="flex gap-3">
               {[Linkedin, Instagram, MessageCircle].map((Icon, i) => (
                 <a
                   key={i}
                   href="#"
-                  className="w-10 h-10 rounded-lg glass flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/30 transition-all"
+                  className="w-10 h-10 rounded-lg border border-border bg-background flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/30 transition-all"
                 >
                   <Icon size={18} />
                 </a>
