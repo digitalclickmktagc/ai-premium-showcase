@@ -1,0 +1,85 @@
+import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
+import { ArrowRight, Play } from "lucide-react";
+
+const HeroSection = () => {
+  return (
+    <section className="relative min-h-screen flex items-center justify-center pt-16 overflow-hidden">
+      {/* Background glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-primary/10 blur-[120px] pointer-events-none" />
+      <div className="absolute top-1/3 right-1/4 w-[300px] h-[300px] rounded-full bg-[#3B82F6]/8 blur-[100px] pointer-events-none" />
+
+      <div className="container mx-auto px-4 lg:px-8 text-center relative z-10">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="max-w-4xl mx-auto"
+        >
+          <p className="text-sm font-medium tracking-widest uppercase text-muted-foreground mb-6">
+            Automação Inteligente com IA
+          </p>
+
+          <h1 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold leading-tight mb-8">
+            O Próximo Nível da{" "}
+            <br className="hidden sm:block" />
+            Automação com <span className="text-gradient-nexa">IA</span>
+          </h1>
+
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-12 font-body"
+          >
+            Escale o faturamento da sua empresa com automação de processos, agentes de IA
+            e tecnologia sob medida, sem dor de cabeça.
+          </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="flex flex-col sm:flex-row items-center justify-center gap-4"
+          >
+            <Button variant="glow" size="lg" className="text-base px-8">
+              Falar com um Especialista
+              <ArrowRight className="ml-2" size={18} />
+            </Button>
+            <Button variant="ghost-glass" size="lg" className="text-base px-8">
+              <Play size={16} className="mr-2" />
+              Ver Soluções
+            </Button>
+          </motion.div>
+        </motion.div>
+
+        {/* Abstract visual element */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8, delay: 0.6 }}
+          className="mt-20 mx-auto max-w-3xl"
+        >
+          <div className="glass-card rounded-2xl p-1">
+            <div className="bg-secondary/50 rounded-xl h-64 md:h-80 flex items-center justify-center">
+              <div className="flex gap-4 items-end">
+                {[40, 65, 50, 80, 60, 90, 75].map((h, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ height: 0 }}
+                    animate={{ height: `${h}%` }}
+                    transition={{ duration: 0.6, delay: 0.8 + i * 0.1 }}
+                    className="w-6 md:w-8 rounded-t-md bg-gradient-to-t from-[#8B5CF6] to-[#3B82F6] opacity-80"
+                    style={{ maxHeight: `${h}%`, minHeight: 20, height: h * 2 }}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  );
+};
+
+export default HeroSection;
