@@ -50,7 +50,7 @@ const BenefitsSection = () => {
               transition={{ duration: 0.4, delay: i * 0.15 }}
               className="text-center"
             >
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#8B5CF6]/20 to-[#3B82F6]/20 flex items-center justify-center mx-auto mb-6 border border-primary/20">
+              <div className="w-14 h-14 rounded-2xl bg-primary/20 flex items-center justify-center mx-auto mb-6 border border-primary/20">
                 <b.icon size={24} className="text-primary" />
               </div>
               <h3 className="font-display text-xl font-bold mb-3">{b.title}</h3>

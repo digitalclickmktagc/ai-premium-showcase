@@ -7,7 +7,7 @@ const HeroSection = () => {
     <section className="relative min-h-screen flex items-center justify-center pt-16 overflow-hidden">
       {/* Background glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-primary/10 blur-[120px] pointer-events-none" />
-      <div className="absolute top-1/3 right-1/4 w-[300px] h-[300px] rounded-full bg-[#3B82F6]/8 blur-[100px] pointer-events-none" />
+      <div className="absolute top-1/3 right-1/4 w-[300px] h-[300px] rounded-full bg-primary/5 blur-[100px] pointer-events-none" />
 
       <div className="container mx-auto px-4 lg:px-8 text-center relative z-10">
         <motion.div
@@ -69,7 +69,7 @@ const HeroSection = () => {
                     initial={{ height: 0 }}
                     animate={{ height: `${h}%` }}
                     transition={{ duration: 0.6, delay: 0.8 + i * 0.1 }}
-                    className="w-6 md:w-8 rounded-t-md bg-gradient-to-t from-[#8B5CF6] to-[#3B82F6] opacity-80"
+                    className="w-6 md:w-8 rounded-t-md bg-gradient-to-t from-primary/60 to-primary opacity-80"
                     style={{ maxHeight: `${h}%`, minHeight: 20, height: h * 2 }}
                   />
                 ))}
