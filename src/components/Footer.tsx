@@ -7,9 +7,9 @@ const Footer = () => {
       <div className="container mx-auto px-4 lg:px-8">
         <div className="grid md:grid-cols-3 gap-12 mb-12">
           <div>
-            <h3 className="font-display text-xl font-extrabold mb-4 text-foreground">
-              NEXA<span className="text-gradient-nexa">.IA</span>
-            </h3>
+            <a href="#" className="flex items-center mb-4">
+              <img src={nexaLogo} alt="NEXA.IA" className="h-10 w-auto" />
+            </a>
             <p className="text-sm text-muted-foreground font-body leading-relaxed mb-4">
               Automação inteligente para empresas que querem crescer sem dor de cabeça.
             </p>
