@@ -30,14 +30,16 @@ const BenefitsSection = () => {
           transition={{ duration: 0.5 }}
           className="text-center mb-16"
         >
-          <p className="text-sm font-medium tracking-widest uppercase text-gradient-nexa mb-4">
+          <p className="text-sm font-medium tracking-[0.3em] uppercase text-gradient-nexa mb-4">
             Por que a NEXA.IA?
           </p>
-          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold">
-            Transformamos <span className="text-gradient-nexa">complexidade</span>
-            <br />
-            em crescimento real.
+          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight">
+            Complexidade{" "}
+            <span className="text-gradient-nexa">simplificada.</span>
           </h2>
+          <p className="text-muted-foreground font-body font-light mt-4 max-w-lg mx-auto">
+            Transformamos gargalos operacionais em motores de lucro através da IA.
+          </p>
         </motion.div>
 
         <div className="grid md:grid-cols-3 gap-8 lg:gap-12">

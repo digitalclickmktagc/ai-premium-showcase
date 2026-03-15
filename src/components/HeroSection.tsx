@@ -12,24 +12,23 @@ const HeroSection = () => {
           transition={{ duration: 0.6 }}
           className="max-w-4xl mx-auto"
         >
-          <p className="text-sm font-medium tracking-widest uppercase text-muted-foreground mb-6">
-            Automação Inteligente com IA
+          <p className="text-sm font-medium tracking-[0.3em] uppercase text-muted-foreground mb-6">
+            NEXA.IA
           </p>
 
-          <h1 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold leading-tight mb-8 text-foreground">
-            O Próximo Nível da{" "}
+          <h1 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold leading-tight mb-8 tracking-tight text-foreground">
+            IA que executa.{" "}
             <br className="hidden sm:block" />
-            Automação com <span className="text-gradient-nexa">IA</span>
+            Você que <span className="text-gradient-nexa">lidera.</span>
           </h1>
 
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-12 font-body"
+            className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto mb-12 font-body font-light"
           >
-            Escale o faturamento da sua empresa com automação de processos, agentes de IA
-            e tecnologia sob medida, sem dor de cabeça.
+            Automação inteligente para empresas que não aceitam limites.
           </motion.p>
 
           <motion.div
@@ -38,8 +37,8 @@ const HeroSection = () => {
             transition={{ duration: 0.6, delay: 0.4 }}
             className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
-            <Button variant="glow" size="lg" className="text-base px-8">
-              Falar com um Especialista
+            <Button variant="glow" size="lg" className="text-base px-8 tracking-wide">
+              Mapear minha Escala
               <ArrowRight className="ml-2" size={18} />
             </Button>
             <Button variant="ghost-glass" size="lg" className="text-base px-8">

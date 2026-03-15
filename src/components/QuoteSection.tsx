@@ -14,13 +14,12 @@ const QuoteSection = () => {
           transition={{ duration: 0.6 }}
           className="text-center max-w-4xl mx-auto"
         >
-          <p className="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold leading-tight">
-            "A automação não substitui pessoas.{" "}
-            <span className="text-gradient-nexa">Ela liberta pessoas</span> para fazerem o
-            que realmente importa."
+          <p className="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold leading-tight tracking-tight">
+            "Tecnologia que devolve{" "}
+            <span className="text-gradient-nexa">o seu tempo.</span>"
           </p>
-          <footer className="mt-8 text-muted-foreground text-sm">
-            — Filosofia NEXA.IA
+          <footer className="mt-8 text-muted-foreground text-sm tracking-[0.2em]">
+            — NEXA.IA
           </footer>
         </motion.blockquote>
       </div>

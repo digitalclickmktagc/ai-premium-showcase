@@ -15,10 +15,9 @@ const Footer = () => {
                 NEXA<span className="text-gradient-nexa">.IA</span>
               </span>
             </a>
-            <p className="text-sm text-muted-foreground font-body leading-relaxed mb-4">
-              Automação inteligente para empresas que querem crescer sem dor de cabeça.
+            <p className="text-sm text-muted-foreground font-body font-light leading-relaxed mb-4">
+              IA que executa. Você que lidera.
             </p>
-            <p className="text-xs text-muted-foreground italic">"O futuro pensa em você."</p>
           </div>
 
           <div>

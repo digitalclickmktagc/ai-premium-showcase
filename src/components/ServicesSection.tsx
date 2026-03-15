@@ -57,18 +57,16 @@ const ServicesSection = () => {
           transition={{ duration: 0.5 }}
           className="mb-16"
         >
-          <p className="text-sm font-medium tracking-widest uppercase text-gradient-nexa mb-4">
-            Serviços
+          <p className="text-sm font-medium tracking-[0.3em] uppercase text-gradient-nexa mb-4">
+            Soluções
           </p>
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
-            <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight">
-              Soluções que{" "}
-              <span className="text-gradient-nexa">transformam</span>
-              <br />
-              resultados
+            <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight tracking-tight">
+              Resultados.{" "}
+              <span className="text-gradient-nexa">Não promessas.</span>
             </h2>
-            <p className="text-muted-foreground max-w-md font-body">
-              Cada serviço é projetado para resolver dores específicas e gerar impacto direto no seu faturamento.
+            <p className="text-muted-foreground max-w-sm font-body font-light">
+              Impacto direto no faturamento. Cada solução resolve uma dor específica.
             </p>
           </div>
         </motion.div>
