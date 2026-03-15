@@ -5,17 +5,17 @@ const benefits = [
   {
     icon: Zap,
     title: "Escalabilidade",
-    desc: "Sistemas que crescem junto com o seu negócio. Sem gargalos, sem limites artificiais. Cresça com confiança.",
+    desc: "Cresce com você. Sem gargalos, sem teto.",
   },
   {
     icon: Clock,
-    title: "Economia de Tempo",
-    desc: "Automatize o operacional e liberte sua equipe para o estratégico. Ganhe horas valiosas toda semana.",
+    title: "Tempo Devolvido",
+    desc: "Operacional no automático. Equipe no estratégico.",
   },
   {
     icon: Crosshair,
     title: "Precisão Cirúrgica",
-    desc: "Dados e IA garantem decisões certeiras. Menos achismo, mais resultados mensuráveis e previsíveis.",
+    desc: "Dados reais. Decisões certeiras. Zero achismo.",
   },
 ];
 
