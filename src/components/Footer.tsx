@@ -1,4 +1,5 @@
 import { Linkedin, Instagram, MessageCircle, Mail, Phone, MapPin } from "lucide-react";
+import nexaLogo from "@/assets/nexa-logo-new.png";
 
 const Footer = () => {
   return (
