@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -55,7 +55,7 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: 'Manrope', sans-serif;
   }
 }
 
@@ -125,7 +125,7 @@
 
 @layer utilities {
   .font-display {
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: 'Manrope', sans-serif;
   }
 
   .font-body {

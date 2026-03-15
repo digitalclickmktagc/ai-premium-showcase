@@ -30,11 +30,11 @@ const TestimonialsSection = () => {
           transition={{ duration: 0.5 }}
           className="text-center mb-16"
         >
-          <p className="text-sm font-medium tracking-widest uppercase text-gradient-nexa mb-4">
+          <p className="text-sm font-medium tracking-[0.3em] uppercase text-gradient-nexa mb-4">
             Depoimentos
           </p>
-          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold">
-            O que dizem <span className="text-gradient-nexa">sobre nós</span>
+          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight">
+            Quem <span className="text-gradient-nexa">confia.</span>
           </h2>
         </motion.div>
 
