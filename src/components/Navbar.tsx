@@ -17,8 +17,13 @@ const Navbar = () => {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-border/50">
       <div className="container mx-auto flex items-center justify-between h-16 px-4 lg:px-8">
-        <a href="#" className="flex items-center">
-          <img src={nexaLogo} alt="NEXA.IA" className="h-9 w-auto" />
+        <a href="#" className="flex items-center gap-2.5">
+          <div className="w-9 h-9 rounded-xl overflow-hidden shadow-md">
+            <img src={nexaLogo} alt="NEXA.IA" className="w-full h-full object-cover" />
+          </div>
+          <span className="font-display text-xl font-extrabold tracking-tight text-foreground">
+            NEXA<span className="text-gradient-nexa">.IA</span>
+          </span>
         </a>
 
         <ul className="hidden md:flex items-center gap-8">
