@@ -49,10 +49,7 @@ const TestimonialsSection = () => {
               <p className="text-muted-foreground font-body leading-relaxed mb-6">
                 "{t.quote}"
               </p>
-              <div>
-                <p className="font-display font-bold text-sm">{t.name}</p>
-                <p className="text-xs text-muted-foreground">{t.role}</p>
-              </div>
+              <p className="font-display font-bold text-sm">{t.name}</p>
             </motion.div>
           ))}
         </div>
