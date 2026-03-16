@@ -13,18 +13,17 @@ const HeroSection = () => {
           className="max-w-4xl mx-auto"
         >
 
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-display font-black tracking-tight leading-[1.1] mb-6 uppercase">
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-display font-black tracking-tight leading-[1.1] mt-8 mb-6 uppercase">
             IA QUE EXECUTA.
             <br />
             <span className="text-gradient-nexa">VOCÊ QUE LIDERA.</span>
           </h1>
 
-
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto mb-12 font-body font-light"
+            className="text-lg md:text-xl text-muted-foreground max-w-none mx-auto mb-12 font-body font-light whitespace-nowrap"
           >
             Automação inteligente para empresas que não aceitam limites.
           </motion.p>
