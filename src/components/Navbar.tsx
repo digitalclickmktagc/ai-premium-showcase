@@ -56,7 +56,7 @@ const Navbar = () => {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden glass border-t border-border/50"
+            className="md:hidden glass"
           >
             <ul className="flex flex-col gap-4 p-6">
               {navLinks.map((link) => (
@@ -71,8 +71,8 @@ const Navbar = () => {
                 </li>
               ))}
               <li>
-                <Button variant="glow" size="sm" className="w-full">
-                  Começar Agora
+                <Button variant="glow" size="sm" className="w-full text-white">
+                  ESCALAR
                 </Button>
               </li>
             </ul>
