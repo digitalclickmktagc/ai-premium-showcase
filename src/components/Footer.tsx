@@ -53,7 +53,7 @@ const Footer = () => {
 
         <div className="border-t border-border/50 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-xs text-muted-foreground">
-            © 2026 NEXA.IA. Todos os direitos reservados.
+            © 2026 Nexa AI. Todos os direitos reservados.
           </p>
           <div className="flex gap-6 text-xs text-muted-foreground">
             <a href="#" className="hover:text-foreground transition-colors">Privacidade</a>

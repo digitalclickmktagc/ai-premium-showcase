@@ -19,10 +19,10 @@ const Navbar = () => {
       <div className="container mx-auto flex items-center justify-between h-16 px-4 lg:px-8">
         <a href="#" className="flex items-center gap-2.5">
           <div className="w-9 h-9 rounded-xl overflow-hidden shadow-md">
-            <img src={nexaLogo} alt="NEXA.IA" className="w-full h-full object-cover" />
+            <img src={nexaLogo} alt="Nexa AI" className="w-full h-full object-cover" />
           </div>
           <span className="font-display text-xl font-extrabold tracking-tight text-foreground">
-            NEXA<span className="text-gradient-nexa">.IA</span>
+            Nexa <span className="text-gradient-nexa">AI</span>
           </span>
         </a>
 
