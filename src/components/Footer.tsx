@@ -15,9 +15,6 @@ const Footer = () => {
                 Nexa <span className="text-gradient-nexa">AI</span>
               </span>
             </a>
-            <p className="text-sm text-muted-foreground font-body font-light leading-relaxed mb-4">
-              IA que executa. Você que lidera.
-            </p>
           </div>
 
           <div>
