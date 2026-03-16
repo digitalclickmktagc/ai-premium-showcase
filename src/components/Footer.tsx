@@ -36,8 +36,7 @@ const Footer = () => {
             <h4 className="font-display font-bold text-sm tracking-widest uppercase mb-4 text-foreground">Redes Sociais</h4>
             <div className="flex justify-center gap-3">
               {[
-                { Icon: Linkedin, href: "#" },
-                { Icon: Instagram, href: "#" },
+                { Icon: Instagram, href: "https://www.instagram.com/nexastartup" },
                 { Icon: MessageCircle, href: "https://wa.me/+5516998935289" },
               ].map(({ Icon, href }, i) => (
                 <a
