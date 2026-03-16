@@ -35,10 +35,16 @@ const Footer = () => {
           <div>
             <h4 className="font-display font-bold text-sm tracking-widest uppercase mb-4 text-foreground">Redes Sociais</h4>
             <div className="flex justify-center gap-3">
-              {[Linkedin, Instagram, MessageCircle].map((Icon, i) => (
+              {[
+                { Icon: Linkedin, href: "#" },
+                { Icon: Instagram, href: "#" },
+                { Icon: MessageCircle, href: "https://wa.me/+5516998935289" },
+              ].map(({ Icon, href }, i) => (
                 <a
                   key={i}
-                  href="#"
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="w-10 h-10 rounded-lg border border-border bg-background flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/30 transition-all"
                 >
                   <Icon size={18} />
