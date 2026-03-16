@@ -5,17 +5,17 @@ const benefits = [
   {
     icon: Zap,
     title: "Escalabilidade",
-    desc: "Cresce com você. Sem gargalos, sem teto.",
+    desc: "Cresce com você.\nSem gargalos,\nsem teto.",
   },
   {
     icon: Clock,
     title: "Tempo Devolvido",
-    desc: "Operacional no automático. Equipe no estratégico.",
+    desc: "Operacional no automático.\nEquipe no estratégico.",
   },
   {
     icon: Crosshair,
     title: "Precisão Cirúrgica",
-    desc: "Dados reais. Decisões certeiras. Zero achismo.",
+    desc: "Dados reais.\nDecisões certeiras.\nZero achismo.",
   },
 ];
 
