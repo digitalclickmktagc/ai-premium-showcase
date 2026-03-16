@@ -148,7 +148,7 @@ const LeadFormSection = () => {
                 type="submit"
                 variant="glow"
                 size="lg"
-                className="w-full text-primary-foreground text-[10px] tracking-widest uppercase font-extrabold py-4 h-auto"
+                className="w-full text-primary-foreground text-[10px] sm:text-sm tracking-widest uppercase font-extrabold py-4 h-auto"
               >
                 Escalar Meu Atendimento.
                 <Send size={16} />
