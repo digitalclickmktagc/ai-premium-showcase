@@ -5,7 +5,7 @@ const Footer = () => {
   return (
     <footer id="contato" className="pt-16 pb-8 bg-card">
       <div className="container mx-auto px-4 lg:px-8">
-        <div className="grid md:grid-cols-3 gap-12 mb-12">
+        <div className="grid gap-10 md:grid-cols-3 md:gap-12 mb-12">
           <div className="flex justify-center md:justify-start">
             <a href="#" className="flex items-center gap-2.5 mb-4">
               <div className="w-10 h-10 rounded-xl overflow-hidden shadow-md">

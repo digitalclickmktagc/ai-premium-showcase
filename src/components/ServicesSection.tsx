@@ -60,7 +60,7 @@ const ServicesSection = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: i * 0.1 }}
-              className="glass-card rounded-2xl p-6 lg:p-8 group flex flex-col sm:flex-row sm:items-center gap-6"
+              className="glass-card rounded-2xl p-5 sm:p-6 lg:p-8 group flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6"
             >
               <div className="flex-1 flex items-center gap-4">
                 <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors shrink-0">
