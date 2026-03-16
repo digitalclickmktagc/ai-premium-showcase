@@ -12,10 +12,6 @@ const HeroSection = () => {
           transition={{ duration: 0.6 }}
           className="max-w-4xl mx-auto"
         >
-          <p className="text-sm font-medium tracking-[0.3em] uppercase text-muted-foreground mb-6">
-            NEXA.IA
-          </p>
-
           <h1 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold leading-tight mb-8 tracking-tight text-foreground">
             IA que executa.{" "}
             <br className="hidden sm:block" />
