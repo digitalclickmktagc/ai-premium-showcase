@@ -37,7 +37,7 @@ const BenefitsSection = () => {
             Complexidade{" "}
             <span className="text-gradient-nexa">simplificada.</span>
           </h2>
-          <p className="text-muted-foreground font-body font-light mt-4 max-w-lg mx-auto">
+          <p className="text-muted-foreground font-body font-light mt-4 whitespace-nowrap">
             Transformamos gargalos operacionais em motores de lucro através da IA.
           </p>
         </motion.div>
