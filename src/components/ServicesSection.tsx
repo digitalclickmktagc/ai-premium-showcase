@@ -65,10 +65,7 @@ const ServicesSection = () => {
               className="glass-card rounded-2xl p-6 lg:p-8 group flex flex-col sm:flex-row sm:items-start gap-6"
             >
               <div className="flex-1">
-                <div className="flex items-center gap-3 mb-3">
-                  <span className="text-2xl font-display font-extrabold text-muted-foreground/20">
-                    {s.num}
-                  </span>
+                <div className="mb-3">
                   <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
                     <s.icon size={18} className="text-primary" />
                   </div>
