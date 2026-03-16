@@ -48,7 +48,7 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="border-t border-border/50 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="border-t border-border/20 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-xs text-muted-foreground">
             © 2026 Nexa AI. Todos os direitos reservados.
           </p>
