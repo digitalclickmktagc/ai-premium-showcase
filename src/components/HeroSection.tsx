@@ -33,13 +33,9 @@ const HeroSection = () => {
             transition={{ duration: 0.6, delay: 0.4 }}
             className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
-            <Button variant="glow" size="lg" className="text-base px-8 tracking-wide">
+            <Button variant="glow" size="lg" className="text-base px-8 tracking-wide text-white">
               Mapear minha Escala
               <ArrowRight className="ml-2" size={18} />
-            </Button>
-            <Button variant="ghost-glass" size="lg" className="text-base px-8">
-              <Play size={16} className="mr-2" />
-              Ver Soluções
             </Button>
           </motion.div>
         </motion.div>
