@@ -8,7 +8,7 @@ const testimonials = [
     role: "CEO",
   },
   {
-    quote: "O CRM personalizado e os agentes de IA revolucionaram nosso atendimento. Hoje respondemos em segundos, não em horas.",
+    quote: "O painel personalizado e o agente de IA revolucionaram nosso atendimento. Hoje respondemos em segundos, não em horas.",
     name: "Ana Oliveira",
     role: "Diretora Comercial",
   },
