@@ -18,7 +18,7 @@ const HeroSection = () => {
           </div>
 
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-display font-black tracking-tight leading-[1.05] mb-8 uppercase">
-            A INTELIGÊNCIA ARTIFICIAL EXECUTA
+            A IA EXECUTA
             <br />
             <span className="text-gradient-nexa">ENQUANTO VOCÊ LIDERA.</span>
           </h1>
