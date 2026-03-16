@@ -30,7 +30,7 @@ const Footer = () => {
                 <Mail size={14} className="text-primary" /> contato@nexaai.com.br
               </li>
               <li className="flex items-center justify-center gap-2">
-                <Phone size={14} className="text-primary" /> (61) 99936-1312
+                <Phone size={14} className="text-primary" /> (16) 99893-5289
               </li>
               <li className="flex items-center justify-center gap-2">
                 <MapPin size={14} className="text-primary" /> Brasília, Brasil
