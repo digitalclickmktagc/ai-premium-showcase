@@ -56,7 +56,7 @@ const BenefitsSection = () => {
                 <b.icon size={24} className="text-primary" />
               </div>
               <h3 className="font-display text-xl font-bold mb-3">{b.title}</h3>
-              <p className="text-muted-foreground font-body leading-relaxed">{b.desc}</p>
+              <p className="text-muted-foreground font-body leading-relaxed whitespace-pre-line">{b.desc}</p>
             </motion.div>
           ))}
         </div>
