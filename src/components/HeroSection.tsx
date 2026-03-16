@@ -38,7 +38,7 @@ const HeroSection = () => {
             transition={{ duration: 0.6, delay: 0.4 }}
           >
             <Button variant="glow" size="lg" className="text-base px-8 tracking-wide text-white">
-              Mapear minha Escala
+              ESCALAR MEU ATENDIMENTO
               <ArrowRight className="ml-2" size={18} />
             </Button>
           </motion.div>

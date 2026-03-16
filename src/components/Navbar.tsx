@@ -40,11 +40,9 @@ const Navbar = () => {
         </ul>
 
         <div className="hidden md:block">
-          <div className="border-gradient-nexa rounded-lg">
-            <Button variant="ghost" size="sm" className="bg-background hover:bg-muted rounded-lg text-foreground">
-              Começar Agora
-            </Button>
-          </div>
+          <Button variant="glow" size="sm" className="text-white">
+            ESCALAR
+          </Button>
         </div>
 
         <button className="md:hidden text-foreground" onClick={() => setOpen(!open)}>
