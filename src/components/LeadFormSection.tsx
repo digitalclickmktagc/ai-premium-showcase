@@ -3,12 +3,7 @@ import { motion } from "framer-motion";
 import { Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const faturamentoOptions = [
-  "Até R$ 50k",
-  "R$ 50k - R$ 100k",
-  "R$ 100k - R$ 500k",
-  "Mais de R$ 500k",
-];
+const faturamentoOptions = ["Até R$ 50k", "R$ 50k - R$ 100k", "R$ 100k - R$ 500k", "Mais de R$ 500k"];
 
 const LeadFormSection = () => {
   const [form, setForm] = useState({
@@ -27,7 +22,7 @@ const LeadFormSection = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const message = encodeURIComponent(
-      `Olá! Gostaria de um diagnóstico gratuito.\n\nNome: ${form.nome}\nE-mail: ${form.email}\nWhatsApp: ${form.whatsapp}\nEmpresa: ${form.empresa}\nSegmento: ${form.segmento}\nFaturamento: ${form.faturamento}`
+      `Olá! Gostaria de um diagnóstico gratuito.\n\nNome: ${form.nome}\nE-mail: ${form.email}\nWhatsApp: ${form.whatsapp}\nEmpresa: ${form.empresa}\nSegmento: ${form.segmento}\nFaturamento: ${form.faturamento}`,
     );
     window.open(`https://wa.me/+5516998935289?text=${message}`, "_blank");
   };
@@ -49,7 +44,7 @@ const LeadFormSection = () => {
             Pronto para <span className="text-gradient-nexa">escalar?</span>
           </h2>
           <p className="mt-4 text-muted-foreground font-body text-base max-w-lg mx-auto">
-            Preencha os dados abaixo e receba um diagnóstico da nossa IA.
+            Preencha os dados abaixo e escale o seu atendimento.
           </p>
         </motion.div>
 
@@ -64,9 +59,7 @@ const LeadFormSection = () => {
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
-                  <label className="block text-xs font-medium text-foreground mb-1.5 font-body">
-                    Nome completo
-                  </label>
+                  <label className="block text-xs font-medium text-foreground mb-1.5 font-body">Nome completo</label>
                   <input
                     type="text"
                     name="nome"
@@ -92,9 +85,7 @@ const LeadFormSection = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-foreground mb-1.5 font-body">
-                    WhatsApp
-                  </label>
+                  <label className="block text-xs font-medium text-foreground mb-1.5 font-body">WhatsApp</label>
                   <input
                     type="tel"
                     name="whatsapp"
@@ -106,9 +97,7 @@ const LeadFormSection = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-foreground mb-1.5 font-body">
-                    Nome da Empresa
-                  </label>
+                  <label className="block text-xs font-medium text-foreground mb-1.5 font-body">Nome da Empresa</label>
                   <input
                     type="text"
                     name="empresa"
@@ -120,9 +109,7 @@ const LeadFormSection = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-foreground mb-1.5 font-body">
-                    Segmento
-                  </label>
+                  <label className="block text-xs font-medium text-foreground mb-1.5 font-body">Segmento</label>
                   <input
                     type="text"
                     name="segmento"
