@@ -5,7 +5,7 @@ const testimonials = [
   {
     quote: "A Nexa AI transformou completamente nosso processo de vendas. Automatizamos 80% das tarefas manuais e dobramos o faturamento em 6 meses.",
     name: "Carlos Mendes",
-    role: "CEO, TechScale",
+    role: "CEO",
   },
   {
     quote: "O CRM personalizado e os agentes de IA revolucionaram nosso atendimento. Hoje respondemos em segundos, não em horas.",
