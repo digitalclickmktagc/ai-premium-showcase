@@ -51,9 +51,6 @@ const ServicesSection = () => {
               Resultados.{" "}
               <span className="text-gradient-nexa">Não promessas.</span>
             </h2>
-            <p className="text-muted-foreground max-w-sm font-body font-light">
-              Impacto direto no faturamento. Cada solução resolve uma dor específica.
-            </p>
           </div>
         </motion.div>
 
