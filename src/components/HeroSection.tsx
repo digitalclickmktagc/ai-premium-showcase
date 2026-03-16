@@ -12,11 +12,8 @@ const HeroSection = () => {
           transition={{ duration: 0.6 }}
           className="max-w-4xl mx-auto"
         >
-          <h1 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold leading-tight mb-8 tracking-tight text-foreground">
-            IA que executa.{" "}
-            <br className="hidden sm:block" />
-            Você que <span className="text-gradient-nexa">lidera.</span>
-          </h1>
+
+
 
           <motion.p
             initial={{ opacity: 0, y: 20 }}
