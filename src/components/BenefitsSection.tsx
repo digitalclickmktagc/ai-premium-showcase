@@ -31,7 +31,7 @@ const BenefitsSection = () => {
           className="text-center mb-16"
         >
           <p className="text-sm font-medium tracking-[0.3em] uppercase text-gradient-nexa mb-4">
-            Por que a NEXA.IA?
+            Por que a Nexa AI?
           </p>
           <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight">
             Complexidade{" "}

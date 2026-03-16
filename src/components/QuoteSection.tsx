@@ -19,7 +19,7 @@ const QuoteSection = () => {
             <span className="text-gradient-nexa">o seu tempo.</span>"
           </p>
           <footer className="mt-8 text-muted-foreground text-sm tracking-[0.2em]">
-            — NEXA.IA
+            — Nexa AI
           </footer>
         </motion.blockquote>
       </div>
