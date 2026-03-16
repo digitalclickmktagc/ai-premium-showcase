@@ -101,7 +101,7 @@ const LeadFormSection = () => {
                   <input
                     type="text"
                     name="empresa"
-                    placeholder="Ex: Atech Solutions"
+                    placeholder="Ex: Nexa AI"
                     value={form.empresa}
                     onChange={handleChange}
                     required
@@ -149,7 +149,7 @@ const LeadFormSection = () => {
                 size="lg"
                 className="w-full text-primary-foreground text-sm tracking-widest uppercase font-extrabold py-4 h-auto"
               >
-                Solicitar Diagnóstico Gratuito
+                Escalar Meu Atendimento.
                 <Send size={16} />
               </Button>
             </form>
