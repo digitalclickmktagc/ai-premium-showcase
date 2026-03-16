@@ -5,9 +5,9 @@ const Footer = () => {
   return (
     <footer id="contato" className="pt-16 pb-8 bg-card">
       <div className="container mx-auto px-4 lg:px-8">
-        <div className="grid gap-10 md:grid-cols-3 md:gap-12 mb-12">
-          <div className="flex justify-center md:justify-start">
-            <a href="#" className="flex items-center gap-2.5 mb-4">
+        <div className="flex flex-col items-center text-center mb-12 space-y-10">
+          <div>
+            <a href="#" className="flex items-center gap-2.5 justify-center mb-4">
               <div className="w-10 h-10 rounded-xl overflow-hidden shadow-md">
                 <img src={nexaLogo} alt="Nexa AI" className="w-full h-full object-cover" />
               </div>
@@ -20,13 +20,13 @@ const Footer = () => {
           <div>
             <h4 className="font-display font-bold text-sm tracking-widest uppercase mb-4 text-foreground">Contato</h4>
             <ul className="space-y-3 text-sm text-muted-foreground font-body">
-              <li className="flex items-center gap-2">
+              <li className="flex items-center justify-center gap-2">
                 <Mail size={14} className="text-primary" /> contato@nexaai.com.br
               </li>
-              <li className="flex items-center gap-2">
+              <li className="flex items-center justify-center gap-2">
                 <Phone size={14} className="text-primary" /> (61) 99936-1312
               </li>
-              <li className="flex items-center gap-2">
+              <li className="flex items-center justify-center gap-2">
                 <MapPin size={14} className="text-primary" /> Brasília, Brasil
               </li>
             </ul>
@@ -34,7 +34,7 @@ const Footer = () => {
 
           <div>
             <h4 className="font-display font-bold text-sm tracking-widest uppercase mb-4 text-foreground">Redes Sociais</h4>
-            <div className="flex gap-3">
+            <div className="flex justify-center gap-3">
               {[Linkedin, Instagram, MessageCircle].map((Icon, i) => (
                 <a
                   key={i}
@@ -46,6 +46,7 @@ const Footer = () => {
               ))}
             </div>
           </div>
+        </div>
         </div>
 
         <div className="border-t border-border/20 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
