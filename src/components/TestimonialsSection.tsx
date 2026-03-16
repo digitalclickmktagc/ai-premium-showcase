@@ -3,7 +3,7 @@ import { Quote } from "lucide-react";
 
 const testimonials = [
   {
-    quote: "A NEXA.IA transformou completamente nosso processo de vendas. Automatizamos 80% das tarefas manuais e dobramos o faturamento em 6 meses.",
+    quote: "A Nexa AI transformou completamente nosso processo de vendas. Automatizamos 80% das tarefas manuais e dobramos o faturamento em 6 meses.",
     name: "Carlos Mendes",
     role: "CEO, TechScale",
   },
