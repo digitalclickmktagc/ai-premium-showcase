@@ -41,9 +41,11 @@ const Navbar = () => {
         </ul>
 
         <div className="hidden md:block">
-          <Button variant="glow" size="sm" className="text-white">
-            ESCALAR
-          </Button>
+          <a href="#diagnostico">
+            <Button variant="glow" size="sm" className="text-white">
+              ESCALAR
+            </Button>
+          </a>
         </div>
 
         <button className="md:hidden text-foreground" onClick={() => setOpen(!open)}>
