@@ -67,15 +67,15 @@ const BenefitsSection = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.3 }}
-          className="mt-24 flex flex-col gap-8 text-center items-center"
+          className="mt-24 flex flex-col gap-4 max-w-3xl mx-auto"
         >
           {[
             { value: "15+", label: "EMPRESAS ATENDIDAS" },
             { value: "100K+", label: "FATURAMENTO GERADO" },
             { value: "60%", label: "REDUÇÃO DE CUSTOS" },
           ].map((stat) => (
-            <div key={stat.label}>
-              <p className="font-display text-3xl md:text-5xl font-extrabold mb-2">{stat.value}</p>
+            <div key={stat.label} className="w-full flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-border pb-4 text-left">
+              <p className="font-display text-3xl md:text-5xl font-extrabold leading-none">{stat.value}</p>
               <p className="text-xs md:text-sm tracking-widest text-muted-foreground">{stat.label}</p>
             </div>
           ))}
