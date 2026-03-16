@@ -74,7 +74,7 @@ const BenefitsSection = () => {
             { value: "100K+", label: "FATURAMENTO GERADO" },
             { value: "60%", label: "REDUÇÃO DE CUSTOS" },
           ].map((stat) => (
-            <div key={stat.label} className="w-full flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-border pb-4 text-left">
+            <div key={stat.label} className="w-full flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-border pb-4 text-center sm:text-left">
               <p className="font-display text-3xl md:text-5xl font-extrabold leading-none">{stat.value}</p>
               <p className="text-xs md:text-sm tracking-widest text-muted-foreground">{stat.label}</p>
             </div>
