@@ -10,7 +10,7 @@ const testimonials = [
   {
     quote: "O CRM personalizado e os agentes de IA revolucionaram nosso atendimento. Hoje respondemos em segundos, não em horas.",
     name: "Ana Oliveira",
-    role: "Diretora Comercial, InnovaGroup",
+    role: "Diretora Comercial",
   },
   {
     quote: "Precisávamos escalar sem perder qualidade. A Nexa AI entregou exatamente isso com uma solução sob medida para nosso segmento.",
