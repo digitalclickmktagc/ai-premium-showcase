@@ -13,6 +13,11 @@ const HeroSection = () => {
           className="max-w-4xl mx-auto"
         >
 
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-display font-black tracking-tight leading-[1.1] mb-6 uppercase">
+            IA QUE EXECUTA.
+            <br />
+            <span className="text-gradient-nexa">VOCÊ QUE LIDERA.</span>
+          </h1>
 
 
           <motion.p
