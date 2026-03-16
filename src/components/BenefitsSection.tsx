@@ -70,9 +70,9 @@ const BenefitsSection = () => {
           className="mt-24 grid grid-cols-3 gap-8 text-center"
         >
           {[
-            { value: "50+", label: "EMPRESAS ATENDIDAS" },
-            { value: "1.5M+", label: "FATURAMENTO GERADO" },
-            { value: "40%", label: "REDUÇÃO DE CUSTOS" },
+            { value: "15+", label: "EMPRESAS ATENDIDAS" },
+            { value: "100K+", label: "FATURAMENTO GERADO" },
+            { value: "60%", label: "REDUÇÃO DE CUSTOS" },
           ].map((stat) => (
             <div key={stat.label}>
               <p className="font-display text-3xl md:text-5xl font-extrabold mb-2">{stat.value}</p>
