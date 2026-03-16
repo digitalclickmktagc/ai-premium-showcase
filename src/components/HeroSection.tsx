@@ -5,7 +5,7 @@ import nexaLogo from "@/assets/nexa-logo-new.png";
 
 const HeroSection = () => {
   return (
-    <section className="relative min-h-screen flex items-center justify-center pt-16 overflow-hidden">
+    <section className="relative min-h-screen flex items-center justify-center pt-16 px-2 overflow-hidden">
       <div className="container mx-auto px-4 lg:px-8 text-center relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -17,10 +17,10 @@ const HeroSection = () => {
             <img src={nexaLogo} alt="Nexa AI" className="w-full h-full object-cover" />
           </div>
 
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-display font-black tracking-tight leading-[1.05] mb-8 uppercase">
+          <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-display font-black tracking-tight leading-[1.05] mb-8 uppercase">
             A IA EXECUTA
             <br />
-            <span className="text-gradient-nexa whitespace-nowrap">ENQUANTO VOCÊ LIDERA.</span>
+            <span className="text-gradient-nexa">ENQUANTO VOCÊ LIDERA.</span>
           </h1>
 
           <motion.p
