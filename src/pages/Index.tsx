@@ -5,6 +5,7 @@ import ServicesSection from "@/components/ServicesSection";
 import BenefitsSection from "@/components/BenefitsSection";
 import QuoteSection from "@/components/QuoteSection";
 import TestimonialsSection from "@/components/TestimonialsSection";
+import LeadFormSection from "@/components/LeadFormSection";
 import Footer from "@/components/Footer";
 import FloatingParticles from "@/components/FloatingParticles";
 
