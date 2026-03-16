@@ -15,7 +15,7 @@ const testimonials = [
   {
     quote: "Precisávamos escalar sem perder qualidade. A Nexa AI entregou exatamente isso com uma solução sob medida para nosso segmento.",
     name: "Rafael Torres",
-    role: "Fundador, Vertix Digital",
+    role: "Fundador",
   },
 ];
 
