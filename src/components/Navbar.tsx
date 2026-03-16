@@ -39,7 +39,7 @@ const Navbar = () => {
           ))}
         </ul>
 
-        <div>
+        <div className="hidden md:block">
           <Button variant="glow" size="sm" className="text-white">
             ESCALAR
           </Button>
