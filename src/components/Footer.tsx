@@ -3,10 +3,10 @@ import nexaLogo from "@/assets/nexa-logo-new.png";
 
 const Footer = () => {
   return (
-    <footer id="contato" className="border-t border-border/50 pt-16 pb-8 bg-card">
+    <footer id="contato" className="pt-16 pb-8 bg-card">
       <div className="container mx-auto px-4 lg:px-8">
         <div className="grid md:grid-cols-3 gap-12 mb-12">
-          <div>
+          <div className="flex justify-center md:justify-start">
             <a href="#" className="flex items-center gap-2.5 mb-4">
               <div className="w-10 h-10 rounded-xl overflow-hidden shadow-md">
                 <img src={nexaLogo} alt="Nexa AI" className="w-full h-full object-cover" />
@@ -48,7 +48,7 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="border-t border-border/50 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="border-t border-border/20 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-xs text-muted-foreground">
             © 2026 Nexa AI. Todos os direitos reservados.
           </p>
