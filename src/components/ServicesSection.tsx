@@ -41,17 +41,15 @@ const ServicesSection = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="mb-16"
+          className="mb-16 text-center"
         >
           <p className="text-sm font-medium tracking-[0.3em] uppercase text-gradient-nexa mb-4">
             Soluções
           </p>
-          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
-            <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight tracking-tight">
-              Resultados.{" "}
-              <span className="text-gradient-nexa">Não promessas.</span>
-            </h2>
-          </div>
+          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight tracking-tight">
+            Resultados.{" "}
+            <span className="text-gradient-nexa">Não promessas.</span>
+          </h2>
         </motion.div>
 
         <div className="flex flex-col gap-4">
