@@ -64,14 +64,14 @@ const ServicesSection = () => {
               transition={{ duration: 0.4, delay: i * 0.1 }}
               className="glass-card rounded-2xl p-6 lg:p-8 group flex flex-col sm:flex-row sm:items-start gap-6"
             >
-              <div className="flex-1">
-                <div className="mb-3">
-                  <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                    <s.icon size={18} className="text-primary" />
-                  </div>
+              <div className="flex-1 flex items-start gap-4">
+                <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors shrink-0 mt-0.5">
+                  <s.icon size={18} className="text-primary" />
                 </div>
-                <h3 className="font-display text-lg font-bold mb-2">{s.title}</h3>
-                <p className="text-sm text-muted-foreground font-body leading-relaxed">{s.desc}</p>
+                <div>
+                  <h3 className="font-display text-lg font-bold mb-1">{s.title}</h3>
+                  <p className="text-sm text-muted-foreground font-body leading-relaxed">{s.desc}</p>
+                </div>
               </div>
               <span className="inline-block text-xs font-medium px-4 py-2 rounded-full bg-primary/10 text-primary border border-primary/20 whitespace-nowrap self-start sm:self-center">
                 {s.badge}
