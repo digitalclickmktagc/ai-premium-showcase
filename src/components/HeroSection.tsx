@@ -29,7 +29,7 @@ const HeroSection = () => {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="text-lg md:text-xl text-muted-foreground mb-12 font-body font-light"
           >
-            Automação inteligente para empresas que não aceitam limites.
+            Automação inteligente para empresas que pensam grande.
           </motion.p>
 
           <motion.div
