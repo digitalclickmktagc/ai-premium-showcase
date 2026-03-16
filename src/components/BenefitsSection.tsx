@@ -67,7 +67,7 @@ const BenefitsSection = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.3 }}
-          className="mt-24 grid grid-cols-3 gap-8 text-center"
+          className="mt-24 flex flex-col gap-8 text-center items-center"
         >
           {[
             { value: "15+", label: "EMPRESAS ATENDIDAS" },
