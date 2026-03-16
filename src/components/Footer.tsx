@@ -43,7 +43,7 @@ const Footer = () => {
             <div className="flex justify-center gap-3">
               {[
                 { Icon: Instagram, href: "https://www.instagram.com/nexastartup" },
-                { Icon: MessageCircle, href: "https://wa.me/+5516998935289" },
+                { Icon: WhatsAppIcon, href: "https://wa.me/+5516998935289" },
               ].map(({ Icon, href }, i) => (
                 <a
                   key={i}
