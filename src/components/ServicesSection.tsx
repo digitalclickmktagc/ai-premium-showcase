@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Settings, Bot, Users, Globe, TrendingUp, Target } from "lucide-react";
+import { Settings, Bot, Users, TrendingUp } from "lucide-react";
 
 const services = [
   {
@@ -25,20 +25,6 @@ const services = [
   },
   {
     num: "04",
-    icon: Globe,
-    title: "Presença Digital High-End",
-    desc: "Sites que vendem. Performance, design e experiência premium.",
-    badge: "5x mais leads",
-  },
-  {
-    num: "05",
-    icon: Target,
-    title: "Aquisição de Precisão",
-    desc: "Tráfego pago com ROI comprovado. Cada centavo rastreado.",
-    badge: "ROAS 4.2x",
-  },
-  {
-    num: "06",
     icon: TrendingUp,
     title: "Escala Exponencial",
     desc: "Crescimento sustentável. Processos, tecnologia e estratégia alinhados.",
