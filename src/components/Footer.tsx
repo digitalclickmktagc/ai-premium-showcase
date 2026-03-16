@@ -24,7 +24,7 @@ const Footer = () => {
             <h4 className="font-display font-bold text-sm tracking-widest uppercase mb-4 text-foreground">Contato</h4>
             <ul className="space-y-3 text-sm text-muted-foreground font-body">
               <li className="flex items-center gap-2">
-                <Mail size={14} className="text-primary" /> contato@nexaia.com.br
+                <Mail size={14} className="text-primary" /> contato@nexaai.com.br
               </li>
               <li className="flex items-center gap-2">
                 <Phone size={14} className="text-primary" /> (61) 99936-1312
