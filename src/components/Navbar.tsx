@@ -74,9 +74,11 @@ const Navbar = () => {
                 </li>
               ))}
               <li>
-                <Button variant="glow" size="sm" className="w-full text-white">
-                  ESCALAR
-                </Button>
+                <a href="#diagnostico" onClick={() => setOpen(false)}>
+                  <Button variant="glow" size="sm" className="w-full text-white">
+                    ESCALAR
+                  </Button>
+                </a>
               </li>
             </ul>
           </motion.div>

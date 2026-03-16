@@ -37,10 +37,12 @@ const HeroSection = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
           >
-            <Button variant="glow" size="lg" className="text-base px-8 tracking-wide text-white">
-              ESCALAR MEU ATENDIMENTO
-              <ArrowRight className="ml-2" size={18} />
-            </Button>
+            <a href="#diagnostico">
+              <Button variant="glow" size="lg" className="text-base px-8 tracking-wide text-white">
+                ESCALAR MEU ATENDIMENTO
+                <ArrowRight className="ml-2" size={18} />
+              </Button>
+            </a>
           </motion.div>
         </motion.div>
       </div>
