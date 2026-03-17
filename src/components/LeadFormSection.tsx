@@ -20,7 +20,18 @@ const LeadFormSection = () => {
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    if (name === "whatsapp") {
+      const digits = value.replace(/\D/g, "").slice(0, 13);
+      let masked = "";
+      if (digits.length > 0) masked += "+" + digits.slice(0, 2);
+      if (digits.length > 2) masked += " (" + digits.slice(2, 4);
+      if (digits.length > 4) masked += ") " + digits.slice(4, 9);
+      if (digits.length > 9) masked += "-" + digits.slice(9, 13);
+      setForm({ ...form, whatsapp: masked });
+    } else {
+      setForm({ ...form, [name]: value });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
