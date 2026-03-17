@@ -1,11 +1,15 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Send } from "lucide-react";
+import { Send, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
+const WEBHOOK_URL = "https://infrasynaiadvanced-n8n.cloudfy.live/webhook-test/49662b45-e787-451f-af90-248998c29c4d";
 const faturamentoOptions = ["Até R$ 50k", "R$ 50k - R$ 100k", "R$ 100k - R$ 500k", "Mais de R$ 500k"];
 
 const LeadFormSection = () => {
+  const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [form, setForm] = useState({
     nome: "",
     email: "",
@@ -19,12 +23,30 @@ const LeadFormSection = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const message = encodeURIComponent(
-      `Olá! Gostaria de um diagnóstico gratuito.\n\nNome: ${form.nome}\nE-mail: ${form.email}\nWhatsApp: ${form.whatsapp}\nEmpresa: ${form.empresa}\nSegmento: ${form.segmento}\nFaturamento: ${form.faturamento}`,
-    );
-    window.open(`https://wa.me/+5516998935289?text=${message}`, "_blank");
+    setIsSubmitting(true);
+    try {
+      const res = await fetch(WEBHOOK_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      if (!res.ok) throw new Error("Erro ao enviar");
+      toast({
+        title: "Formulário Preenchido!",
+        description: "Nossa equipe entrará em contato.",
+      });
+      setForm({ nome: "", email: "", whatsapp: "", empresa: "", segmento: "", faturamento: "" });
+    } catch {
+      toast({
+        title: "Erro ao enviar",
+        description: "Tente novamente em alguns instantes.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const inputClasses =
@@ -148,10 +170,20 @@ const LeadFormSection = () => {
                 type="submit"
                 variant="glow"
                 size="lg"
+                disabled={isSubmitting}
                 className="w-full text-primary-foreground text-[10px] sm:text-sm tracking-widest uppercase font-extrabold py-4 h-auto"
               >
-                Escalar Meu Atendimento.
-                <Send size={16} />
+                {isSubmitting ? (
+                  <>
+                    Enviando...
+                    <Loader2 size={16} className="animate-spin" />
+                  </>
+                ) : (
+                  <>
+                    Escalar Meu Atendimento.
+                    <Send size={16} />
+                  </>
+                )}
               </Button>
             </form>
           </div>
