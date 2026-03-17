@@ -170,10 +170,20 @@ const LeadFormSection = () => {
                 type="submit"
                 variant="glow"
                 size="lg"
+                disabled={isSubmitting}
                 className="w-full text-primary-foreground text-[10px] sm:text-sm tracking-widest uppercase font-extrabold py-4 h-auto"
               >
-                Escalar Meu Atendimento.
-                <Send size={16} />
+                {isSubmitting ? (
+                  <>
+                    Enviando...
+                    <Loader2 size={16} className="animate-spin" />
+                  </>
+                ) : (
+                  <>
+                    Escalar Meu Atendimento.
+                    <Send size={16} />
+                  </>
+                )}
               </Button>
             </form>
           </div>
