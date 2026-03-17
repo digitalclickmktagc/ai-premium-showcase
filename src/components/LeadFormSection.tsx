@@ -124,7 +124,7 @@ const LeadFormSection = () => {
                   <input
                     type="tel"
                     name="whatsapp"
-                    placeholder="(00) 00000-0000"
+                    placeholder="+55 (00) 00000-0000"
                     value={form.whatsapp}
                     onChange={handleChange}
                     required
