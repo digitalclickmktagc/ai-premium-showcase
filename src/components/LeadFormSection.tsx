@@ -4,7 +4,7 @@ import { Send, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 
-const WEBHOOK_URL = "https://infrasynaiadvanced-n8n.cloudfy.live/webhook-test/49662b45-e787-451f-af90-248998c29c4d";
+const WEBHOOK_URL = "https://infrasynaiadvanced-n8n.cloudfy.live/webhook/49662b45-e787-451f-af90-248998c29c4d";
 const faturamentoOptions = ["Até R$ 50k", "R$ 50k - R$ 100k", "R$ 100k - R$ 500k", "Mais de R$ 500k"];
 
 const LeadFormSection = () => {
