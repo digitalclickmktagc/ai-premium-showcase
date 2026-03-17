@@ -38,10 +38,11 @@ const LeadFormSection = () => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
+      const payload = { ...form, whatsapp: form.whatsapp.replace(/\D/g, "") };
       const res = await fetch(WEBHOOK_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       });
       if (!res.ok) throw new Error("Erro ao enviar");
       toast({
