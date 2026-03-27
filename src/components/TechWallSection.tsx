@@ -5,7 +5,7 @@ import {
 } from "lucide-react";
 import supabaseIcon from "@/assets/supabase-icon.png";
 import chatgptIcon from "@/assets/chatgpt-icon.png";
-import whatsappIcon from "@/assets/whatsapp-icon.webp";
+import whatsappIcon from "@/assets/whatsapp-icon.png";
 
 interface TechCard {
   icon: React.ReactNode;
