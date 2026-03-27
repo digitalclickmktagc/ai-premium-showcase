@@ -37,7 +37,7 @@ const col2Cards: TechCard[] = [
 const col3Cards: TechCard[] = [
   { icon: <img src={githubIcon} alt="GitHub" className="w-7 h-7" />, name: "GitHub", category: "VCS", color: "text-foreground" },
   { icon: <Palette size={28} />, name: "Figma", category: "Design", color: "text-pink-500" },
-  { icon: <FileText size={28} />, name: "Notion", category: "Wiki", color: "text-foreground" },
+  { icon: <img src={notionIcon} alt="Notion" className="w-7 h-7" />, name: "Notion", category: "Wiki", color: "text-foreground" },
   { icon: <img src={evolutionIcon} alt="Evolution" className="w-7 h-7" />, name: "Evolution", category: "API", color: "text-emerald-500" },
 ];
 
