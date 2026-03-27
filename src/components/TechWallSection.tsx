@@ -1,8 +1,9 @@
 import { motion } from "framer-motion";
 import {
-  Cpu, Database, Cloud, Zap, MessageSquare, Brain,
+  Cpu, Cloud, Zap, MessageSquare, Brain,
   GitBranch, Palette, FileText, Bot, Workflow, Shield
 } from "lucide-react";
+import supabaseIcon from "@/assets/supabase-icon.png";
 
 interface TechCard {
   icon: React.ReactNode;
