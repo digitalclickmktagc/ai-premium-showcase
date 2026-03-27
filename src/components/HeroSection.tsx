@@ -139,19 +139,20 @@ const HeroSection = () => {
               initial={{ opacity: 0, x: 40, filter: "blur(12px)" }}
               animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
               transition={{ duration: 0.9, delay: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
-              className="relative h-[600px] overflow-hidden"
+              className="relative h-[650px] overflow-hidden"
             >
               {/* Fade edges */}
-              <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-white to-transparent z-10 pointer-events-none" />
-              <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white to-transparent z-10 pointer-events-none" />
-              <div className="absolute top-0 bottom-0 right-0 w-16 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
+              <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-white to-transparent z-10 pointer-events-none" />
+              <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-white to-transparent z-10 pointer-events-none" />
+              <div className="absolute top-0 bottom-0 right-0 w-24 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
+              <div className="absolute top-0 bottom-0 left-0 w-12 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
 
               {/* 3D Wall */}
               <div className="tech-wall-container h-full w-full">
-                <div className="tech-wall-grid h-full w-full flex gap-5 px-4">
+                <div className="tech-wall-grid h-full w-full flex gap-6 px-6">
                   <WallColumn cards={col1Cards} direction="up" />
-                  <WallColumn cards={col2Cards} direction="down" className="pt-12" />
-                  <WallColumn cards={col3Cards} direction="up" className="pt-24" />
+                  <WallColumn cards={col2Cards} direction="down" className="pt-16" />
+                  <WallColumn cards={col3Cards} direction="up" className="pt-28" />
                 </div>
               </div>
             </motion.div>
