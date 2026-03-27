@@ -358,15 +358,19 @@
     box-shadow:
       0 1px 3px rgba(0, 0, 0, 0.04),
       0 4px 20px rgba(0, 0, 0, 0.05);
-    transition: border-color 0.3s, background-color 0.3s, transform 0.3s, box-shadow 0.3s;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: auto;
+    cursor: default;
   }
 
   .tech-wall-card:hover {
-    border-color: rgba(147, 51, 234, 0.2);
+    border-color: rgba(147, 51, 234, 0.35);
     background: rgba(255, 255, 255, 1);
-    transform: translateZ(20px);
+    transform: translateY(-4px) scale(1.02);
     box-shadow:
-      0 8px 30px rgba(147, 51, 234, 0.1),
+      0 0 20px rgba(147, 51, 234, 0.15),
+      0 0 40px rgba(147, 51, 234, 0.08),
+      0 8px 30px rgba(147, 51, 234, 0.12),
       0 2px 8px rgba(0, 0, 0, 0.06);
   }
 }
