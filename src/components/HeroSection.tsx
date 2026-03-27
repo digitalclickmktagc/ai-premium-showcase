@@ -160,10 +160,15 @@ const HeroSection = () => {
               {/* Tech wall — background layer */}
               <div className="absolute inset-0 overflow-hidden">
                 {/* Edge fades */}
-                <div className="absolute top-0 left-0 right-0 h-28 bg-gradient-to-b from-white to-transparent z-10 pointer-events-none" />
-                <div className="absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-white to-transparent z-10 pointer-events-none" />
-                <div className="absolute top-0 bottom-0 right-0 w-20 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
-                <div className="absolute top-0 bottom-0 left-0 w-40 bg-gradient-to-r from-white via-white/80 to-transparent z-10 pointer-events-none" />
+                <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-[#f8f6fb] to-transparent z-10 pointer-events-none" />
+                <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#f8f6fb] to-transparent z-10 pointer-events-none" />
+                <div className="absolute top-0 bottom-0 right-0 w-24 bg-gradient-to-l from-[#f8f6fb] to-transparent z-10 pointer-events-none" />
+                <div
+                  className="absolute top-0 bottom-0 left-0 w-48 z-10 pointer-events-none"
+                  style={{
+                    background: "linear-gradient(to right, #f8f6fb 0%, rgba(248,246,251,0.95) 30%, rgba(248,246,251,0.6) 60%, transparent 100%)",
+                  }}
+                />
 
                 <div className="tech-wall-container h-full w-full">
                   <div className="tech-wall-grid h-full w-full flex gap-4 px-4">
