@@ -255,8 +255,8 @@ const HeroSection = () => {
                       className="p-3 rounded-2xl"
                       style={{ background: "rgba(0,0,0,0.02)", border: "1px solid rgba(0,0,0,0.05)" }}
                     >
-                      <p className="text-[11px] text-muted-foreground/60 mb-1">Faturamento</p>
-                      <p className="font-display text-xl font-bold text-foreground">100K+</p>
+                      <p className="text-[11px] text-muted-foreground/60 mb-1">Escala Exponencial</p>
+                      <p className="font-display text-xl font-bold text-foreground">∞</p>
                     </div>
                   </div>
 
