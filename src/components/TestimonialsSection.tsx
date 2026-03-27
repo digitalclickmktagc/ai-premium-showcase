@@ -134,9 +134,6 @@ const TestimonialsSection = () => {
               <Avatar name={featured.name} />
               <div>
                 <p className="font-display font-bold text-sm text-foreground">{featured.name}</p>
-                <p className="text-xs text-muted-foreground">
-                  {featured.role}{featured.company ? ` · ${featured.company}` : ""}
-                </p>
               </div>
             </div>
           </div>
