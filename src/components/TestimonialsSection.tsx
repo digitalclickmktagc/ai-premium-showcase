@@ -48,7 +48,7 @@ const TestimonialsSection = () => {
   const [featured, ...rest] = testimonials;
 
   return (
-    <section id="depoimentos" className="py-24 lg:py-32 relative overflow-hidden bg-[#FAFAFA]">
+    <section id="depoimentos" className="py-24 lg:py-32 relative overflow-hidden bg-white">
       {/* Ghost section number */}
       <div
         className="absolute -top-8 right-0 font-display font-black select-none pointer-events-none leading-none"
