@@ -67,38 +67,8 @@ const LeadFormSection = () => {
   return (
     <section
       id="diagnostico"
-      className="py-24 lg:py-32 relative overflow-hidden"
-      style={{
-        background: "linear-gradient(135deg, #1a0030 0%, #0d0020 40%, #180030 100%)",
-      }}
+      className="py-24 lg:py-32 relative overflow-hidden bg-white"
     >
-      {/* Gradient orbs inside section */}
-      <div
-        className="absolute top-0 left-1/3 w-[600px] h-[600px] rounded-full pointer-events-none"
-        style={{
-          background: "radial-gradient(circle, rgba(147,51,234,0.3) 0%, transparent 65%)",
-          filter: "blur(80px)",
-          transform: "translate(-50%, -50%)",
-        }}
-      />
-      <div
-        className="absolute bottom-0 right-1/3 w-[500px] h-[500px] rounded-full pointer-events-none"
-        style={{
-          background: "radial-gradient(circle, rgba(109,40,217,0.25) 0%, transparent 65%)",
-          filter: "blur(80px)",
-          transform: "translate(50%, 50%)",
-        }}
-      />
-
-      {/* Dot grid on dark */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          backgroundImage: "radial-gradient(rgba(255,255,255,0.04) 1px, transparent 1px)",
-          backgroundSize: "28px 28px",
-        }}
-      />
-
       <div className="container mx-auto px-4 lg:px-8 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -110,28 +80,20 @@ const LeadFormSection = () => {
           <div
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6"
             style={{
-              background: "rgba(147,51,234,0.2)",
-              border: "1px solid rgba(147,51,234,0.3)",
+              background: "rgba(147,51,234,0.06)",
+              border: "1px solid rgba(147,51,234,0.15)",
             }}
           >
-            <Sparkles size={13} className="text-purple-300" />
-            <span className="text-xs font-medium tracking-wide text-purple-200">
+            <Sparkles size={13} className="text-primary" />
+            <span className="text-xs font-medium tracking-wide text-primary">
               Diagnóstico Gratuito
             </span>
           </div>
 
-          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-light tracking-tight text-white">
-            Pronto para <span
-              style={{
-                background: "linear-gradient(135deg, #C084FC, #A855F7, #9333EA)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-              }}
-            >escalar?</span>
+          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-light tracking-tight text-foreground">
+            Pronto para <span className="text-gradient-nexa">escalar?</span>
           </h2>
-          <p className="mt-4 text-sm max-w-lg mx-auto font-body"
-            style={{ color: "rgba(255,255,255,0.45)" }}>
+          <p className="mt-4 text-sm max-w-lg mx-auto font-body text-muted-foreground">
             <span className="hidden sm:inline">Preencha os dados abaixo e escale o seu atendimento.</span>
             <span className="sm:hidden">Preencha os dados abaixo<br />e escale o seu atendimento.</span>
           </p>

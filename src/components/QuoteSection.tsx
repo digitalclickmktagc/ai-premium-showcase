@@ -2,40 +2,7 @@ import { motion } from "framer-motion";
 
 const QuoteSection = () => {
   return (
-    <section className="relative overflow-hidden" style={{ background: "#06000F" }}>
-      {/* Noise texture */}
-      <div
-        className="absolute inset-0 pointer-events-none z-0"
-        style={{ opacity: 0.4 }}
-      />
-
-      {/* Purple gradient orbs */}
-      <div
-        className="absolute top-0 left-1/4 w-[600px] h-[600px] rounded-full pointer-events-none"
-        style={{
-          background: "radial-gradient(circle, rgba(147,51,234,0.25) 0%, transparent 65%)",
-          filter: "blur(80px)",
-          transform: "translate(-50%, -50%)",
-        }}
-      />
-      <div
-        className="absolute bottom-0 right-1/4 w-[500px] h-[500px] rounded-full pointer-events-none"
-        style={{
-          background: "radial-gradient(circle, rgba(109,40,217,0.2) 0%, transparent 65%)",
-          filter: "blur(80px)",
-          transform: "translate(50%, 50%)",
-        }}
-      />
-
-      {/* Subtle grid on dark */}
-      <div
-        className="absolute inset-0 pointer-events-none z-0"
-        style={{
-          backgroundImage: "radial-gradient(rgba(255,255,255,0.04) 1px, transparent 1px)",
-          backgroundSize: "28px 28px",
-        }}
-      />
-
+    <section className="relative overflow-hidden bg-white">
       <div className="container mx-auto px-4 lg:px-8 relative z-10 py-28 lg:py-40">
         <motion.div
           initial={{ opacity: 0, y: 30, filter: "blur(12px)" }}
@@ -58,16 +25,9 @@ const QuoteSection = () => {
             "
           </div>
 
-          <p className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light leading-tight tracking-tight text-white">
+          <p className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light leading-tight tracking-tight text-foreground">
             Tecnologia que devolve{" "}
-            <span
-              style={{
-                background: "linear-gradient(135deg, #C084FC, #A855F7, #9333EA)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-              }}
-            >
+            <span className="text-gradient-nexa">
               o seu tempo.
             </span>
           </p>
@@ -86,8 +46,7 @@ const QuoteSection = () => {
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.6 }}
-            className="text-sm tracking-[0.3em] font-medium"
-            style={{ color: "rgba(255,255,255,0.3)" }}
+            className="text-sm tracking-[0.3em] font-medium text-muted-foreground"
           >
             — NEXA AI
           </motion.footer>
