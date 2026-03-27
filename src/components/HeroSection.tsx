@@ -248,8 +248,8 @@ const HeroSection = () => {
                       className="p-3 rounded-2xl"
                       style={{ background: "rgba(0,0,0,0.02)", border: "1px solid rgba(0,0,0,0.05)" }}
                     >
-                      <p className="text-[11px] text-muted-foreground/60 mb-1">Empresas</p>
-                      <p className="font-display text-xl font-bold text-foreground">15+</p>
+                      <p className="text-[11px] text-muted-foreground/60 mb-1">Disponível</p>
+                      <p className="font-display text-xl font-bold text-foreground">24/7</p>
                     </div>
                     <div
                       className="p-3 rounded-2xl"
