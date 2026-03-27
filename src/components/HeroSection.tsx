@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { ArrowRight, Zap, Palette, TrendingUp } from "lucide-react";
+import { ArrowRight, Zap, Palette } from "lucide-react";
 import supabaseIcon from "@/assets/supabase-icon.png";
 import chatgptIcon from "@/assets/chatgpt-icon.png";
 import whatsappIcon from "@/assets/whatsapp-icon.png";
