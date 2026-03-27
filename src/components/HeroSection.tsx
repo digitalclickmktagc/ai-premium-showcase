@@ -82,25 +82,6 @@ const HeroSection = () => {
               </a>
             </motion.div>
 
-            {/* Social proof micro-stats */}
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.5 }}
-              className="flex items-center gap-8 mt-14 flex-wrap justify-center lg:justify-start"
-            >
-              {[
-                { value: "15+", label: "Empresas" },
-                { value: "100K+", label: "Faturamento" },
-                { value: "60%", label: "Redução de custos" },
-              ].map((s, i) => (
-                <div key={s.label} className="flex flex-col items-center lg:items-start gap-0.5">
-                  <span className="font-display text-2xl font-extrabold text-gradient-nexa">{s.value}</span>
-                  <span className="text-xs text-muted-foreground/70 tracking-wide font-body">{s.label}</span>
-                  {i < 2 && <div className="hidden lg:block absolute" />}
-                </div>
-              ))}
-            </motion.div>
           </div>
 
           {/* RIGHT — premium metric card */}
