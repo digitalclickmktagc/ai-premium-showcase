@@ -3,7 +3,7 @@ import { Cpu, Zap, Palette, FileText } from "lucide-react";
 import supabaseIcon from "@/assets/supabase-icon.png";
 import chatgptIcon from "@/assets/chatgpt-icon.png";
 import whatsappIcon from "@/assets/whatsapp-icon.png";
-import vercelIcon from "@/assets/vercel-icon.png";
+import claudeIcon from "@/assets/claude-icon.png";
 import postgresIcon from "@/assets/postgres-icon.png";
 import evolutionIcon from "@/assets/evolution-icon.png";
 import geminiIcon from "@/assets/gemini-icon.png";
@@ -27,7 +27,7 @@ const col1Cards: TechCard[] = [
 ];
 
 const col2Cards: TechCard[] = [
-  { icon: <img src={vercelIcon} alt="Vercel" className="w-7 h-7" />, name: "Vercel", category: "Deploy", color: "text-foreground" },
+  { icon: <img src={claudeIcon} alt="Claude" className="w-7 h-7" />, name: "Claude", category: "Code", color: "text-foreground" },
   { icon: <Zap size={28} />, name: "Make", category: "Integration", color: "text-violet-500" },
   { icon: <img src={postgresIcon} alt="Postgres" className="w-7 h-7" />, name: "Postgres", category: "Database", color: "text-blue-500" },
   { icon: <img src={redisIcon} alt="Redis" className="w-7 h-7" />, name: "Redis", category: "Cache", color: "text-red-500" },
