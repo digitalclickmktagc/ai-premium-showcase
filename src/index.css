@@ -111,6 +111,16 @@
   to   { stroke-dashoffset: 0; }
 }
 
+@keyframes techWallUp {
+  0%   { transform: translateY(0); }
+  100% { transform: translateY(-50%); }
+}
+
+@keyframes techWallDown {
+  0%   { transform: translateY(-50%); }
+  100% { transform: translateY(0); }
+}
+
 @keyframes marquee {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
