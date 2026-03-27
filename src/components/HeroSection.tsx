@@ -54,23 +54,23 @@ const col3: TechCard[] = [
 
 /* ── Small wall card ── */
 const MiniCard = ({ card }: { card: TechCard }) => (
-  <div className="tech-wall-card rounded-xl p-3.5 flex flex-col justify-between aspect-[5/4]">
+  <div className="tech-wall-card rounded-2xl p-5 flex flex-col justify-between aspect-[4/3]">
     <div className="flex justify-between items-start">
       {card.icon}
-      <span className="relative flex h-1.5 w-1.5">
+      <span className="relative flex h-2 w-2">
         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400/50" />
-        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-400" />
+        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
       </span>
     </div>
     <div>
-      <div className="text-xs font-display font-semibold text-foreground">{card.name}</div>
-      <div className="text-[9px] font-display text-muted-foreground uppercase tracking-wider">{card.category}</div>
+      <div className="text-sm font-display font-semibold text-foreground">{card.name}</div>
+      <div className="text-[10px] font-display text-muted-foreground uppercase tracking-wider">{card.category}</div>
     </div>
   </div>
 );
 
 const WallCol = ({ cards, dir, className = "" }: { cards: TechCard[]; dir: "up" | "down"; className?: string }) => (
-  <div className={`tech-wall-column ${dir === "up" ? "tech-wall-col-up" : "tech-wall-col-down"} flex flex-col gap-4 w-full ${className}`}>
+  <div className={`tech-wall-column ${dir === "up" ? "tech-wall-col-up" : "tech-wall-col-down"} flex flex-col gap-5 w-full ${className}`}>
     {[...cards, ...cards].map((c, i) => (
       <MiniCard key={`${c.name}-${i}`} card={c} />
     ))}
