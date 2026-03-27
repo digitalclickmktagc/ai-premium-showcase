@@ -13,16 +13,6 @@ import githubIcon from "@/assets/github-icon.png";
 import n8nIcon from "@/assets/n8n-icon.png";
 import notionIcon from "@/assets/notion-icon.png";
 
-/* ── Chart data for metric card ── */
-const chartPoints = [6, 14, 9, 20, 16, 28, 22, 36, 30, 42];
-const maxVal = Math.max(...chartPoints);
-const minVal = Math.min(...chartPoints);
-const normalize = (v: number) =>
-  100 - ((v - minVal) / (maxVal - minVal)) * 80 - 10;
-const polyline = chartPoints
-  .map((v, i) => `${(i / (chartPoints.length - 1)) * 100},${normalize(v)}`)
-  .join(" ");
-
 /* ── Tech card types ── */
 interface TechCard {
   icon: React.ReactNode;
