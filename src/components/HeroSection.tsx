@@ -191,7 +191,7 @@ const HeroSection = () => {
 
                   {/* Main metric */}
                   <div className="mb-2">
-                    <p className="text-xs text-muted-foreground/60 tracking-[0.15em] uppercase mb-1">Redução de Custos</p>
+                    <p className="text-xs text-muted-foreground/60 tracking-[0.15em] uppercase mb-1">Conversão</p>
                     <div className="flex items-end gap-2">
                       <span
                         className="font-display text-6xl font-bold leading-none"
@@ -202,7 +202,7 @@ const HeroSection = () => {
                           backgroundClip: "text",
                         }}
                       >
-                        −60%
+                        +35%
                       </span>
                       <span className="text-xs text-muted-foreground/50 mb-2 pb-1">vs. anterior</span>
                     </div>
