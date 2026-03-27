@@ -342,6 +342,8 @@
   .tech-wall-column {
     will-change: transform;
     transform-style: flat;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
   }
 
   .tech-wall-col-up {
