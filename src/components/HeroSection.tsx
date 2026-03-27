@@ -1,22 +1,77 @@
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { ArrowRight, Sparkles, Zap, TrendingUp } from "lucide-react";
-import nexaLogo from "@/assets/nexa-logo-new.png";
+import { ArrowRight, Zap, Palette } from "lucide-react";
+import supabaseIcon from "@/assets/supabase-icon.png";
+import chatgptIcon from "@/assets/chatgpt-icon.png";
+import whatsappIcon from "@/assets/whatsapp-icon.png";
+import claudeIcon from "@/assets/claude-icon.png";
+import postgresIcon from "@/assets/postgres-icon.png";
+import evolutionIcon from "@/assets/evolution-icon.png";
+import geminiIcon from "@/assets/gemini-icon.png";
+import redisIcon from "@/assets/redis-icon.png";
+import githubIcon from "@/assets/github-icon.png";
+import n8nIcon from "@/assets/n8n-icon.png";
+import notionIcon from "@/assets/notion-icon.png";
 
-const chartPoints = [6, 14, 9, 20, 16, 28, 22, 36, 30, 42];
-const maxVal = Math.max(...chartPoints);
-const minVal = Math.min(...chartPoints);
-const normalize = (v: number) =>
-  100 - ((v - minVal) / (maxVal - minVal)) * 80 - 10;
+interface TechCard {
+  icon: React.ReactNode;
+  name: string;
+  category: string;
+  color: string;
+}
 
-const polyline = chartPoints
-  .map((v, i) => `${(i / (chartPoints.length - 1)) * 100},${normalize(v)}`)
-  .join(" ");
+const col1Cards: TechCard[] = [
+  { icon: <img src={chatgptIcon} alt="OpenAI" className="w-7 h-7" />, name: "OpenAI", category: "Intelligence", color: "text-primary" },
+  { icon: <img src={n8nIcon} alt="N8N" className="w-7 h-7" />, name: "N8N", category: "Automation", color: "text-orange-500" },
+  { icon: <img src={whatsappIcon} alt="WhatsApp" className="w-9 h-9" />, name: "WhatsApp", category: "Messaging", color: "text-green-500" },
+  { icon: <img src={supabaseIcon} alt="Supabase" className="w-7 h-7" />, name: "Supabase", category: "Database", color: "text-emerald-500" },
+  { icon: <img src={geminiIcon} alt="Google Gemini" className="w-7 h-7" />, name: "Gemini", category: "AI Model", color: "text-blue-500" },
+];
+
+const col2Cards: TechCard[] = [
+  { icon: <img src={claudeIcon} alt="Claude" className="w-7 h-7" />, name: "Claude", category: "Code", color: "text-foreground" },
+  { icon: <Zap size={28} />, name: "Make", category: "Integration", color: "text-violet-500" },
+  { icon: <img src={postgresIcon} alt="Postgres" className="w-7 h-7" />, name: "Postgres", category: "Database", color: "text-blue-500" },
+  { icon: <img src={redisIcon} alt="Redis" className="w-7 h-7" />, name: "Redis", category: "Cache", color: "text-red-500" },
+];
+
+const col3Cards: TechCard[] = [
+  { icon: <img src={githubIcon} alt="GitHub" className="w-7 h-7" />, name: "GitHub", category: "VCS", color: "text-foreground" },
+  { icon: <Palette size={28} />, name: "Figma", category: "Design", color: "text-pink-500" },
+  { icon: <img src={notionIcon} alt="Notion" className="w-7 h-7" />, name: "Notion", category: "Wiki", color: "text-foreground" },
+  { icon: <img src={evolutionIcon} alt="Evolution" className="w-7 h-7" />, name: "Evolution", category: "API", color: "text-emerald-500" },
+];
+
+const WallCard = ({ card }: { card: TechCard }) => (
+  <div className="tech-wall-card rounded-2xl p-5 aspect-[4/3] flex flex-col justify-between">
+    <div className="flex justify-between items-start">
+      <div className={card.color}>{card.icon}</div>
+      <span className="relative flex h-2 w-2">
+        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400/50" />
+        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
+      </span>
+    </div>
+    <div>
+      <div className="text-sm font-display font-semibold text-foreground">{card.name}</div>
+      <div className="text-[10px] font-display text-muted-foreground uppercase tracking-wider">{card.category}</div>
+    </div>
+  </div>
+);
+
+const WallColumn = ({ cards, direction, className = "" }: { cards: TechCard[]; direction: "up" | "down"; className?: string }) => {
+  const doubled = [...cards, ...cards];
+  return (
+    <div className={`tech-wall-column ${direction === "up" ? "tech-wall-col-up" : "tech-wall-col-down"} flex flex-col gap-5 w-full ${className}`}>
+      {doubled.map((card, i) => (
+        <WallCard key={`${card.name}-${i}`} card={card} />
+      ))}
+    </div>
+  );
+};
 
 const HeroSection = () => {
   return (
     <section className="relative min-h-screen flex items-center justify-center pt-24 pb-16 px-4 overflow-hidden">
-
       {/* Dot grid background */}
       <div className="absolute inset-0 dot-grid opacity-100 pointer-events-none" />
 
@@ -28,13 +83,10 @@ const HeroSection = () => {
       />
 
       <div className="container mx-auto relative z-10">
-        <div className="lg:grid lg:grid-cols-12 lg:gap-16 lg:items-center">
+        <div className="lg:grid lg:grid-cols-12 lg:gap-8 lg:items-center">
 
           {/* LEFT — content */}
-          <div className="lg:col-span-7 text-center lg:text-left flex flex-col items-center lg:items-start">
-
-
-            {/* Heading */}
+          <div className="lg:col-span-5 text-center lg:text-left flex flex-col items-center lg:items-start">
             <motion.h1
               initial={{ opacity: 0, y: 30, filter: "blur(10px)" }}
               animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
@@ -48,7 +100,6 @@ const HeroSection = () => {
               <span className="text-gradient-nexa font-bold">LIDERA.</span>
             </motion.h1>
 
-            {/* Subtext */}
             <motion.p
               initial={{ opacity: 0, y: 20, filter: "blur(6px)" }}
               animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
@@ -58,7 +109,6 @@ const HeroSection = () => {
               Automação inteligente para empresas que pensam grande.
             </motion.p>
 
-            {/* CTAs */}
             <motion.div
               initial={{ opacity: 0, y: 20, filter: "blur(6px)" }}
               animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
@@ -81,148 +131,27 @@ const HeroSection = () => {
                 </Button>
               </a>
             </motion.div>
-
           </div>
 
-          {/* RIGHT — premium metric card */}
-          <div className="hidden lg:flex lg:col-span-5 justify-center items-center mt-12 lg:mt-0">
+          {/* RIGHT — Tech Wall Cards */}
+          <div className="hidden lg:block lg:col-span-7 relative">
             <motion.div
               initial={{ opacity: 0, x: 40, filter: "blur(12px)" }}
               animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
               transition={{ duration: 0.9, delay: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
-              className="relative"
+              className="relative h-[600px] overflow-hidden"
             >
-              {/* Purple halo glow — visible on white */}
-              <div
-                className="absolute inset-0 rounded-[36px] pointer-events-none"
-                style={{
-                  background: "radial-gradient(ellipse at center, rgba(147,51,234,0.18) 0%, transparent 70%)",
-                  filter: "blur(30px)",
-                  transform: "scale(1.2)",
-                }}
-              />
+              {/* Fade edges */}
+              <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-white to-transparent z-10 pointer-events-none" />
+              <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white to-transparent z-10 pointer-events-none" />
+              <div className="absolute top-0 bottom-0 right-0 w-16 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
 
-              {/* Card */}
-              <div
-                className="relative w-[330px] rounded-[28px] overflow-hidden"
-                style={{
-                  background: "#ffffff",
-                  border: "1px solid rgba(0,0,0,0.07)",
-                  boxShadow: `
-                    0 2px 4px rgba(0,0,0,0.04),
-                    0 8px 32px rgba(0,0,0,0.07),
-                    0 24px 80px rgba(147,51,234,0.12),
-                    0 0 0 1px rgba(147,51,234,0.06)
-                  `,
-                }}
-              >
-                {/* Gradient top edge accent */}
-                <div
-                  className="absolute top-0 left-0 right-0 h-[2px]"
-                  style={{ background: "linear-gradient(90deg, #6B21A8, #9333EA, #A855F7, #7C3AED)" }}
-                />
-
-                <div className="p-6 pt-7">
-                  {/* Live indicator */}
-                  <div className="flex items-center justify-between mb-6">
-                    <div className="flex items-center gap-2">
-                      <span className="relative flex h-2.5 w-2.5">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary/50" />
-                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary" />
-                      </span>
-                      <span className="text-[11px] font-semibold text-foreground/60 tracking-wide uppercase">Live</span>
-                    </div>
-                    <div
-                      className="flex items-center gap-1.5 px-2.5 py-1 rounded-full"
-                      style={{
-                        background: "rgba(147,51,234,0.06)",
-                        border: "1px solid rgba(147,51,234,0.15)",
-                      }}
-                    >
-                      <Zap size={10} className="text-primary" />
-                      <span className="text-[10px] font-semibold text-primary tracking-wide">AI Powered</span>
-                    </div>
-                  </div>
-
-                  {/* Main metric */}
-                  <div className="mb-2">
-                    <p className="text-xs text-muted-foreground/60 tracking-[0.15em] uppercase mb-1">Conversão</p>
-                    <div className="flex items-end gap-2">
-                      <span
-                        className="font-display text-6xl font-bold leading-none"
-                        style={{
-                          background: "linear-gradient(135deg, #7C3AED, #9333EA, #A855F7)",
-                          WebkitBackgroundClip: "text",
-                          WebkitTextFillColor: "transparent",
-                          backgroundClip: "text",
-                        }}
-                      >
-                        +35%
-                      </span>
-                      <span className="text-xs text-muted-foreground/50 mb-2 pb-1">vs. anterior</span>
-                    </div>
-                  </div>
-
-                  {/* Mini chart */}
-                  <div className="relative h-[72px] mb-5 -mx-1">
-                    <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 w-full h-full">
-                      <defs>
-                        <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="rgba(147,51,234,0.2)" />
-                          <stop offset="100%" stopColor="rgba(147,51,234,0)" />
-                        </linearGradient>
-                      </defs>
-                      <polygon points={`0,100 ${polyline} 100,100`} fill="url(#chartFill)" />
-                      <polyline
-                        points={polyline}
-                        fill="none"
-                        stroke="rgba(147,51,234,0.7)"
-                        strokeWidth="1.8"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      {(() => {
-                        const lastIdx = chartPoints.length - 1;
-                        const lx = (lastIdx / (chartPoints.length - 1)) * 100;
-                        const ly = normalize(chartPoints[lastIdx]);
-                        return <circle cx={lx} cy={ly} r="2.5" fill="#9333ea" />;
-                      })()}
-                    </svg>
-                  </div>
-
-                  {/* Divider */}
-                  <div className="flex items-center gap-2 mb-5">
-                    <div className="flex-1 h-px bg-black/[0.06]" />
-                    <span className="text-[10px] text-muted-foreground/40 tracking-widest uppercase">Resultados</span>
-                    <div className="flex-1 h-px bg-black/[0.06]" />
-                  </div>
-
-                  {/* Bottom stats */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <div
-                      className="p-3 rounded-2xl"
-                      style={{ background: "rgba(0,0,0,0.02)", border: "1px solid rgba(0,0,0,0.05)" }}
-                    >
-                      <p className="text-[11px] text-muted-foreground/60 mb-1">Disponível</p>
-                      <p className="font-display text-xl font-bold text-foreground">24/7</p>
-                    </div>
-                    <div
-                      className="p-3 rounded-2xl"
-                      style={{ background: "rgba(0,0,0,0.02)", border: "1px solid rgba(0,0,0,0.05)" }}
-                    >
-                      <p className="text-[11px] text-muted-foreground/60 mb-1">Custos</p>
-                      <p className="font-display text-xl font-bold text-foreground">−60%</p>
-                    </div>
-                  </div>
-
-                  {/* Trending indicator */}
-                  <div
-                    className="mt-3 flex items-center gap-2 p-3 rounded-xl"
-                    style={{ background: "rgba(147,51,234,0.04)", border: "1px solid rgba(147,51,234,0.1)" }}
-                  >
-                    <TrendingUp size={14} className="text-primary" />
-                    <span className="text-xs text-primary font-medium">Crescimento 2× em 6 meses</span>
-                  </div>
+              {/* 3D Wall */}
+              <div className="tech-wall-container h-full w-full">
+                <div className="tech-wall-grid h-full w-full flex gap-5 px-4">
+                  <WallColumn cards={col1Cards} direction="up" />
+                  <WallColumn cards={col2Cards} direction="down" className="pt-12" />
+                  <WallColumn cards={col3Cards} direction="up" className="pt-24" />
                 </div>
               </div>
             </motion.div>
