@@ -33,32 +33,6 @@ const HeroSection = () => {
           {/* LEFT — content */}
           <div className="lg:col-span-7 text-center lg:text-left flex flex-col items-center lg:items-start">
 
-            {/* Logo + badge row */}
-            <motion.div
-              initial={{ opacity: 0, y: 20, filter: "blur(8px)" }}
-              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-              transition={{ duration: 0.6, delay: 0.05 }}
-              className="flex flex-col sm:flex-row items-center lg:items-start gap-4 mb-10"
-            >
-              <div className="relative flex-shrink-0">
-                <div className="absolute inset-0 rounded-2xl bg-primary/20 blur-xl scale-150" />
-                <div className="relative w-14 h-14 rounded-2xl overflow-hidden shadow-lg ring-1 ring-primary/20">
-                  <img src={nexaLogo} alt="Nexa AI" className="w-full h-full object-cover" />
-                </div>
-              </div>
-              <div
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full backdrop-blur-sm"
-                style={{
-                  background: "rgba(147,51,234,0.06)",
-                  border: "1px solid rgba(147,51,234,0.15)",
-                }}
-              >
-                <Sparkles size={13} className="text-primary" />
-                <span className="text-xs font-medium tracking-wide text-primary">
-                  Automação com Inteligência Artificial
-                </span>
-              </div>
-            </motion.div>
 
             {/* Heading */}
             <motion.h1
