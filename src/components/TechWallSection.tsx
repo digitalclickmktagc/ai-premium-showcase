@@ -1,11 +1,15 @@
 import { motion } from "framer-motion";
-import {
-  Cpu, Cloud, Zap, MessageSquare, Brain,
-  GitBranch, Palette, FileText, Bot, Workflow, Shield
-} from "lucide-react";
+import { Cpu, Zap, Palette, FileText } from "lucide-react";
 import supabaseIcon from "@/assets/supabase-icon.png";
 import chatgptIcon from "@/assets/chatgpt-icon.png";
 import whatsappIcon from "@/assets/whatsapp-icon.png";
+import vercelIcon from "@/assets/vercel-icon.png";
+import postgresIcon from "@/assets/postgres-icon.png";
+import evolutionIcon from "@/assets/evolution-icon.png";
+import geminiIcon from "@/assets/gemini-icon.png";
+import redisIcon from "@/assets/redis-icon.png";
+import githubIcon from "@/assets/github-icon.png";
+import n8nIcon from "@/assets/n8n-icon.png";
 
 interface TechCard {
   icon: React.ReactNode;
@@ -16,23 +20,24 @@ interface TechCard {
 
 const col1Cards: TechCard[] = [
   { icon: <img src={chatgptIcon} alt="OpenAI" className="w-7 h-7" />, name: "OpenAI", category: "Intelligence", color: "text-primary" },
-  { icon: <Workflow size={28} />, name: "N8N", category: "Automation", color: "text-orange-500" },
-  { icon: <img src={whatsappIcon} alt="WhatsApp" className="w-9 h-9" />, name: "WhatsApp", category: "Messaging", color: "text-green-500" },
+  { icon: <img src={n8nIcon} alt="N8N" className="w-7 h-7" />, name: "N8N", category: "Automation", color: "text-orange-500" },
+  { icon: <img src={whatsappIcon} alt="WhatsApp" className="w-7 h-7" />, name: "WhatsApp", category: "Messaging", color: "text-green-500" },
   { icon: <img src={supabaseIcon} alt="Supabase" className="w-7 h-7" />, name: "Supabase", category: "Database", color: "text-emerald-500" },
+  { icon: <img src={geminiIcon} alt="Google Gemini" className="w-7 h-7" />, name: "Gemini", category: "AI Model", color: "text-blue-500" },
 ];
 
 const col2Cards: TechCard[] = [
-  { icon: <Cloud size={28} />, name: "Vercel", category: "Deploy", color: "text-foreground" },
+  { icon: <img src={vercelIcon} alt="Vercel" className="w-7 h-7" />, name: "Vercel", category: "Deploy", color: "text-foreground" },
   { icon: <Zap size={28} />, name: "Make", category: "Integration", color: "text-violet-500" },
-  { icon: <Cpu size={28} />, name: "LangChain", category: "AI Framework", color: "text-blue-500" },
-  { icon: <Shield size={28} />, name: "Cloudflare", category: "Security", color: "text-amber-500" },
+  { icon: <img src={postgresIcon} alt="Postgres" className="w-7 h-7" />, name: "Postgres", category: "Database", color: "text-blue-500" },
+  { icon: <img src={redisIcon} alt="Redis" className="w-7 h-7" />, name: "Redis", category: "Cache", color: "text-red-500" },
 ];
 
 const col3Cards: TechCard[] = [
-  { icon: <GitBranch size={28} />, name: "GitHub", category: "VCS", color: "text-foreground" },
+  { icon: <img src={githubIcon} alt="GitHub" className="w-7 h-7" />, name: "GitHub", category: "VCS", color: "text-foreground" },
   { icon: <Palette size={28} />, name: "Figma", category: "Design", color: "text-pink-500" },
   { icon: <FileText size={28} />, name: "Notion", category: "Wiki", color: "text-foreground" },
-  { icon: <Bot size={28} />, name: "Chatbot", category: "Atendimento", color: "text-primary" },
+  { icon: <img src={evolutionIcon} alt="Evolution" className="w-7 h-7" />, name: "Evolution", category: "API", color: "text-emerald-500" },
 ];
 
 const WallCard = ({ card }: { card: TechCard }) => (
