@@ -121,34 +121,6 @@ const BenefitsSection = () => {
           })}
         </div>
 
-        {/* Stats strip — premium */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-          className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto"
-        >
-          {stats.map((stat, i) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: 0.4 + i * 0.08 }}
-              className="stat-highlight px-6 py-8 text-center"
-            >
-              <p className="font-display text-4xl md:text-5xl font-extrabold leading-none text-gradient-nexa mb-3">
-                {stat.value}
-              </p>
-              <p className="text-[11px] tracking-[0.2em] font-semibold"
-                style={{ color: "rgba(0,0,0,0.4)" }}>
-                {stat.label}
-              </p>
-            </motion.div>
-          ))}
-        </motion.div>
-
       </div>
     </section>
   );
