@@ -1,8 +1,9 @@
 import { motion } from "framer-motion";
 import {
-  Cpu, Database, Cloud, Zap, MessageSquare, Brain,
+  Cpu, Cloud, Zap, MessageSquare, Brain,
   GitBranch, Palette, FileText, Bot, Workflow, Shield
 } from "lucide-react";
+import supabaseIcon from "@/assets/supabase-icon.png";
 
 interface TechCard {
   icon: React.ReactNode;
@@ -15,7 +16,7 @@ const col1Cards: TechCard[] = [
   { icon: <Brain size={28} />, name: "OpenAI", category: "Intelligence", color: "text-primary" },
   { icon: <Workflow size={28} />, name: "N8N", category: "Automation", color: "text-orange-500" },
   { icon: <MessageSquare size={28} />, name: "WhatsApp", category: "Messaging", color: "text-green-500" },
-  { icon: <Database size={28} />, name: "Supabase", category: "Database", color: "text-emerald-500" },
+  { icon: <img src={supabaseIcon} alt="Supabase" className="w-7 h-7" />, name: "Supabase", category: "Database", color: "text-emerald-500" },
 ];
 
 const col2Cards: TechCard[] = [
@@ -107,7 +108,7 @@ const TechWallSection = () => {
             <div className="flex flex-col gap-4">
               {[
                 { icon: <Cpu size={18} />, title: "Arquitetura Modular", sub: "React / N8N / Make" },
-                { icon: <Database size={18} />, title: "Dados em Tempo Real", sub: "Supabase / Postgres" },
+                { icon: <img src={supabaseIcon} alt="Supabase" className="w-[18px] h-[18px]" />, title: "Dados em Tempo Real", sub: "Supabase / Postgres" },
                 { icon: <Brain size={18} />, title: "IA Integrada", sub: "OpenAI / LangChain" },
               ].map((f) => (
                 <div key={f.title} className="group flex items-center gap-4 cursor-default">
