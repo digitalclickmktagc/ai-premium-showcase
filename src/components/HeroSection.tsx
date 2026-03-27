@@ -183,6 +183,80 @@ const HeroSection = () => {
                 </div>
               </div>
             </motion.div>
+
+            {/* Floating Conversion Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 30, filter: "blur(8px)" }}
+              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              transition={{ duration: 0.8, delay: 0.6 }}
+              className="absolute bottom-8 left-4 z-20 w-[280px]"
+            >
+              <div className="bg-white/95 backdrop-blur-xl rounded-2xl border border-black/[0.06] shadow-[0_8px_40px_rgba(147,51,234,0.1)] p-5">
+                {/* Header */}
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                    <span className="text-[11px] font-display font-semibold text-foreground uppercase tracking-wider">Live</span>
+                  </div>
+                  <span className="text-[10px] font-display font-medium text-primary bg-primary/10 px-2.5 py-1 rounded-full flex items-center gap-1">
+                    <Zap size={10} />
+                    AI Powered
+                  </span>
+                </div>
+
+                {/* Main stat */}
+                <div className="mb-3">
+                  <p className="text-[10px] font-display text-muted-foreground uppercase tracking-widest mb-1">Conversão</p>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-3xl font-display font-bold text-gradient-nexa">+35%</span>
+                    <span className="text-xs text-muted-foreground font-body">vs. anterior</span>
+                  </div>
+                </div>
+
+                {/* Mini chart */}
+                <div className="mb-3">
+                  <svg viewBox="0 0 200 50" className="w-full h-10">
+                    <polyline
+                      fill="none"
+                      stroke="hsl(271 81% 56%)"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      points="0,40 20,38 40,35 60,30 80,32 100,25 120,20 140,22 160,15 180,10 200,8"
+                    />
+                    <polyline
+                      fill="url(#chartGrad)"
+                      strokeWidth="0"
+                      points="0,50 0,40 20,38 40,35 60,30 80,32 100,25 120,20 140,22 160,15 180,10 200,8 200,50"
+                    />
+                    <defs>
+                      <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="hsl(271 81% 56%)" stopOpacity="0.15" />
+                        <stop offset="100%" stopColor="hsl(271 81% 56%)" stopOpacity="0" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                </div>
+
+                {/* Bottom stats */}
+                <div className="flex gap-2 mb-3">
+                  <div className="flex-1 bg-muted/50 rounded-lg px-3 py-2">
+                    <p className="text-[9px] font-display text-muted-foreground uppercase tracking-wider">Disponível</p>
+                    <p className="text-sm font-display font-bold text-foreground">24/7</p>
+                  </div>
+                  <div className="flex-1 bg-muted/50 rounded-lg px-3 py-2">
+                    <p className="text-[9px] font-display text-muted-foreground uppercase tracking-wider">Custos</p>
+                    <p className="text-sm font-display font-bold text-foreground">−60%</p>
+                  </div>
+                </div>
+
+                {/* Footer */}
+                <div className="flex items-center gap-1.5 text-primary">
+                  <TrendingUp size={12} />
+                  <span className="text-[10px] font-display font-medium">Crescimento 2× em 6 meses</span>
+                </div>
+              </div>
+            </motion.div>
           </div>
 
         </div>
