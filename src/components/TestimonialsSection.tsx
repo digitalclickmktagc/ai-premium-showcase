@@ -235,10 +235,7 @@ const TestimonialsSection = () => {
               >
                 <Avatar name={t.name} />
                 <div>
-                  <p className="font-display font-bold text-sm text-foreground">{t.name}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {t.role}{t.company ? ` · ${t.company}` : ""}
-                  </p>
+                   <p className="font-display font-bold text-sm text-foreground">{t.name}</p>
                 </div>
               </div>
             </motion.div>
