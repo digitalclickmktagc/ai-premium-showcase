@@ -224,7 +224,7 @@ const TestimonialsSection = () => {
               }}
             >
               <div>
-                <Stars />
+                <Stars count={t.stars} />
                 <p className="text-muted-foreground font-body leading-relaxed my-5 text-sm">
                   "{t.quote}"
                 </p>
