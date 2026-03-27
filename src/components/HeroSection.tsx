@@ -79,6 +79,19 @@ const WallColumn = ({ cards, direction, className = "", hoveredCard }: { cards: 
 };
 
 const HeroSection = () => {
+  const [hoveredCard, setHoveredCard] = useState<string | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    const elements = document.elementsFromPoint(e.clientX, e.clientY);
+    const card = elements.find(el => el.hasAttribute('data-card-id'));
+    setHoveredCard(card ? card.getAttribute('data-card-id') : null);
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    setHoveredCard(null);
+  }, []);
+
   return (
     <section className="relative min-h-screen flex items-center justify-center pt-24 pb-16 px-4 overflow-hidden">
       {/* Dot grid background */}
@@ -143,7 +156,12 @@ const HeroSection = () => {
           </div>
 
           {/* RIGHT — Tech Wall Cards */}
-          <div className="hidden lg:block lg:col-span-7 relative">
+          <div
+            ref={containerRef}
+            className="hidden lg:block lg:col-span-7 relative"
+            onMouseMove={handleMouseMove}
+            onMouseLeave={handleMouseLeave}
+          >
             <motion.div
               initial={{ opacity: 0, x: 40, filter: "blur(12px)" }}
               animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
@@ -159,9 +177,9 @@ const HeroSection = () => {
               {/* 3D Wall */}
               <div className="tech-wall-container h-full w-full">
                 <div className="tech-wall-grid h-full w-full flex gap-6 px-6">
-                  <WallColumn cards={col1Cards} direction="up" />
-                  <WallColumn cards={col2Cards} direction="down" className="pt-16" />
-                  <WallColumn cards={col3Cards} direction="up" className="pt-28" />
+                  <WallColumn cards={col1Cards} direction="up" hoveredCard={hoveredCard} />
+                  <WallColumn cards={col2Cards} direction="down" className="pt-16" hoveredCard={hoveredCard} />
+                  <WallColumn cards={col3Cards} direction="up" className="pt-28" hoveredCard={hoveredCard} />
                 </div>
               </div>
             </motion.div>
