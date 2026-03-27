@@ -31,25 +31,25 @@ interface TechCard {
 }
 
 const col1: TechCard[] = [
-  { icon: <img src={chatgptIcon} alt="OpenAI" className="w-6 h-6" />, name: "OpenAI", category: "Intelligence" },
-  { icon: <img src={n8nIcon} alt="N8N" className="w-6 h-6" />, name: "N8N", category: "Automation" },
-  { icon: <img src={whatsappIcon} alt="WhatsApp" className="w-8 h-8" />, name: "WhatsApp", category: "Messaging" },
-  { icon: <img src={supabaseIcon} alt="Supabase" className="w-6 h-6" />, name: "Supabase", category: "Database" },
-  { icon: <img src={geminiIcon} alt="Gemini" className="w-6 h-6" />, name: "Gemini", category: "AI Model" },
+  { icon: <img src={chatgptIcon} alt="OpenAI" className="w-7 h-7" />, name: "OpenAI", category: "Intelligence" },
+  { icon: <img src={n8nIcon} alt="N8N" className="w-7 h-7" />, name: "N8N", category: "Automation" },
+  { icon: <img src={whatsappIcon} alt="WhatsApp" className="w-9 h-9" />, name: "WhatsApp", category: "Messaging" },
+  { icon: <img src={supabaseIcon} alt="Supabase" className="w-7 h-7" />, name: "Supabase", category: "Database" },
+  { icon: <img src={geminiIcon} alt="Gemini" className="w-7 h-7" />, name: "Gemini", category: "AI Model" },
 ];
 
 const col2: TechCard[] = [
-  { icon: <img src={claudeIcon} alt="Claude" className="w-6 h-6" />, name: "Claude", category: "Code" },
-  { icon: <Zap size={24} className="text-violet-500" />, name: "Make", category: "Integration" },
-  { icon: <img src={postgresIcon} alt="Postgres" className="w-6 h-6" />, name: "Postgres", category: "Database" },
-  { icon: <img src={redisIcon} alt="Redis" className="w-6 h-6" />, name: "Redis", category: "Cache" },
+  { icon: <img src={claudeIcon} alt="Claude" className="w-7 h-7" />, name: "Claude", category: "Code" },
+  { icon: <Zap size={28} className="text-violet-500" />, name: "Make", category: "Integration" },
+  { icon: <img src={postgresIcon} alt="Postgres" className="w-7 h-7" />, name: "Postgres", category: "Database" },
+  { icon: <img src={redisIcon} alt="Redis" className="w-7 h-7" />, name: "Redis", category: "Cache" },
 ];
 
 const col3: TechCard[] = [
-  { icon: <img src={githubIcon} alt="GitHub" className="w-6 h-6" />, name: "GitHub", category: "VCS" },
-  { icon: <Palette size={24} className="text-pink-500" />, name: "Figma", category: "Design" },
-  { icon: <img src={notionIcon} alt="Notion" className="w-6 h-6" />, name: "Notion", category: "Wiki" },
-  { icon: <img src={evolutionIcon} alt="Evolution" className="w-6 h-6" />, name: "Evolution", category: "API" },
+  { icon: <img src={githubIcon} alt="GitHub" className="w-7 h-7" />, name: "GitHub", category: "VCS" },
+  { icon: <Palette size={28} className="text-pink-500" />, name: "Figma", category: "Design" },
+  { icon: <img src={notionIcon} alt="Notion" className="w-7 h-7" />, name: "Notion", category: "Wiki" },
+  { icon: <img src={evolutionIcon} alt="Evolution" className="w-7 h-7" />, name: "Evolution", category: "API" },
 ];
 
 /* ── Small wall card ── */
