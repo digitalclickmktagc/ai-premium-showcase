@@ -179,7 +179,7 @@ const HeroSection = () => {
                 initial={{ opacity: 0, y: 30, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 transition={{ duration: 0.8, delay: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }}
-                className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20"
+                className="absolute bottom-8 left-4 z-20"
               >
                 <div
                   className="w-[300px] rounded-[24px] overflow-hidden"
