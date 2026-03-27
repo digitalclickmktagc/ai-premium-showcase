@@ -4,6 +4,7 @@ import {
   GitBranch, Palette, FileText, Bot, Workflow, Shield
 } from "lucide-react";
 import supabaseIcon from "@/assets/supabase-icon.png";
+import chatgptIcon from "@/assets/chatgpt-icon.png";
 
 interface TechCard {
   icon: React.ReactNode;
