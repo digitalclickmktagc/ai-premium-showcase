@@ -5,6 +5,16 @@ import { useState } from "react";
 const services = [
   {
     num: "01",
+    icon: TrendingUp,
+    title: "Escala Exponencial",
+    desc: "Crescimento sustentável. Processos, tecnologia e estratégia alinhados.",
+    badge: "Crescimento real",
+    metric: "∞",
+    metricLabel: "Potencial",
+    detail: "Infraestrutura de crescimento que se adapta ao seu ritmo. Escale sem dores de cabeça operacionais.",
+  },
+  {
+    num: "02",
     icon: Settings,
     title: "Fluxos Autônomos",
     desc: "Processos que rodam sozinhos. Sem gargalos, sem intervenção.",
@@ -14,7 +24,7 @@ const services = [
     detail: "Automatize fluxos complexos de ponta a ponta. Tarefas manuais se tornam máquinas de eficiência que operam 24/7 sem supervisão.",
   },
   {
-    num: "02",
+    num: "03",
     icon: Bot,
     title: "Agentes Inteligentes",
     desc: "IA que atende, qualifica e converte. 24/7, sem pausas.",
@@ -24,7 +34,7 @@ const services = [
     detail: "Agentes de IA que entendem contexto, qualificam leads e fecham vendas enquanto sua equipe dorme.",
   },
   {
-    num: "03",
+    num: "04",
     icon: Users,
     title: "Gestão Preditiva",
     desc: "Antecipe decisões. Dados em tempo real para ações certeiras.",
@@ -32,16 +42,6 @@ const services = [
     metric: "+35%",
     metricLabel: "Conversão",
     detail: "Dashboards inteligentes que transformam ruído em sinal. Tome decisões antes que os problemas apareçam.",
-  },
-  {
-    num: "04",
-    icon: TrendingUp,
-    title: "Escala Exponencial",
-    desc: "Crescimento sustentável. Processos, tecnologia e estratégia alinhados.",
-    badge: "Crescimento real",
-    metric: "∞",
-    metricLabel: "Potencial",
-    detail: "Infraestrutura de crescimento que se adapta ao seu ritmo. Escale sem dores de cabeça operacionais.",
   },
 ];
 
