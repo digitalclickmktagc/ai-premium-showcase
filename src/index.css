@@ -351,9 +351,6 @@
     animation: techWallDown 40s linear infinite;
   }
 
-  .tech-wall-column:hover {
-    animation-play-state: paused;
-  }
 
   .tech-wall-card {
     background: rgba(255, 255, 255, 1);
