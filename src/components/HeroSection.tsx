@@ -215,24 +215,24 @@ const HeroSection = () => {
 
                 {/* Mini chart */}
                 <div className="mb-3">
-                  <svg viewBox="0 0 200 60" className="w-full h-12">
+                  <svg viewBox="0 0 200 50" className="w-full h-12">
                     <polyline
                       fill="none"
                       stroke="hsl(271 81% 56%)"
                       strokeWidth="2.5"
                       strokeLinecap="round"
-                      strokeLinejoin="miter"
-                      points="0,48 30,48 30,40 60,40 60,35 90,35 90,28 120,28 120,20 150,20 150,12 200,12"
+                      strokeLinejoin="round"
+                      points="0,45 25,43 50,40 75,38 95,35 110,30 130,25 150,22 165,18 180,14 195,10 200,8"
                     />
                     <polyline
                       fill="url(#chartGrad)"
                       strokeWidth="0"
-                      points="0,60 0,48 30,48 30,40 60,40 60,35 90,35 90,28 120,28 120,20 150,20 150,12 200,12 200,60"
+                      points="0,50 0,45 25,43 50,40 75,38 95,35 110,30 130,25 150,22 165,18 180,14 195,10 200,8 200,50"
                     />
                     <defs>
                       <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="hsl(271 81% 56%)" stopOpacity="0.2" />
-                        <stop offset="100%" stopColor="hsl(271 81% 56%)" stopOpacity="0.02" />
+                        <stop offset="0%" stopColor="hsl(271 81% 56%)" stopOpacity="0.15" />
+                        <stop offset="100%" stopColor="hsl(271 81% 56%)" stopOpacity="0" />
                       </linearGradient>
                     </defs>
                   </svg>
