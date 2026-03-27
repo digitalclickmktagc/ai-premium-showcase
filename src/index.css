@@ -335,7 +335,7 @@
   }
 
   .tech-wall-grid {
-    transform: rotateY(-18deg) rotateX(10deg) rotateZ(-2deg) scale(1.1);
+    transform: rotateY(-14deg) rotateX(8deg) rotateZ(-1.5deg) scale(1.05);
     transform-style: preserve-3d;
   }
 
