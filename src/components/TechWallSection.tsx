@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Cpu, Zap, Palette, FileText } from "lucide-react";
+import { Cpu, Zap, Palette } from "lucide-react";
 import supabaseIcon from "@/assets/supabase-icon.png";
 import chatgptIcon from "@/assets/chatgpt-icon.png";
 import whatsappIcon from "@/assets/whatsapp-icon.png";
@@ -10,6 +10,7 @@ import geminiIcon from "@/assets/gemini-icon.png";
 import redisIcon from "@/assets/redis-icon.png";
 import githubIcon from "@/assets/github-icon.png";
 import n8nIcon from "@/assets/n8n-icon.png";
+import notionIcon from "@/assets/notion-icon.png";
 
 interface TechCard {
   icon: React.ReactNode;
