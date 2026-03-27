@@ -332,18 +332,16 @@
   .tech-wall-container {
     perspective: 2000px;
     transform-style: preserve-3d;
-    pointer-events: auto;
   }
 
   .tech-wall-grid {
     transform: rotateY(-18deg) rotateX(10deg) rotateZ(-2deg) scale(1.1);
-    transform-style: flat;
-    pointer-events: auto;
+    transform-style: preserve-3d;
   }
 
   .tech-wall-column {
     will-change: transform;
-    pointer-events: auto;
+    transform-style: flat;
   }
 
   .tech-wall-col-up {
