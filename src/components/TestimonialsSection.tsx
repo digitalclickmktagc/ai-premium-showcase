@@ -5,20 +5,17 @@ const testimonials = [
   {
     quote: "A Nexa AI transformou completamente nosso processo de vendas. Automatizamos 80% das tarefas manuais e dobramos o faturamento em 6 meses.",
     name: "Carlos Mendes",
-    role: "CEO",
-    company: "TechFlow",
+    stars: 5,
   },
   {
     quote: "O painel personalizado e o agente de IA revolucionaram nosso atendimento. Hoje respondemos em segundos, não em horas.",
     name: "Ana Oliveira",
-    role: "Diretora de Operações",
-    company: "Opex",
+    stars: 4.5,
   },
   {
     quote: "Precisávamos escalar sem perder qualidade. A Nexa AI entregou exatamente isso com uma solução sob medida para nosso segmento.",
     name: "Rafael Torres",
-    role: "Fundador",
-    company: "Scale.io",
+    stars: 4,
   },
 ];
 
