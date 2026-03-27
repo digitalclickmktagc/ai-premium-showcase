@@ -110,7 +110,7 @@ const TechWallSection = () => {
               {[
                 { icon: <Cpu size={18} />, title: "Arquitetura Modular", sub: "React / N8N / Make" },
                 { icon: <img src={supabaseIcon} alt="Supabase" className="w-[18px] h-[18px]" />, title: "Dados em Tempo Real", sub: "Supabase / Postgres" },
-                { icon: <Brain size={18} />, title: "IA Integrada", sub: "OpenAI / LangChain" },
+                { icon: <img src={chatgptIcon} alt="OpenAI" className="w-[18px] h-[18px]" />, title: "IA Integrada", sub: "OpenAI / LangChain" },
               ].map((f) => (
                 <div key={f.title} className="group flex items-center gap-4 cursor-default">
                   <div className="w-10 h-10 rounded-xl border border-black/[0.08] bg-primary/[0.03] flex items-center justify-center text-muted-foreground group-hover:text-primary group-hover:bg-primary/[0.06] group-hover:border-primary/20 transition-all duration-200">
