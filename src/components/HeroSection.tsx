@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { ArrowRight, Zap, Palette, TrendingUp } from "lucide-react";
+import { ArrowRight, Zap, Palette } from "lucide-react";
 import supabaseIcon from "@/assets/supabase-icon.png";
 import chatgptIcon from "@/assets/chatgpt-icon.png";
 import whatsappIcon from "@/assets/whatsapp-icon.png";
@@ -97,173 +97,90 @@ const HeroSection = () => {
       {/* Dot grid background */}
       <div className="absolute inset-0 dot-grid opacity-100 pointer-events-none" />
 
-      {/* Gradient fade at edges */}
-      <div className="absolute inset-0 pointer-events-none"
-        style={{
-          background: "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(147,51,234,0.05) 0%, transparent 70%)",
-        }}
-      />
+      {/* Tech Wall as background — behind text */}
+      <div
+        ref={containerRef}
+        className="absolute inset-0 z-0 pointer-events-auto"
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+      >
+        <div className="absolute inset-0 overflow-hidden">
+          {/* Fade edges */}
+          <div className="absolute top-0 left-0 right-0 h-40 bg-gradient-to-b from-white to-transparent z-10 pointer-events-none" />
+          <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-white to-transparent z-10 pointer-events-none" />
+          <div className="absolute top-0 bottom-0 right-0 w-32 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
+          <div className="absolute top-0 bottom-0 left-0 w-32 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
 
-      <div className="container mx-auto relative z-10">
-        <div className="lg:grid lg:grid-cols-12 lg:gap-8 lg:items-center">
+          {/* Strong center fade so text is readable */}
+          <div className="absolute inset-0 z-10 pointer-events-none"
+            style={{
+              background: "radial-gradient(ellipse 70% 60% at 50% 50%, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.6) 40%, transparent 70%)",
+            }}
+          />
 
-          {/* LEFT — content */}
-          <div className="lg:col-span-5 text-center lg:text-left flex flex-col items-center lg:items-start">
-            <motion.h1
-              initial={{ opacity: 0, y: 30, filter: "blur(10px)" }}
-              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-              transition={{ duration: 0.8, delay: 0.1, ease: [0.25, 0.46, 0.45, 0.94] }}
-              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-display font-light tracking-tight leading-[1.05] mb-6 uppercase text-foreground"
-            >
-              A IA EXECUTA
-              <br />
-              <span className="text-gradient-nexa font-bold">ENQUANTO VOCÊ</span>
-              <br />
-              <span className="text-gradient-nexa font-bold">LIDERA.</span>
-            </motion.h1>
-
-            <motion.p
-              initial={{ opacity: 0, y: 20, filter: "blur(6px)" }}
-              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-              transition={{ duration: 0.7, delay: 0.2 }}
-              className="text-lg md:text-xl text-muted-foreground mb-10 font-body font-light max-w-xl"
-            >
-              Automação inteligente para empresas que pensam grande.
-            </motion.p>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20, filter: "blur(6px)" }}
-              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-              transition={{ duration: 0.7, delay: 0.3 }}
-              className="flex flex-col sm:flex-row gap-4 items-center lg:items-start"
-            >
-              <a href="#diagnostico">
-                <Button variant="glow" size="lg" className="text-sm px-8 tracking-widest text-white cursor-pointer uppercase">
-                  ESCALAR MEU ATENDIMENTO
-                  <ArrowRight className="ml-2" size={16} />
-                </Button>
-              </a>
-              <a href="#solucoes">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="text-sm px-8 tracking-wide cursor-pointer border-black/10 hover:border-primary/30 hover:bg-primary/[0.03] text-foreground"
-                >
-                  Ver soluções
-                </Button>
-              </a>
-            </motion.div>
+          {/* 3D Wall */}
+          <div className="tech-wall-container h-full w-full">
+            <div className="tech-wall-grid h-full w-full flex gap-6 px-6 justify-center">
+              <WallColumn cards={col1Cards} direction="up" hoveredCard={hoveredCard} />
+              <WallColumn cards={col2Cards} direction="down" className="pt-16" hoveredCard={hoveredCard} />
+              <WallColumn cards={col3Cards} direction="up" className="pt-28" hoveredCard={hoveredCard} />
+              <WallColumn cards={col1Cards} direction="down" className="pt-12 hidden xl:flex" hoveredCard={hoveredCard} />
+              <WallColumn cards={col2Cards} direction="up" className="pt-20 hidden 2xl:flex" hoveredCard={hoveredCard} />
+            </div>
           </div>
-
-          {/* RIGHT — Tech Wall Cards */}
-          <div
-            ref={containerRef}
-            className="hidden lg:block lg:col-span-7 relative"
-            onMouseMove={handleMouseMove}
-            onMouseLeave={handleMouseLeave}
-          >
-            <motion.div
-              initial={{ opacity: 0, x: 40, filter: "blur(12px)" }}
-              animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
-              transition={{ duration: 0.9, delay: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
-              className="relative h-[650px] overflow-hidden"
-            >
-              {/* Fade edges */}
-              <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-white to-transparent z-10 pointer-events-none" />
-              <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-white to-transparent z-10 pointer-events-none" />
-              <div className="absolute top-0 bottom-0 right-0 w-24 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
-              <div className="absolute top-0 bottom-0 left-0 w-12 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
-
-              {/* 3D Wall */}
-              <div className="tech-wall-container h-full w-full">
-                <div className="tech-wall-grid h-full w-full flex gap-6 px-6">
-                  <WallColumn cards={col1Cards} direction="up" hoveredCard={hoveredCard} />
-                  <WallColumn cards={col2Cards} direction="down" className="pt-16" hoveredCard={hoveredCard} />
-                  <WallColumn cards={col3Cards} direction="up" className="pt-28" hoveredCard={hoveredCard} />
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Floating Conversion Card */}
-            <motion.div
-              initial={{ opacity: 0, y: 30, filter: "blur(8px)" }}
-              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-              transition={{ duration: 0.8, delay: 0.6 }}
-              className="absolute bottom-8 left-4 z-20 w-[280px]"
-            >
-              <div className="bg-white/95 backdrop-blur-xl rounded-2xl border border-black/[0.06] shadow-[0_8px_40px_rgba(147,51,234,0.1)] p-5">
-                {/* Header */}
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                    <span className="text-[11px] font-display font-semibold text-foreground uppercase tracking-wider">Live</span>
-                  </div>
-                  <span className="text-[10px] font-display font-medium text-primary bg-primary/10 px-2.5 py-1 rounded-full flex items-center gap-1">
-                    <Zap size={10} />
-                    AI Powered
-                  </span>
-                </div>
-
-                {/* Main stat */}
-                <div className="mb-3">
-                  <p className="text-[10px] font-display text-muted-foreground uppercase tracking-widest mb-1">Conversão</p>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-display font-bold text-gradient-nexa">+35%</span>
-                    <span className="text-xs text-muted-foreground font-body">vs. anterior</span>
-                  </div>
-                </div>
-
-                {/* Mini chart */}
-                <div className="mb-3">
-                  <svg viewBox="0 0 200 50" className="w-full h-12">
-                    <polyline
-                      fill="none"
-                      stroke="hsl(271 81% 56%)"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      points="0,45 25,43 50,40 75,38 95,35 110,30 130,25 150,22 165,18 180,14 195,10 200,8"
-                    />
-                    <polyline
-                      fill="url(#chartGrad)"
-                      strokeWidth="0"
-                      points="0,50 0,45 25,43 50,40 75,38 95,35 110,30 130,25 150,22 165,18 180,14 195,10 200,8 200,50"
-                    />
-                    <defs>
-                      <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="hsl(271 81% 56%)" stopOpacity="0.15" />
-                        <stop offset="100%" stopColor="hsl(271 81% 56%)" stopOpacity="0" />
-                      </linearGradient>
-                    </defs>
-                  </svg>
-                </div>
-
-                {/* Bottom stats */}
-                <div className="flex gap-2 mb-3">
-                  <div className="flex-1 bg-muted/50 rounded-lg px-3 py-2">
-                    <p className="text-[9px] font-display text-muted-foreground uppercase tracking-wider">Disponível</p>
-                    <p className="text-sm font-display font-bold text-foreground">24/7</p>
-                  </div>
-                  <div className="flex-1 bg-muted/50 rounded-lg px-3 py-2">
-                    <p className="text-[9px] font-display text-muted-foreground uppercase tracking-wider">Custos</p>
-                    <p className="text-sm font-display font-bold text-foreground">−60%</p>
-                  </div>
-                </div>
-
-                {/* Footer */}
-                <div className="flex items-center gap-1.5 text-primary">
-                  <TrendingUp size={12} />
-                  <span className="text-[10px] font-display font-medium">Crescimento 2× em 6 meses</span>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-
         </div>
       </div>
 
+      {/* Centered content — on top */}
+      <div className="container mx-auto relative z-20 flex flex-col items-center text-center pointer-events-none">
+        <motion.h1
+          initial={{ opacity: 0, y: 30, filter: "blur(10px)" }}
+          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          transition={{ duration: 0.8, delay: 0.1, ease: [0.25, 0.46, 0.45, 0.94] }}
+          className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-display font-light tracking-tight leading-[1.05] mb-6 uppercase text-foreground"
+        >
+          A IA EXECUTA
+          <br />
+          <span className="text-gradient-nexa font-bold">ENQUANTO VOCÊ</span>
+          <br />
+          <span className="text-gradient-nexa font-bold">LIDERA.</span>
+        </motion.h1>
+
+        <motion.p
+          initial={{ opacity: 0, y: 20, filter: "blur(6px)" }}
+          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          transition={{ duration: 0.7, delay: 0.2 }}
+          className="text-lg md:text-xl text-muted-foreground mb-10 font-body font-light max-w-xl"
+        >
+          Automação inteligente para empresas que pensam grande.
+        </motion.p>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20, filter: "blur(6px)" }}
+          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          transition={{ duration: 0.7, delay: 0.3 }}
+          className="flex flex-col sm:flex-row gap-4 items-center pointer-events-auto"
+        >
+          <a href="#diagnostico">
+            <Button variant="glow" size="lg" className="text-sm px-8 tracking-widest text-white cursor-pointer uppercase">
+              ESCALAR MEU ATENDIMENTO
+              <ArrowRight className="ml-2" size={16} />
+            </Button>
+          </a>
+          <a href="#solucoes">
+            <Button
+              variant="outline"
+              size="lg"
+              className="text-sm px-8 tracking-wide cursor-pointer border-black/10 hover:border-primary/30 hover:bg-primary/[0.03] text-foreground"
+            >
+              Ver soluções
+            </Button>
+          </a>
+        </motion.div>
+      </div>
+
       {/* Bottom fade */}
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-white to-transparent pointer-events-none" />
+      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-white to-transparent pointer-events-none z-20" />
     </section>
   );
 };
