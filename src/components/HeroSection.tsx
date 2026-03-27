@@ -43,21 +43,33 @@ const col3Cards: TechCard[] = [
   { icon: <img src={evolutionIcon} alt="Evolution" className="w-7 h-7" />, name: "Evolution", category: "API", color: "text-emerald-500" },
 ];
 
-const WallCard = ({ card }: { card: TechCard }) => (
-  <div className="tech-wall-card rounded-2xl p-5 aspect-[4/3] flex flex-col justify-between">
-    <div className="flex justify-between items-start">
-      <div className={card.color}>{card.icon}</div>
-      <span className="relative flex h-2 w-2">
-        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400/50" />
-        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
-      </span>
+const WallCard = ({ card }: { card: TechCard }) => {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <div
+      className="tech-wall-card rounded-2xl p-5 aspect-[4/3] flex flex-col justify-between"
+      style={hovered ? {
+        borderColor: 'rgba(147, 51, 234, 0.4)',
+        boxShadow: '0 0 20px rgba(147, 51, 234, 0.2), 0 0 40px rgba(147, 51, 234, 0.1), 0 8px 30px rgba(147, 51, 234, 0.15)',
+        filter: 'drop-shadow(0 0 12px rgba(147, 51, 234, 0.25))',
+      } : {}}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      <div className="flex justify-between items-start">
+        <div className={card.color}>{card.icon}</div>
+        <span className="relative flex h-2 w-2">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400/50" />
+          <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
+        </span>
+      </div>
+      <div>
+        <div className="text-sm font-display font-semibold text-foreground">{card.name}</div>
+        <div className="text-[10px] font-display text-muted-foreground uppercase tracking-wider">{card.category}</div>
+      </div>
     </div>
-    <div>
-      <div className="text-sm font-display font-semibold text-foreground">{card.name}</div>
-      <div className="text-[10px] font-display text-muted-foreground uppercase tracking-wider">{card.category}</div>
-    </div>
-  </div>
-);
+  );
+};
 
 const WallColumn = ({ cards, direction, className = "" }: { cards: TechCard[]; direction: "up" | "down"; className?: string }) => {
   const doubled = [...cards, ...cards];
