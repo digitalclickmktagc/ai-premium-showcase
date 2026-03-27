@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Send, Loader2 } from "lucide-react";
+import { Send, Loader2, Shield, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 
@@ -61,11 +61,45 @@ const LeadFormSection = () => {
   };
 
   const inputClasses =
-    "w-full px-4 py-3 rounded-xl bg-muted/40 border border-border text-foreground font-body text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all";
+    "w-full px-4 py-3.5 rounded-xl bg-white border text-foreground font-body text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all duration-200"
+    + " border-black/[0.08]";
 
   return (
-    <section id="diagnostico" className="py-24 lg:py-32">
-      <div className="container mx-auto px-4 lg:px-8">
+    <section
+      id="diagnostico"
+      className="py-24 lg:py-32 relative overflow-hidden"
+      style={{
+        background: "linear-gradient(135deg, #1a0030 0%, #0d0020 40%, #180030 100%)",
+      }}
+    >
+      {/* Gradient orbs inside section */}
+      <div
+        className="absolute top-0 left-1/3 w-[600px] h-[600px] rounded-full pointer-events-none"
+        style={{
+          background: "radial-gradient(circle, rgba(147,51,234,0.3) 0%, transparent 65%)",
+          filter: "blur(80px)",
+          transform: "translate(-50%, -50%)",
+        }}
+      />
+      <div
+        className="absolute bottom-0 right-1/3 w-[500px] h-[500px] rounded-full pointer-events-none"
+        style={{
+          background: "radial-gradient(circle, rgba(109,40,217,0.25) 0%, transparent 65%)",
+          filter: "blur(80px)",
+          transform: "translate(50%, 50%)",
+        }}
+      />
+
+      {/* Dot grid on dark */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          backgroundImage: "radial-gradient(rgba(255,255,255,0.04) 1px, transparent 1px)",
+          backgroundSize: "28px 28px",
+        }}
+      />
+
+      <div className="container mx-auto px-4 lg:px-8 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -73,10 +107,31 @@ const LeadFormSection = () => {
           transition={{ duration: 0.5 }}
           className="text-center mb-12"
         >
-          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight">
-            Pronto para <span className="text-gradient-nexa">escalar?</span>
+          <div
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6"
+            style={{
+              background: "rgba(147,51,234,0.2)",
+              border: "1px solid rgba(147,51,234,0.3)",
+            }}
+          >
+            <Sparkles size={13} className="text-purple-300" />
+            <span className="text-xs font-medium tracking-wide text-purple-200">
+              Diagnóstico Gratuito
+            </span>
+          </div>
+
+          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-light tracking-tight text-white">
+            Pronto para <span
+              style={{
+                background: "linear-gradient(135deg, #C084FC, #A855F7, #9333EA)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+              }}
+            >escalar?</span>
           </h2>
-          <p className="mt-4 text-muted-foreground font-body text-base max-w-lg mx-auto">
+          <p className="mt-4 text-sm max-w-lg mx-auto font-body"
+            style={{ color: "rgba(255,255,255,0.45)" }}>
             <span className="hidden sm:inline">Preencha os dados abaixo e escale o seu atendimento.</span>
             <span className="sm:hidden">Preencha os dados abaixo<br />e escale o seu atendimento.</span>
           </p>
@@ -89,73 +144,39 @@ const LeadFormSection = () => {
           transition={{ duration: 0.5, delay: 0.1 }}
           className="max-w-2xl mx-auto"
         >
-          <div className="glass-card rounded-2xl p-8 sm:p-10">
+          <div
+            className="rounded-3xl p-8 sm:p-10"
+            style={{
+              background: "rgba(255,255,255,0.97)",
+              boxShadow: "0 4px 24px rgba(0,0,0,0.3), 0 32px 80px rgba(147,51,234,0.2)",
+            }}
+          >
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                {[
+                  { label: "Nome completo", name: "nome", type: "text", placeholder: "Seu nome" },
+                  { label: "E-mail corporativo", name: "email", type: "email", placeholder: "seu@email.com" },
+                  { label: "WhatsApp", name: "whatsapp", type: "tel", placeholder: "(00) 00000-0000" },
+                  { label: "Nome da Empresa", name: "empresa", type: "text", placeholder: "Ex: Nexa AI" },
+                  { label: "Segmento", name: "segmento", type: "text", placeholder: "Ex: Tecnologia, Varejo..." },
+                ].map(({ label, name, type, placeholder }) => (
+                  <div key={name}>
+                    <label className="block text-xs font-semibold text-foreground/70 mb-2 font-body tracking-wide">
+                      {label}
+                    </label>
+                    <input
+                      type={type}
+                      name={name}
+                      placeholder={placeholder}
+                      value={form[name as keyof typeof form]}
+                      onChange={handleChange}
+                      required
+                      className={inputClasses}
+                    />
+                  </div>
+                ))}
                 <div>
-                  <label className="block text-xs font-medium text-foreground mb-1.5 font-body">Nome completo</label>
-                  <input
-                    type="text"
-                    name="nome"
-                    placeholder="Seu nome"
-                    value={form.nome}
-                    onChange={handleChange}
-                    required
-                    className={inputClasses}
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-foreground mb-1.5 font-body">
-                    E-mail corporativo
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    placeholder="seu@email.com"
-                    value={form.email}
-                    onChange={handleChange}
-                    required
-                    className={inputClasses}
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-foreground mb-1.5 font-body">WhatsApp</label>
-                  <input
-                    type="tel"
-                    name="whatsapp"
-                    placeholder="(00) 00000-0000"
-                    value={form.whatsapp}
-                    onChange={handleChange}
-                    required
-                    className={inputClasses}
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-foreground mb-1.5 font-body">Nome da Empresa</label>
-                  <input
-                    type="text"
-                    name="empresa"
-                    placeholder="Ex: Nexa AI"
-                    value={form.empresa}
-                    onChange={handleChange}
-                    required
-                    className={inputClasses}
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-foreground mb-1.5 font-body">Segmento</label>
-                  <input
-                    type="text"
-                    name="segmento"
-                    placeholder="Ex: Tecnologia, Varejo..."
-                    value={form.segmento}
-                    onChange={handleChange}
-                    required
-                    className={inputClasses}
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-foreground mb-1.5 font-body">
+                  <label className="block text-xs font-semibold text-foreground/70 mb-2 font-body tracking-wide">
                     Faturamento mensal
                   </label>
                   <select
@@ -165,37 +186,40 @@ const LeadFormSection = () => {
                     required
                     className={inputClasses}
                   >
-                    <option value="" disabled>
-                      Selecione...
-                    </option>
+                    <option value="" disabled>Selecione...</option>
                     {faturamentoOptions.map((opt) => (
-                      <option key={opt} value={opt}>
-                        {opt}
-                      </option>
+                      <option key={opt} value={opt}>{opt}</option>
                     ))}
                   </select>
                 </div>
               </div>
 
-              <Button
-                type="submit"
-                variant="glow"
-                size="lg"
-                disabled={isSubmitting}
-                className="w-full text-primary-foreground text-[10px] sm:text-sm tracking-widest uppercase font-extrabold py-4 h-auto"
-              >
-                {isSubmitting ? (
-                  <>
-                    Enviando...
-                    <Loader2 size={16} className="animate-spin" />
-                  </>
-                ) : (
-                  <>
-                    Escalar Meu Atendimento.
-                    <Send size={16} />
-                  </>
-                )}
-              </Button>
+              <div className="pt-2">
+                <Button
+                  type="submit"
+                  variant="glow"
+                  size="lg"
+                  disabled={isSubmitting}
+                  className="w-full text-primary-foreground text-[10px] sm:text-sm tracking-widest uppercase font-extrabold py-4 h-auto cursor-pointer"
+                >
+                  {isSubmitting ? (
+                    <>
+                      Enviando...
+                      <Loader2 size={16} className="animate-spin" />
+                    </>
+                  ) : (
+                    <>
+                      Escalar Meu Atendimento
+                      <Send size={16} />
+                    </>
+                  )}
+                </Button>
+              </div>
+
+              <p className="flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground/50 pt-1">
+                <Shield size={12} />
+                Seus dados estão seguros e protegidos.
+              </p>
             </form>
           </div>
         </motion.div>

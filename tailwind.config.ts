@@ -14,8 +14,9 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ['Manrope', 'sans-serif'],
+        display: ['Bricolage Grotesque', 'sans-serif'],
         body: ['Inter', 'sans-serif'],
+        bricolage: ['Bricolage Grotesque', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -70,11 +71,36 @@ export default {
           "0%": { transform: "translateX(0%)" },
           "100%": { transform: "translateX(-50%)" },
         },
+        "fade-up": {
+          "0%": { opacity: "0", transform: "translateY(20px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+        "pulse-soft": {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0.7" },
+        },
+        "shimmer": {
+          "0%": { backgroundPosition: "-200% 0" },
+          "100%": { backgroundPosition: "200% 0" },
+        },
+        "fade-in-up-blur": {
+          "0%": { opacity: "0", transform: "translateY(20px)", filter: "blur(10px)" },
+          "100%": { opacity: "1", transform: "translateY(0)", filter: "blur(0)" },
+        },
+        "animation-in": {
+          "0%": { opacity: "0", transform: "translateY(30px)", filter: "blur(8px)" },
+          "100%": { opacity: "1", transform: "translateY(0)", filter: "blur(0px)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "marquee": "marquee 30s linear infinite",
+        "fade-up": "fade-up 0.5s ease-out forwards",
+        "pulse-soft": "pulse-soft 3s ease-in-out infinite",
+        "shimmer": "shimmer 3s ease-in-out infinite",
+        "entry": "fade-in-up-blur 1s cubic-bezier(0.2, 0.8, 0.2, 1) both",
+        "section-in": "animation-in 0.8s ease-out both",
       },
     },
   },

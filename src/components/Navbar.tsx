@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -14,68 +14,120 @@ const navLinks = [
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [activeLink, setActiveLink] = useState<string | null>(null);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-transparent">
-      <div className="container mx-auto flex items-center justify-between h-16 px-4 lg:px-8">
-        <a href="#" className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl overflow-hidden shadow-md">
-            <img src={nexaLogo} alt="Nexa AI" className="w-full h-full object-cover" />
-          </div>
-          <span className="font-display text-xl font-extrabold tracking-tight text-foreground">
-            Nexa <span className="text-gradient-nexa">AI</span>
-          </span>
-        </a>
-
-        <ul className="hidden md:flex items-center gap-8">
-          {navLinks.map((link) => (
-            <li key={link.href}>
-              <a
-                href={link.href}
-                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-              >
-                {link.label}
-              </a>
-            </li>
-          ))}
-        </ul>
-
-        <div className="hidden md:block">
-          <a href="#diagnostico">
-            <Button variant="glow" size="sm" className="text-white">
-              ESCALAR
-            </Button>
+    <motion.nav
+      initial={{ opacity: 0, y: -16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+      className="fixed top-0 left-0 right-0 z-50"
+    >
+      <div className="container mx-auto px-4 lg:px-8 pt-4">
+        <div
+          className={`flex items-center justify-between h-14 px-4 rounded-2xl transition-all duration-500 ${
+            scrolled
+              ? "bg-white/85 border border-black/[0.07] backdrop-blur-xl shadow-[0_2px_30px_rgba(0,0,0,0.08)]"
+              : "bg-transparent border border-transparent"
+          }`}
+        >
+          {/* Logo */}
+          <a href="#" className="flex items-center gap-2.5 flex-shrink-0">
+            <div className="w-8 h-8 rounded-xl overflow-hidden shadow-md ring-1 ring-primary/20">
+              <img src={nexaLogo} alt="Nexa AI" className="w-full h-full object-cover" />
+            </div>
+            <span className="font-display text-lg font-bold tracking-tight text-foreground">
+              Nexa <span className="text-gradient-nexa">AI</span>
+            </span>
           </a>
-        </div>
 
-        <button className="md:hidden text-foreground" onClick={() => setOpen(!open)}>
-          {open ? <X size={24} /> : <Menu size={24} />}
-        </button>
+          {/* Pill nav — desktop */}
+          <div className="hidden md:flex items-center bg-black/[0.03] border border-black/[0.06] rounded-full px-1.5 py-1.5 backdrop-blur-sm gap-0.5">
+            {navLinks.map((link) => {
+              const isActive = activeLink === link.href;
+              return (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setActiveLink(link.href)}
+                  className={`relative flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 ${
+                    isActive
+                      ? "bg-white text-foreground shadow-[0_1px_6px_rgba(0,0,0,0.1)]"
+                      : "text-muted-foreground hover:text-foreground hover:bg-white/60"
+                  }`}
+                >
+                  {isActive && (
+                    <motion.span
+                      layoutId="nav-dot"
+                      className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0"
+                      initial={false}
+                      transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                    />
+                  )}
+                  {link.label}
+                </a>
+              );
+            })}
+          </div>
+
+          {/* CTA */}
+          <div className="hidden md:block flex-shrink-0">
+            <a href="#diagnostico" onClick={() => setActiveLink("#diagnostico")}>
+              <Button variant="glow" size="sm" className="text-white cursor-pointer text-xs tracking-widest">
+                ESCALAR
+              </Button>
+            </a>
+          </div>
+
+          {/* Mobile toggle */}
+          <button
+            className="md:hidden text-foreground p-1.5 rounded-xl hover:bg-primary/[0.06] transition-colors"
+            onClick={() => setOpen(!open)}
+            aria-label="Menu"
+          >
+            {open ? <X size={20} /> : <Menu size={20} />}
+          </button>
+        </div>
       </div>
 
+      {/* Mobile menu */}
       <AnimatePresence>
         {open && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="md:hidden glass"
+            initial={{ opacity: 0, y: -8, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -8, scale: 0.98 }}
+            transition={{ duration: 0.2, ease: "easeInOut" }}
+            className="md:hidden mx-4 mt-2 rounded-2xl bg-white/95 border border-black/[0.07] backdrop-blur-xl shadow-[0_8px_40px_rgba(0,0,0,0.1)] overflow-hidden"
           >
-            <ul className="flex flex-col gap-4 p-6">
+            <ul className="flex flex-col gap-1 p-3">
               {navLinks.map((link) => (
                 <li key={link.href}>
                   <a
                     href={link.href}
-                    className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-                    onClick={() => setOpen(false)}
+                    className="flex items-center gap-2 px-4 py-3 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-black/[0.03] rounded-xl transition-all duration-200"
+                    onClick={() => {
+                      setActiveLink(link.href);
+                      setOpen(false);
+                    }}
                   >
+                    {activeLink === link.href && (
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
+                    )}
                     {link.label}
                   </a>
                 </li>
               ))}
-              <li>
-                <a href="#diagnostico" onClick={() => setOpen(false)}>
-                  <Button variant="glow" size="sm" className="w-full text-white">
+              <li className="mt-2 px-1">
+                <a href="#diagnostico" onClick={() => { setActiveLink("#diagnostico"); setOpen(false); }}>
+                  <Button variant="glow" size="sm" className="w-full text-white cursor-pointer">
                     ESCALAR
                   </Button>
                 </a>
@@ -84,7 +136,7 @@ const Navbar = () => {
           </motion.div>
         )}
       </AnimatePresence>
-    </nav>
+    </motion.nav>
   );
 };
 

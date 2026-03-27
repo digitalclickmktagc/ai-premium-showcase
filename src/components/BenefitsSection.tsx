@@ -6,23 +6,49 @@ const benefits = [
     icon: Zap,
     title: "Escalabilidade",
     desc: "Cresce com você.\nSem gargalos,\nsem teto.",
+    highlight: "Sem limites de crescimento",
+    color: "#9333ea",
   },
   {
     icon: Clock,
     title: "Tempo Devolvido",
     desc: "Operacional no automático.\nEquipe no estratégico.",
+    highlight: "Foco total em resultados",
+    color: "#7c3aed",
   },
   {
     icon: Crosshair,
     title: "Precisão Cirúrgica",
     desc: "Dados reais.\nDecisões certeiras.\nZero achismo.",
+    highlight: "Inteligência acionável",
+    color: "#a855f7",
   },
+];
+
+const stats = [
+  { value: "15+", label: "EMPRESAS ATENDIDAS" },
+  { value: "100K+", label: "FATURAMENTO GERADO" },
+  { value: "60%", label: "REDUÇÃO DE CUSTOS" },
 ];
 
 const BenefitsSection = () => {
   return (
-    <section id="diferenciais" className="py-24 lg:py-32">
-      <div className="container mx-auto px-4 lg:px-8">
+    <section id="diferenciais" className="py-24 lg:py-32 relative overflow-hidden">
+      {/* Ghost section number */}
+      <div
+        className="absolute -top-8 left-0 font-display font-black select-none pointer-events-none leading-none"
+        style={{
+          fontSize: "clamp(120px, 20vw, 240px)",
+          color: "transparent",
+          WebkitTextStroke: "1px rgba(0,0,0,0.04)",
+        }}
+      >
+        02.
+      </div>
+
+      <div className="container mx-auto px-4 lg:px-8 relative z-10">
+
+        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -33,7 +59,7 @@ const BenefitsSection = () => {
           <p className="text-sm font-medium tracking-[0.3em] uppercase text-gradient-nexa mb-4">
             Por que a Nexa AI?
           </p>
-          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight">
+          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-light tracking-tight text-foreground">
             Complexidade{" "}
             <span className="text-gradient-nexa">simplificada.</span>
           </h2>
@@ -42,44 +68,87 @@ const BenefitsSection = () => {
           </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-3 gap-8 lg:gap-12">
-          {benefits.map((b, i) => (
-            <motion.div
-              key={b.title}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: i * 0.15 }}
-              className="text-center"
-            >
-              <div className="w-14 h-14 rounded-2xl bg-primary/20 flex items-center justify-center mx-auto mb-6 border border-primary/20">
-                <b.icon size={24} className="text-primary" />
-              </div>
-              <h3 className="font-display text-xl font-bold mb-3">{b.title}</h3>
-              <p className="text-muted-foreground font-body leading-relaxed whitespace-pre-line">{b.desc}</p>
-            </motion.div>
-          ))}
+        {/* Benefit cards */}
+        <div className="grid md:grid-cols-3 gap-5 lg:gap-6 mb-20">
+          {benefits.map((b, i) => {
+            const Icon = b.icon;
+            return (
+              <motion.div
+                key={b.title}
+                initial={{ opacity: 0, y: 30, filter: "blur(8px)" }}
+                whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: i * 0.12 }}
+                className="group relative rounded-2xl p-8 overflow-hidden premium-card"
+              >
+                {/* Watermark number */}
+                <span
+                  className="absolute -bottom-4 -right-2 font-display font-black select-none pointer-events-none leading-none"
+                  style={{ fontSize: "6rem", color: "rgba(0,0,0,0.04)" }}
+                >
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+
+                {/* Top row: icon + highlight tag */}
+                <div className="flex items-start justify-between mb-6">
+                  <div
+                    className="w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300"
+                    style={{
+                      background: `rgba(147,51,234,0.07)`,
+                      border: `1px solid rgba(147,51,234,0.12)`,
+                    }}
+                  >
+                    <Icon size={22} className="text-primary" />
+                  </div>
+                  <span
+                    className="text-[10px] font-semibold tracking-wide rounded-full px-2.5 py-1"
+                    style={{
+                      color: "#7c3aed",
+                      border: "1px solid rgba(147,51,234,0.15)",
+                      background: "rgba(147,51,234,0.05)",
+                    }}
+                  >
+                    {b.highlight}
+                  </span>
+                </div>
+
+                <h3 className="font-display text-xl font-bold mb-3 text-foreground">{b.title}</h3>
+                <p className="text-muted-foreground font-body leading-relaxed whitespace-pre-line text-sm">
+                  {b.desc}
+                </p>
+              </motion.div>
+            );
+          })}
         </div>
 
-        {/* Stats */}
+        {/* Stats strip — premium */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.3 }}
-          className="mt-24 flex flex-col gap-4 max-w-3xl mx-auto"
+          className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto"
         >
-          {[
-            { value: "15+", label: "EMPRESAS ATENDIDAS" },
-            { value: "100K+", label: "FATURAMENTO GERADO" },
-            { value: "60%", label: "REDUÇÃO DE CUSTOS" },
-          ].map((stat) => (
-            <div key={stat.label} className="w-full flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-border pb-4 text-center sm:text-left">
-              <p className="font-display text-3xl md:text-5xl font-extrabold leading-none">{stat.value}</p>
-              <p className="text-xs md:text-sm tracking-widest text-muted-foreground">{stat.label}</p>
-            </div>
+          {stats.map((stat, i) => (
+            <motion.div
+              key={stat.label}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: 0.4 + i * 0.08 }}
+              className="stat-highlight px-6 py-8 text-center"
+            >
+              <p className="font-display text-4xl md:text-5xl font-extrabold leading-none text-gradient-nexa mb-3">
+                {stat.value}
+              </p>
+              <p className="text-[11px] tracking-[0.2em] font-semibold"
+                style={{ color: "rgba(0,0,0,0.4)" }}>
+                {stat.label}
+              </p>
+            </motion.div>
           ))}
         </motion.div>
+
       </div>
     </section>
   );
