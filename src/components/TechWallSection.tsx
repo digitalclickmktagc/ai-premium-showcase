@@ -108,7 +108,7 @@ const TechWallSection = () => {
             <div className="flex flex-col gap-4">
               {[
                 { icon: <Cpu size={18} />, title: "Arquitetura Modular", sub: "React / N8N / Make" },
-                { icon: <Database size={18} />, title: "Dados em Tempo Real", sub: "Supabase / Postgres" },
+                { icon: <img src={supabaseIcon} alt="Supabase" className="w-[18px] h-[18px]" />, title: "Dados em Tempo Real", sub: "Supabase / Postgres" },
                 { icon: <Brain size={18} />, title: "IA Integrada", sub: "OpenAI / LangChain" },
               ].map((f) => (
                 <div key={f.title} className="group flex items-center gap-4 cursor-default">
