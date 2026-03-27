@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600&family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,42 +6,53 @@
 
 @layer base {
   :root {
-    --background: 0 0% 96%;
-    --foreground: 0 0% 10%;
+    /* ── Light Theme ── */
+    --background: 0 0% 100%;
+    --foreground: 224 71.4% 4.1%;
 
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 10%;
+    --card-foreground: 224 71.4% 4.1%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 10%;
+    --popover-foreground: 224 71.4% 4.1%;
 
+    /* ── NEXA Brand Colors ── */
     --primary: 271 81% 56%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 92%;
-    --secondary-foreground: 0 0% 10%;
+    --secondary: 220 14.3% 95.9%;
+    --secondary-foreground: 220.9 39.3% 11%;
 
-    --muted: 0 0% 90%;
-    --muted-foreground: 0 0% 40%;
+    --muted: 220 14.3% 95.9%;
+    --muted-foreground: 220 8.9% 46.1%;
 
     --accent: 271 81% 56%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 0 0% 0% / 0.08;
-    --input: 0 0% 0% / 0.08;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
     --ring: 271 81% 56%;
 
     --radius: 0.75rem;
 
+    /* ── NEXA Gradients ── */
     --gradient-nexa: linear-gradient(135deg, #6B21A8, #9333EA, #A855F7, #7C3AED);
     --gradient-nexa-hover: linear-gradient(135deg, #7C3AED, #A855F7, #C084FC, #8B5CF6);
-    --glow-primary: 0 0 40px rgba(147, 51, 234, 0.15);
-    --glow-accent: 0 0 60px rgba(147, 51, 234, 0.08);
-    --glass-bg: rgba(255, 255, 255, 0.7);
-    --glass-border: rgba(147, 51, 234, 0.08);
+    --gradient-nexa-soft: linear-gradient(135deg, rgba(107, 33, 168, 0.06), rgba(147, 51, 234, 0.03), transparent);
+
+    /* ── Glows (light mode) ── */
+    --glow-primary: 0 4px 30px rgba(147, 51, 234, 0.22);
+    --glow-accent: 0 8px 50px rgba(147, 51, 234, 0.1);
+    --glow-strong: 0 8px 60px rgba(147, 51, 234, 0.28);
+
+    /* ── Glass (light mode) ── */
+    --glass-bg: rgba(255, 255, 255, 0.75);
+    --glass-bg-strong: rgba(255, 255, 255, 0.95);
+    --glass-border: rgba(0, 0, 0, 0.06);
+    --glass-border-hover: rgba(147, 51, 234, 0.22);
   }
 }
 
@@ -51,14 +62,100 @@
   }
 
   body {
-    @apply bg-background text-foreground font-body antialiased;
+    @apply bg-background text-foreground font-body antialiased overflow-x-hidden;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Manrope', sans-serif;
+    font-family: 'Bricolage Grotesque', sans-serif;
+  }
+
+  input, select, textarea {
+    color: hsl(224 71.4% 4.1%);
+    color-scheme: light;
+  }
+
+  input::placeholder {
+    color: hsl(220 8.9% 62%) !important;
+    opacity: 1;
+  }
+
+  ::selection {
+    background: hsl(271 81% 56% / 0.15);
+    color: hsl(271 81% 30%);
   }
 }
 
+/* ─────────────────────────────────────────────
+   Dot grid background
+───────────────────────────────────────────── */
+.dot-grid {
+  background-image: radial-gradient(rgba(0, 0, 0, 0.07) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+/* ─────────────────────────────────────────────
+   Animations
+───────────────────────────────────────────── */
+@keyframes fadeInUpBlur {
+  0% { opacity: 0; transform: translateY(20px); filter: blur(10px); }
+  100% { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+
+@keyframes animationIn {
+  0% { opacity: 0; transform: translateY(30px); filter: blur(8px); }
+  100% { opacity: 1; transform: translateY(0); filter: blur(0px); }
+}
+
+@keyframes flow {
+  from { stroke-dashoffset: 24; }
+  to   { stroke-dashoffset: 0; }
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+
+.animate-entry {
+  animation: fadeInUpBlur 1s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.animate-flow {
+  animation: flow 1s linear infinite;
+}
+
+.animate-marquee {
+  animation: marquee 35s linear infinite;
+}
+
+.animate-on-scroll {
+  animation-play-state: paused !important;
+}
+.animate-on-scroll.animate {
+  animation-play-state: running !important;
+}
+
+.delay-75  { animation-delay: 75ms; }
+.delay-100 { animation-delay: 100ms; }
+.delay-150 { animation-delay: 150ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-300 { animation-delay: 300ms; }
+.delay-500 { animation-delay: 500ms; }
+.delay-700 { animation-delay: 700ms; }
+
+/* ─────────────────────────────────────────────
+   Components
+───────────────────────────────────────────── */
 @layer components {
   .text-gradient-nexa {
     background: var(--gradient-nexa);
@@ -92,43 +189,162 @@
 
   .glass {
     background: var(--glass-bg);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(24px) saturate(1.5);
+    -webkit-backdrop-filter: blur(24px) saturate(1.5);
+    border: 1px solid rgba(0, 0, 0, 0.06);
   }
 
   .glass-card {
-    background: var(--glass-bg);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(147, 51, 234, 0.1);
-    transition: all 0.3s ease;
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.07);
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.04),
+      0 4px 20px rgba(0, 0, 0, 0.06),
+      0 0 0 1px rgba(0, 0, 0, 0.02);
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 
   .glass-card:hover {
-    border-color: rgba(147, 51, 234, 0.3);
-    box-shadow: var(--glow-primary);
+    border-color: rgba(147, 51, 234, 0.18);
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.04),
+      0 12px 50px rgba(147, 51, 234, 0.1),
+      0 0 0 1px rgba(147, 51, 234, 0.05);
     transform: translateY(-4px);
+  }
+
+  .glass-card-subtle {
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+  }
+
+  .glass-card-subtle:hover {
+    border-color: rgba(147, 51, 234, 0.18);
+    box-shadow: 0 4px 24px rgba(147, 51, 234, 0.1);
   }
 
   .glow-button {
     background: var(--gradient-nexa);
-    box-shadow: 0 0 20px rgba(147, 51, 234, 0.3);
-    transition: all 0.3s ease;
+    box-shadow:
+      0 2px 20px rgba(147, 51, 234, 0.4),
+      0 4px 12px rgba(147, 51, 234, 0.25);
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .glow-button::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--gradient-nexa-hover);
+    opacity: 0;
+    transition: opacity 0.3s ease;
   }
 
   .glow-button:hover {
-    box-shadow: 0 0 30px rgba(147, 51, 234, 0.5);
-    transform: translateY(-1px);
+    box-shadow:
+      0 4px 40px rgba(147, 51, 234, 0.55),
+      0 8px 24px rgba(147, 51, 234, 0.35);
+    transform: translateY(-2px);
+  }
+
+  .glow-button:hover::before {
+    opacity: 1;
+  }
+
+  .glow-button > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .section-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.08), transparent);
+  }
+
+  .stat-highlight {
+    background: linear-gradient(135deg, rgba(147, 51, 234, 0.05), rgba(107, 33, 168, 0.02));
+    border: 1px solid rgba(147, 51, 234, 0.1);
+    border-radius: 1rem;
+    transition: all 0.3s ease;
+  }
+
+  .stat-highlight:hover {
+    border-color: rgba(147, 51, 234, 0.22);
+    box-shadow: 0 4px 24px rgba(147, 51, 234, 0.1);
+    background: linear-gradient(135deg, rgba(147, 51, 234, 0.08), rgba(107, 33, 168, 0.04));
+  }
+
+  /* Premium card with gradient border on hover */
+  .premium-card {
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.07);
+    box-shadow:
+      0 1px 3px rgba(0, 0, 0, 0.04),
+      0 6px 24px rgba(0, 0, 0, 0.05);
+    transition: all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    position: relative;
+  }
+
+  .premium-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, rgba(147, 51, 234, 0), rgba(147, 51, 234, 0));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    transition: all 0.35s ease;
+    opacity: 0;
+  }
+
+  .premium-card:hover {
+    border-color: transparent;
+    box-shadow:
+      0 1px 3px rgba(0, 0, 0, 0.04),
+      0 16px 60px rgba(147, 51, 234, 0.12),
+      0 0 0 1px rgba(147, 51, 234, 0.12);
+    transform: translateY(-6px);
+  }
+
+  .premium-card:hover::after {
+    background: var(--gradient-nexa);
+    opacity: 1;
   }
 }
 
+/* ─────────────────────────────────────────────
+   Utilities
+───────────────────────────────────────────── */
 @layer utilities {
   .font-display {
-    font-family: 'Manrope', sans-serif;
+    font-family: 'Bricolage Grotesque', sans-serif;
   }
 
   .font-body {
     font-family: 'Inter', sans-serif;
+  }
+
+  .font-bricolage {
+    font-family: 'Bricolage Grotesque', sans-serif !important;
+  }
+
+  /* Noise texture overlay for dark sections */
+  .noise::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 200px 200px;
+    pointer-events: none;
+    z-index: 0;
+    mix-blend-mode: overlay;
   }
 }
