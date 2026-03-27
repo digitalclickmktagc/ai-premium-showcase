@@ -13,40 +13,39 @@ import githubIcon from "@/assets/github-icon.png";
 import n8nIcon from "@/assets/n8n-icon.png";
 import notionIcon from "@/assets/notion-icon.png";
 
-/* ── Tech card types ── */
 interface TechCard {
   icon: React.ReactNode;
   name: string;
   category: string;
+  color: string;
 }
 
-const col1: TechCard[] = [
-  { icon: <img src={chatgptIcon} alt="OpenAI" className="w-7 h-7" />, name: "OpenAI", category: "Intelligence" },
-  { icon: <img src={n8nIcon} alt="N8N" className="w-7 h-7" />, name: "N8N", category: "Automation" },
-  { icon: <img src={whatsappIcon} alt="WhatsApp" className="w-9 h-9" />, name: "WhatsApp", category: "Messaging" },
-  { icon: <img src={supabaseIcon} alt="Supabase" className="w-7 h-7" />, name: "Supabase", category: "Database" },
-  { icon: <img src={geminiIcon} alt="Gemini" className="w-7 h-7" />, name: "Gemini", category: "AI Model" },
+const col1Cards: TechCard[] = [
+  { icon: <img src={chatgptIcon} alt="OpenAI" className="w-7 h-7" />, name: "OpenAI", category: "Intelligence", color: "text-primary" },
+  { icon: <img src={n8nIcon} alt="N8N" className="w-7 h-7" />, name: "N8N", category: "Automation", color: "text-orange-500" },
+  { icon: <img src={whatsappIcon} alt="WhatsApp" className="w-9 h-9" />, name: "WhatsApp", category: "Messaging", color: "text-green-500" },
+  { icon: <img src={supabaseIcon} alt="Supabase" className="w-7 h-7" />, name: "Supabase", category: "Database", color: "text-emerald-500" },
+  { icon: <img src={geminiIcon} alt="Google Gemini" className="w-7 h-7" />, name: "Gemini", category: "AI Model", color: "text-blue-500" },
 ];
 
-const col2: TechCard[] = [
-  { icon: <img src={claudeIcon} alt="Claude" className="w-7 h-7" />, name: "Claude", category: "Code" },
-  { icon: <Zap size={28} className="text-violet-500" />, name: "Make", category: "Integration" },
-  { icon: <img src={postgresIcon} alt="Postgres" className="w-7 h-7" />, name: "Postgres", category: "Database" },
-  { icon: <img src={redisIcon} alt="Redis" className="w-7 h-7" />, name: "Redis", category: "Cache" },
+const col2Cards: TechCard[] = [
+  { icon: <img src={claudeIcon} alt="Claude" className="w-7 h-7" />, name: "Claude", category: "Code", color: "text-foreground" },
+  { icon: <Zap size={28} />, name: "Make", category: "Integration", color: "text-violet-500" },
+  { icon: <img src={postgresIcon} alt="Postgres" className="w-7 h-7" />, name: "Postgres", category: "Database", color: "text-blue-500" },
+  { icon: <img src={redisIcon} alt="Redis" className="w-7 h-7" />, name: "Redis", category: "Cache", color: "text-red-500" },
 ];
 
-const col3: TechCard[] = [
-  { icon: <img src={githubIcon} alt="GitHub" className="w-7 h-7" />, name: "GitHub", category: "VCS" },
-  { icon: <Palette size={28} className="text-pink-500" />, name: "Figma", category: "Design" },
-  { icon: <img src={notionIcon} alt="Notion" className="w-7 h-7" />, name: "Notion", category: "Wiki" },
-  { icon: <img src={evolutionIcon} alt="Evolution" className="w-7 h-7" />, name: "Evolution", category: "API" },
+const col3Cards: TechCard[] = [
+  { icon: <img src={githubIcon} alt="GitHub" className="w-7 h-7" />, name: "GitHub", category: "VCS", color: "text-foreground" },
+  { icon: <Palette size={28} />, name: "Figma", category: "Design", color: "text-pink-500" },
+  { icon: <img src={notionIcon} alt="Notion" className="w-7 h-7" />, name: "Notion", category: "Wiki", color: "text-foreground" },
+  { icon: <img src={evolutionIcon} alt="Evolution" className="w-7 h-7" />, name: "Evolution", category: "API", color: "text-emerald-500" },
 ];
 
-/* ── Small wall card ── */
-const MiniCard = ({ card }: { card: TechCard }) => (
-  <div className="tech-wall-card rounded-2xl p-5 flex flex-col justify-between aspect-[4/3]">
+const WallCard = ({ card }: { card: TechCard }) => (
+  <div className="tech-wall-card rounded-2xl p-5 aspect-[4/3] flex flex-col justify-between">
     <div className="flex justify-between items-start">
-      {card.icon}
+      <div className={card.color}>{card.icon}</div>
       <span className="relative flex h-2 w-2">
         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400/50" />
         <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
@@ -59,31 +58,35 @@ const MiniCard = ({ card }: { card: TechCard }) => (
   </div>
 );
 
-const WallCol = ({ cards, dir, className = "" }: { cards: TechCard[]; dir: "up" | "down"; className?: string }) => (
-  <div className={`tech-wall-column ${dir === "up" ? "tech-wall-col-up" : "tech-wall-col-down"} flex flex-col gap-5 w-full ${className}`}>
-    {[...cards, ...cards].map((c, i) => (
-      <MiniCard key={`${c.name}-${i}`} card={c} />
-    ))}
-  </div>
-);
+const WallColumn = ({ cards, direction, className = "" }: { cards: TechCard[]; direction: "up" | "down"; className?: string }) => {
+  const doubled = [...cards, ...cards];
+  return (
+    <div className={`tech-wall-column ${direction === "up" ? "tech-wall-col-up" : "tech-wall-col-down"} flex flex-col gap-5 w-full ${className}`}>
+      {doubled.map((card, i) => (
+        <WallCard key={`${card.name}-${i}`} card={card} />
+      ))}
+    </div>
+  );
+};
 
 const HeroSection = () => {
   return (
     <section className="relative min-h-screen flex items-center justify-center pt-24 pb-16 px-4 overflow-hidden">
-      {/* Dot grid */}
+      {/* Dot grid background */}
       <div className="absolute inset-0 dot-grid opacity-100 pointer-events-none" />
 
-      {/* Ambient top glow */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{ background: "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(147,51,234,0.05) 0%, transparent 70%)" }}
+      {/* Gradient fade at edges */}
+      <div className="absolute inset-0 pointer-events-none"
+        style={{
+          background: "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(147,51,234,0.05) 0%, transparent 70%)",
+        }}
       />
 
       <div className="container mx-auto relative z-10">
-        <div className="lg:grid lg:grid-cols-12 lg:gap-10 lg:items-center">
+        <div className="lg:grid lg:grid-cols-12 lg:gap-8 lg:items-center">
 
-          {/* LEFT — text */}
-          <div className="lg:col-span-6 text-center lg:text-left flex flex-col items-center lg:items-start">
+          {/* LEFT — content */}
+          <div className="lg:col-span-5 text-center lg:text-left flex flex-col items-center lg:items-start">
             <motion.h1
               initial={{ opacity: 0, y: 30, filter: "blur(10px)" }}
               animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
@@ -130,47 +133,28 @@ const HeroSection = () => {
             </motion.div>
           </div>
 
-          {/* RIGHT — layered: tech wall (bg) + metric card (fg) */}
-          <div className="hidden lg:flex lg:col-span-6 justify-center items-center relative">
+          {/* RIGHT — Tech Wall Cards */}
+          <div className="hidden lg:block lg:col-span-7 relative">
             <motion.div
-              initial={{ opacity: 0, x: 50, filter: "blur(14px)" }}
+              initial={{ opacity: 0, x: 40, filter: "blur(12px)" }}
               animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
-              transition={{ duration: 1, delay: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
-              className="relative w-full h-[580px]"
+              transition={{ duration: 0.9, delay: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
+              className="relative h-[650px] overflow-hidden"
             >
-              {/* Purple ambient glow behind everything */}
-              <div
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full pointer-events-none"
-                style={{
-                  background: "radial-gradient(circle, rgba(147,51,234,0.12) 0%, rgba(147,51,234,0.04) 40%, transparent 70%)",
-                  filter: "blur(40px)",
-                }}
-              />
+              {/* Fade edges */}
+              <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-white to-transparent z-10 pointer-events-none" />
+              <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-white to-transparent z-10 pointer-events-none" />
+              <div className="absolute top-0 bottom-0 right-0 w-24 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
+              <div className="absolute top-0 bottom-0 left-0 w-12 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
 
-              {/* Tech wall — background layer */}
-              <div className="absolute inset-0 overflow-hidden">
-                {/* Edge fades */}
-                <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-[#f8f6fb] to-transparent z-10 pointer-events-none" />
-                <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#f8f6fb] to-transparent z-10 pointer-events-none" />
-                <div className="absolute top-0 bottom-0 right-0 w-24 bg-gradient-to-l from-[#f8f6fb] to-transparent z-10 pointer-events-none" />
-                <div
-                  className="absolute top-0 bottom-0 left-0 w-48 z-10 pointer-events-none"
-                  style={{
-                    background: "linear-gradient(to right, #f8f6fb 0%, rgba(248,246,251,0.95) 30%, rgba(248,246,251,0.6) 60%, transparent 100%)",
-                  }}
-                />
-
-                <div className="tech-wall-container h-full w-full">
-                  <div className="tech-wall-grid h-full w-full flex gap-4 px-4">
-                    <WallCol cards={col1} dir="up" />
-                    <WallCol cards={col2} dir="down" className="pt-14" />
-                    <WallCol cards={col3} dir="up" className="pt-24" />
-                  </div>
+              {/* 3D Wall */}
+              <div className="tech-wall-container h-full w-full">
+                <div className="tech-wall-grid h-full w-full flex gap-6 px-6">
+                  <WallColumn cards={col1Cards} direction="up" />
+                  <WallColumn cards={col2Cards} direction="down" className="pt-16" />
+                  <WallColumn cards={col3Cards} direction="up" className="pt-28" />
                 </div>
               </div>
-
-
-
             </motion.div>
           </div>
 
