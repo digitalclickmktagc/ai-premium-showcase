@@ -57,7 +57,7 @@ const Navbar = () => {
                   key={link.href}
                   href={link.href}
                   onClick={() => setActiveLink(link.href)}
-                  className={`relative flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 ${
+                  className={`group relative flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 ${
                     isActive
                       ? "bg-white text-foreground shadow-[0_1px_6px_rgba(0,0,0,0.1)]"
                       : "text-muted-foreground hover:text-foreground hover:bg-white/60"
@@ -71,7 +71,14 @@ const Navbar = () => {
                       transition={{ type: "spring", stiffness: 400, damping: 30 }}
                     />
                   )}
-                  {link.label}
+                  <span className="relative">
+                    {link.label}
+                    <span
+                      className={`absolute -bottom-0.5 left-0 h-[1.5px] bg-primary rounded-full transition-all duration-300 ${
+                        isActive ? "w-full" : "w-0 group-hover:w-full"
+                      }`}
+                    />
+                  </span>
                 </a>
               );
             })}
