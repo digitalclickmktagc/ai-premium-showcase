@@ -107,11 +107,7 @@ const LeadFormSection = () => {
           className="max-w-2xl mx-auto"
         >
           <div
-            className="rounded-3xl p-8 sm:p-10"
-            style={{
-              background: "rgba(255,255,255,0.97)",
-              boxShadow: "0 4px 24px rgba(0,0,0,0.3), 0 32px 80px rgba(147,51,234,0.2)",
-            }}
+            className="glass-card rounded-3xl p-8 sm:p-10"
           >
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
