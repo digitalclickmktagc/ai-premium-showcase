@@ -16,7 +16,7 @@ const col1Cards: TechCard[] = [
   { icon: <Brain size={28} />, name: "OpenAI", category: "Intelligence", color: "text-primary" },
   { icon: <Workflow size={28} />, name: "N8N", category: "Automation", color: "text-orange-500" },
   { icon: <MessageSquare size={28} />, name: "WhatsApp", category: "Messaging", color: "text-green-500" },
-  { icon: <Database size={28} />, name: "Supabase", category: "Database", color: "text-emerald-500" },
+  { icon: <img src={supabaseIcon} alt="Supabase" className="w-7 h-7" />, name: "Supabase", category: "Database", color: "text-emerald-500" },
 ];
 
 const col2Cards: TechCard[] = [
