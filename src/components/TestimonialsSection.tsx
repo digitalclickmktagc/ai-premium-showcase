@@ -19,13 +19,25 @@ const testimonials = [
   },
 ];
 
-const Stars = ({ count = 5 }) => (
-  <div className="flex gap-1">
-    {Array.from({ length: count }).map((_, j) => (
-      <Star key={j} size={13} className="fill-primary/70 text-primary/70" />
-    ))}
-  </div>
-);
+const Stars = ({ count = 5 }: { count?: number }) => {
+  const full = Math.floor(count);
+  const hasHalf = count % 1 !== 0;
+  return (
+    <div className="flex gap-1">
+      {Array.from({ length: full }).map((_, j) => (
+        <Star key={j} size={13} className="fill-primary/70 text-primary/70" />
+      ))}
+      {hasHalf && (
+        <div className="relative" style={{ width: 13, height: 13 }}>
+          <Star size={13} className="text-primary/30 absolute inset-0" />
+          <div className="overflow-hidden absolute inset-0" style={{ width: "50%" }}>
+            <Star size={13} className="fill-primary/70 text-primary/70" />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 const Avatar = ({ name }: { name: string }) => (
   <div
