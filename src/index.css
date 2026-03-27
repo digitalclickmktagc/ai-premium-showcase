@@ -112,13 +112,13 @@
 }
 
 @keyframes techWallUp {
-  0%   { transform: translateY(0); }
-  100% { transform: translateY(-50%); }
+  0%   { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(0, -50%, 0); }
 }
 
 @keyframes techWallDown {
-  0%   { transform: translateY(-50%); }
-  100% { transform: translateY(0); }
+  0%   { transform: translate3d(0, -50%, 0); }
+  100% { transform: translate3d(0, 0, 0); }
 }
 
 @keyframes marquee {
@@ -342,6 +342,8 @@
   .tech-wall-column {
     will-change: transform;
     transform-style: flat;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
   }
 
   .tech-wall-col-up {
