@@ -1,47 +1,41 @@
 import { motion } from "framer-motion";
-import { Cpu, Database, Brain } from "lucide-react";
-
-import chatgptIcon from "@/assets/tech/chatgpt.png";
-import n8nIcon from "@/assets/tech/n8n.png";
-import evolutionIcon from "@/assets/tech/evolution.png";
-import supabaseIcon from "@/assets/tech/supabase.png";
-import googleIcon from "@/assets/tech/google.png";
-import geminiIcon from "@/assets/tech/gemini.png";
-import postgresIcon from "@/assets/tech/postgres.png";
-import redisIcon from "@/assets/tech/redis.png";
-import githubIcon from "@/assets/tech/github.png";
+import {
+  Cpu, Database, Cloud, Zap, MessageSquare, Brain,
+  GitBranch, Palette, FileText, Bot, Workflow, Shield
+} from "lucide-react";
 
 interface TechCard {
-  icon: string;
+  icon: React.ReactNode;
   name: string;
   category: string;
+  color: string;
 }
 
 const col1Cards: TechCard[] = [
-  { icon: chatgptIcon, name: "ChatGPT", category: "Intelligence" },
-  { icon: n8nIcon, name: "N8N", category: "Automation" },
-  { icon: evolutionIcon, name: "Evolution", category: "Messaging" },
-  { icon: supabaseIcon, name: "Supabase", category: "Database" },
+  { icon: <Brain size={28} />, name: "OpenAI", category: "Intelligence", color: "text-primary" },
+  { icon: <Workflow size={28} />, name: "N8N", category: "Automation", color: "text-orange-500" },
+  { icon: <MessageSquare size={28} />, name: "WhatsApp", category: "Messaging", color: "text-green-500" },
+  { icon: <Database size={28} />, name: "Supabase", category: "Database", color: "text-emerald-500" },
 ];
 
 const col2Cards: TechCard[] = [
-  { icon: googleIcon, name: "Google", category: "Cloud" },
-  { icon: geminiIcon, name: "Gemini", category: "AI Model" },
-  { icon: postgresIcon, name: "PostgreSQL", category: "Database" },
-  { icon: redisIcon, name: "Redis", category: "Cache" },
+  { icon: <Cloud size={28} />, name: "Vercel", category: "Deploy", color: "text-foreground" },
+  { icon: <Zap size={28} />, name: "Make", category: "Integration", color: "text-violet-500" },
+  { icon: <Cpu size={28} />, name: "LangChain", category: "AI Framework", color: "text-blue-500" },
+  { icon: <Shield size={28} />, name: "Cloudflare", category: "Security", color: "text-amber-500" },
 ];
 
 const col3Cards: TechCard[] = [
-  { icon: githubIcon, name: "GitHub", category: "VCS" },
-  { icon: chatgptIcon, name: "OpenAI", category: "AI Framework" },
-  { icon: n8nIcon, name: "N8N", category: "Workflows" },
-  { icon: supabaseIcon, name: "Supabase", category: "Backend" },
+  { icon: <GitBranch size={28} />, name: "GitHub", category: "VCS", color: "text-foreground" },
+  { icon: <Palette size={28} />, name: "Figma", category: "Design", color: "text-pink-500" },
+  { icon: <FileText size={28} />, name: "Notion", category: "Wiki", color: "text-foreground" },
+  { icon: <Bot size={28} />, name: "Chatbot", category: "Atendimento", color: "text-primary" },
 ];
 
 const WallCard = ({ card }: { card: TechCard }) => (
   <div className="tech-wall-card rounded-2xl p-5 aspect-[4/3] flex flex-col justify-between">
     <div className="flex justify-between items-start">
-      <img src={card.icon} alt={card.name} className="w-7 h-7 object-contain" />
+      <div className={card.color}>{card.icon}</div>
       <span className="relative flex h-2 w-2">
         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400/50" />
         <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
@@ -67,12 +61,14 @@ const WallColumn = ({ cards, direction, className = "" }: { cards: TechCard[]; d
 
 const TechWallSection = () => {
   return (
-    <section className="relative py-24 lg:py-0 overflow-hidden bg-background">
+    <section className="relative py-24 lg:py-0 overflow-hidden bg-white">
+      {/* Ambient purple glow */}
       <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/[0.06] blur-[120px] rounded-full pointer-events-none z-0" />
 
       <div className="container mx-auto relative z-10 flex flex-col md:flex-row min-h-[700px] lg:min-h-[800px]">
         {/* LEFT — Content */}
         <div className="w-full md:w-[42%] px-4 py-16 md:py-28 flex flex-col justify-center relative z-20">
+          {/* Badge */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -84,6 +80,7 @@ const TechWallSection = () => {
             <span className="text-[10px] font-display font-semibold text-primary uppercase tracking-[0.15em]">Infraestrutura</span>
           </motion.div>
 
+          {/* Title */}
           <motion.h2
             initial={{ opacity: 0, y: 30, filter: "blur(8px)" }}
             whileInView={{ opacity: 1, y: 0, filter: "blur(0)" }}
@@ -106,6 +103,7 @@ const TechWallSection = () => {
               Não construímos apenas automações — arquitetamos ecossistemas digitais de alta performance. Um stack curado com as melhores tecnologias garante escalabilidade desde o dia um.
             </p>
 
+            {/* Features */}
             <div className="flex flex-col gap-4">
               {[
                 { icon: <Cpu size={18} />, title: "Arquitetura Modular", sub: "React / N8N / Make" },
@@ -113,7 +111,7 @@ const TechWallSection = () => {
                 { icon: <Brain size={18} />, title: "IA Integrada", sub: "OpenAI / LangChain" },
               ].map((f) => (
                 <div key={f.title} className="group flex items-center gap-4 cursor-default">
-                  <div className="w-10 h-10 rounded-xl border border-border bg-primary/[0.03] flex items-center justify-center text-muted-foreground group-hover:text-primary group-hover:bg-primary/[0.06] group-hover:border-primary/20 transition-all duration-200">
+                  <div className="w-10 h-10 rounded-xl border border-black/[0.08] bg-primary/[0.03] flex items-center justify-center text-muted-foreground group-hover:text-primary group-hover:bg-primary/[0.06] group-hover:border-primary/20 transition-all duration-200">
                     {f.icon}
                   </div>
                   <div>
@@ -124,10 +122,11 @@ const TechWallSection = () => {
               ))}
             </div>
 
+            {/* CTA */}
             <div className="pt-4">
               <a
                 href="#diagnostico"
-                className="inline-flex items-center px-6 py-2.5 rounded-full border border-border text-sm font-display font-medium text-foreground hover:border-primary/30 hover:bg-primary/[0.03] transition-all duration-200"
+                className="inline-flex items-center px-6 py-2.5 rounded-full border border-black/10 text-sm font-display font-medium text-foreground hover:border-primary/30 hover:bg-primary/[0.03] transition-all duration-200"
               >
                 Explorar Stack Completo
               </a>
