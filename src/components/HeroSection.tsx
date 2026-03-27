@@ -163,7 +163,7 @@ const HeroSection = () => {
                 <div className="absolute top-0 left-0 right-0 h-28 bg-gradient-to-b from-white to-transparent z-10 pointer-events-none" />
                 <div className="absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-white to-transparent z-10 pointer-events-none" />
                 <div className="absolute top-0 bottom-0 right-0 w-20 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
-                <div className="absolute top-0 bottom-0 left-0 w-16 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
+                <div className="absolute top-0 bottom-0 left-0 w-40 bg-gradient-to-r from-white via-white/80 to-transparent z-10 pointer-events-none" />
 
                 <div className="tech-wall-container h-full w-full">
                   <div className="tech-wall-grid h-full w-full flex gap-4 px-4">
