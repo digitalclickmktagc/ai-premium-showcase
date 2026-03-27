@@ -3,7 +3,7 @@ import { Cpu, Zap, Palette, FileText } from "lucide-react";
 import supabaseIcon from "@/assets/supabase-icon.png";
 import chatgptIcon from "@/assets/chatgpt-icon.png";
 import whatsappIcon from "@/assets/whatsapp-icon.png";
-import vercelIcon from "@/assets/vercel-icon.png";
+import claudeIcon from "@/assets/claude-icon.png";
 import postgresIcon from "@/assets/postgres-icon.png";
 import evolutionIcon from "@/assets/evolution-icon.png";
 import geminiIcon from "@/assets/gemini-icon.png";
