@@ -31,46 +31,46 @@ interface TechCard {
 }
 
 const col1: TechCard[] = [
-  { icon: <img src={chatgptIcon} alt="OpenAI" className="w-6 h-6" />, name: "OpenAI", category: "Intelligence" },
-  { icon: <img src={n8nIcon} alt="N8N" className="w-6 h-6" />, name: "N8N", category: "Automation" },
-  { icon: <img src={whatsappIcon} alt="WhatsApp" className="w-8 h-8" />, name: "WhatsApp", category: "Messaging" },
-  { icon: <img src={supabaseIcon} alt="Supabase" className="w-6 h-6" />, name: "Supabase", category: "Database" },
-  { icon: <img src={geminiIcon} alt="Gemini" className="w-6 h-6" />, name: "Gemini", category: "AI Model" },
+  { icon: <img src={chatgptIcon} alt="OpenAI" className="w-7 h-7" />, name: "OpenAI", category: "Intelligence" },
+  { icon: <img src={n8nIcon} alt="N8N" className="w-7 h-7" />, name: "N8N", category: "Automation" },
+  { icon: <img src={whatsappIcon} alt="WhatsApp" className="w-9 h-9" />, name: "WhatsApp", category: "Messaging" },
+  { icon: <img src={supabaseIcon} alt="Supabase" className="w-7 h-7" />, name: "Supabase", category: "Database" },
+  { icon: <img src={geminiIcon} alt="Gemini" className="w-7 h-7" />, name: "Gemini", category: "AI Model" },
 ];
 
 const col2: TechCard[] = [
-  { icon: <img src={claudeIcon} alt="Claude" className="w-6 h-6" />, name: "Claude", category: "Code" },
-  { icon: <Zap size={24} className="text-violet-500" />, name: "Make", category: "Integration" },
-  { icon: <img src={postgresIcon} alt="Postgres" className="w-6 h-6" />, name: "Postgres", category: "Database" },
-  { icon: <img src={redisIcon} alt="Redis" className="w-6 h-6" />, name: "Redis", category: "Cache" },
+  { icon: <img src={claudeIcon} alt="Claude" className="w-7 h-7" />, name: "Claude", category: "Code" },
+  { icon: <Zap size={28} className="text-violet-500" />, name: "Make", category: "Integration" },
+  { icon: <img src={postgresIcon} alt="Postgres" className="w-7 h-7" />, name: "Postgres", category: "Database" },
+  { icon: <img src={redisIcon} alt="Redis" className="w-7 h-7" />, name: "Redis", category: "Cache" },
 ];
 
 const col3: TechCard[] = [
-  { icon: <img src={githubIcon} alt="GitHub" className="w-6 h-6" />, name: "GitHub", category: "VCS" },
-  { icon: <Palette size={24} className="text-pink-500" />, name: "Figma", category: "Design" },
-  { icon: <img src={notionIcon} alt="Notion" className="w-6 h-6" />, name: "Notion", category: "Wiki" },
-  { icon: <img src={evolutionIcon} alt="Evolution" className="w-6 h-6" />, name: "Evolution", category: "API" },
+  { icon: <img src={githubIcon} alt="GitHub" className="w-7 h-7" />, name: "GitHub", category: "VCS" },
+  { icon: <Palette size={28} className="text-pink-500" />, name: "Figma", category: "Design" },
+  { icon: <img src={notionIcon} alt="Notion" className="w-7 h-7" />, name: "Notion", category: "Wiki" },
+  { icon: <img src={evolutionIcon} alt="Evolution" className="w-7 h-7" />, name: "Evolution", category: "API" },
 ];
 
 /* ── Small wall card ── */
 const MiniCard = ({ card }: { card: TechCard }) => (
-  <div className="tech-wall-card rounded-xl p-3.5 flex flex-col justify-between aspect-[5/4]">
+  <div className="tech-wall-card rounded-2xl p-5 flex flex-col justify-between aspect-[4/3]">
     <div className="flex justify-between items-start">
       {card.icon}
-      <span className="relative flex h-1.5 w-1.5">
+      <span className="relative flex h-2 w-2">
         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400/50" />
-        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-400" />
+        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
       </span>
     </div>
     <div>
-      <div className="text-xs font-display font-semibold text-foreground">{card.name}</div>
-      <div className="text-[9px] font-display text-muted-foreground uppercase tracking-wider">{card.category}</div>
+      <div className="text-sm font-display font-semibold text-foreground">{card.name}</div>
+      <div className="text-[10px] font-display text-muted-foreground uppercase tracking-wider">{card.category}</div>
     </div>
   </div>
 );
 
 const WallCol = ({ cards, dir, className = "" }: { cards: TechCard[]; dir: "up" | "down"; className?: string }) => (
-  <div className={`tech-wall-column ${dir === "up" ? "tech-wall-col-up" : "tech-wall-col-down"} flex flex-col gap-4 w-full ${className}`}>
+  <div className={`tech-wall-column ${dir === "up" ? "tech-wall-col-up" : "tech-wall-col-down"} flex flex-col gap-5 w-full ${className}`}>
     {[...cards, ...cards].map((c, i) => (
       <MiniCard key={`${c.name}-${i}`} card={c} />
     ))}
