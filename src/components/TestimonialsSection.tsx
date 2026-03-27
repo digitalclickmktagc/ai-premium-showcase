@@ -5,30 +5,39 @@ const testimonials = [
   {
     quote: "A Nexa AI transformou completamente nosso processo de vendas. Automatizamos 80% das tarefas manuais e dobramos o faturamento em 6 meses.",
     name: "Carlos Mendes",
-    role: "CEO",
-    company: "TechFlow",
+    stars: 5,
   },
   {
     quote: "O painel personalizado e o agente de IA revolucionaram nosso atendimento. Hoje respondemos em segundos, não em horas.",
     name: "Ana Oliveira",
-    role: "Diretora de Operações",
-    company: "Opex",
+    stars: 4.5,
   },
   {
     quote: "Precisávamos escalar sem perder qualidade. A Nexa AI entregou exatamente isso com uma solução sob medida para nosso segmento.",
     name: "Rafael Torres",
-    role: "Fundador",
-    company: "Scale.io",
+    stars: 4,
   },
 ];
 
-const Stars = ({ count = 5 }) => (
-  <div className="flex gap-1">
-    {Array.from({ length: count }).map((_, j) => (
-      <Star key={j} size={13} className="fill-primary/70 text-primary/70" />
-    ))}
-  </div>
-);
+const Stars = ({ count = 5 }: { count?: number }) => {
+  const full = Math.floor(count);
+  const hasHalf = count % 1 !== 0;
+  return (
+    <div className="flex gap-1">
+      {Array.from({ length: full }).map((_, j) => (
+        <Star key={j} size={13} className="fill-primary/70 text-primary/70" />
+      ))}
+      {hasHalf && (
+        <div className="relative" style={{ width: 13, height: 13 }}>
+          <Star size={13} className="text-primary/30 absolute inset-0" />
+          <div className="overflow-hidden absolute inset-0" style={{ width: "50%" }}>
+            <Star size={13} className="fill-primary/70 text-primary/70" />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 const Avatar = ({ name }: { name: string }) => (
   <div
@@ -114,7 +123,7 @@ const TestimonialsSection = () => {
             />
 
             <Quote size={40} style={{ color: "rgba(147,51,234,0.18)" }} className="mb-6 mt-2" />
-            <Stars />
+            <Stars count={featured.stars} />
             <blockquote className="font-display text-xl sm:text-2xl font-light leading-relaxed text-foreground/90 mt-5 mb-8">
               "{featured.quote}"
             </blockquote>
@@ -125,9 +134,6 @@ const TestimonialsSection = () => {
               <Avatar name={featured.name} />
               <div>
                 <p className="font-display font-bold text-sm text-foreground">{featured.name}</p>
-                <p className="text-xs text-muted-foreground">
-                  {featured.role}{featured.company ? ` · ${featured.company}` : ""}
-                </p>
               </div>
             </div>
           </div>
@@ -218,7 +224,7 @@ const TestimonialsSection = () => {
               }}
             >
               <div>
-                <Stars />
+                <Stars count={t.stars} />
                 <p className="text-muted-foreground font-body leading-relaxed my-5 text-sm">
                   "{t.quote}"
                 </p>
@@ -229,10 +235,7 @@ const TestimonialsSection = () => {
               >
                 <Avatar name={t.name} />
                 <div>
-                  <p className="font-display font-bold text-sm text-foreground">{t.name}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {t.role}{t.company ? ` · ${t.company}` : ""}
-                  </p>
+                   <p className="font-display font-bold text-sm text-foreground">{t.name}</p>
                 </div>
               </div>
             </motion.div>
