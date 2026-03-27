@@ -123,7 +123,7 @@ const TestimonialsSection = () => {
             />
 
             <Quote size={40} style={{ color: "rgba(147,51,234,0.18)" }} className="mb-6 mt-2" />
-            <Stars />
+            <Stars count={featured.stars} />
             <blockquote className="font-display text-xl sm:text-2xl font-light leading-relaxed text-foreground/90 mt-5 mb-8">
               "{featured.quote}"
             </blockquote>
