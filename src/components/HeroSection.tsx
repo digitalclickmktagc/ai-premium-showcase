@@ -117,9 +117,7 @@ const HeroSection = () => {
             >
               A IA EXECUTA
               <br />
-              <span className="text-gradient-nexa font-bold">ENQUANTO VOCÊ</span>
-              <br />
-              <span className="text-gradient-nexa font-bold">LIDERA.</span>
+              <span className="text-gradient-nexa font-bold">ENQUANTO VOCÊ LIDERA.</span>
             </motion.h1>
 
             <motion.p
