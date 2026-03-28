@@ -132,15 +132,6 @@ const HeroSection = () => {
                   <ArrowRight className="ml-2" size={16} />
                 </Button>
               </a>
-              <a href="#solucoes">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="text-sm px-8 tracking-wide cursor-pointer border-black/10 hover:border-primary/30 hover:bg-primary/[0.03] text-foreground"
-                >
-                  Ver soluções
-                </Button>
-              </a>
             </motion.div>
           </div>
 
