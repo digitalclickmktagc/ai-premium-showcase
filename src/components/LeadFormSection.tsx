@@ -91,7 +91,7 @@ const LeadFormSection = () => {
           </div>
 
           <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-light tracking-tight text-foreground">
-            Pronto para <span className="text-gradient-nexa">escalar?</span>
+            Pronto para <span className="text-gradient-nexa font-bold">escalar?</span>
           </h2>
           <p className="mt-4 text-sm max-w-lg mx-auto font-body text-muted-foreground">
             <span className="hidden sm:inline">Preencha os dados abaixo e escale o seu atendimento.</span>

@@ -67,7 +67,7 @@ const ServicesSection = () => {
           </p>
           <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-light leading-tight tracking-tight text-foreground">
             Resultados.{" "}
-            <span className="text-gradient-nexa">Não promessas.</span>
+            <span className="text-gradient-nexa font-bold">Não promessas.</span>
           </h2>
         </motion.div>
 

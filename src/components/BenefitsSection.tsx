@@ -61,7 +61,7 @@ const BenefitsSection = () => {
           </p>
           <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-light tracking-tight text-foreground">
             Complexidade{" "}
-            <span className="text-gradient-nexa">simplificada.</span>
+            <span className="text-gradient-nexa font-bold">simplificada.</span>
           </h2>
           <p className="text-muted-foreground font-body font-light mt-4 sm:whitespace-nowrap">
             Transformamos gargalos operacionais em motores de lucro através da IA.
