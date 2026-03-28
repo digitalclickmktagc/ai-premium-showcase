@@ -94,15 +94,6 @@ const HeroSection = () => {
 
   return (
     <section className="relative min-h-screen flex items-center justify-center pt-24 pb-16 px-4 overflow-hidden">
-      {/* Dot grid background with top/bottom fade via mask */}
-      <div className="absolute inset-0 dot-grid opacity-100 pointer-events-none" style={{ maskImage: 'linear-gradient(to bottom, transparent 0%, black 10%, black 85%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 10%, black 85%, transparent 100%)' }} />
-
-      {/* Gradient fade at edges */}
-      <div className="absolute inset-0 pointer-events-none"
-        style={{
-          background: "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(147,51,234,0.05) 0%, transparent 70%)",
-        }}
-      />
 
       <div className="container mx-auto relative z-10">
         <div className="lg:grid lg:grid-cols-12 lg:gap-8 lg:items-center">
