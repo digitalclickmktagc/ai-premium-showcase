@@ -276,16 +276,16 @@
   }
 
   .stat-highlight {
-    background: linear-gradient(135deg, rgba(147, 51, 234, 0.05), rgba(107, 33, 168, 0.02));
-    border: 1px solid rgba(147, 51, 234, 0.1);
+    background: linear-gradient(135deg, rgba(147, 51, 234, 0.08), rgba(107, 33, 168, 0.04));
+    border: 1px solid rgba(147, 51, 234, 0.15);
     border-radius: 1rem;
     transition: all 0.3s ease;
   }
 
   .stat-highlight:hover {
-    border-color: rgba(147, 51, 234, 0.22);
-    box-shadow: 0 4px 24px rgba(147, 51, 234, 0.1);
-    background: linear-gradient(135deg, rgba(147, 51, 234, 0.08), rgba(107, 33, 168, 0.04));
+    border-color: rgba(147, 51, 234, 0.3);
+    box-shadow: 0 4px 24px rgba(147, 51, 234, 0.15);
+    background: linear-gradient(135deg, rgba(147, 51, 234, 0.12), rgba(107, 33, 168, 0.06));
   }
 
   /* Premium card with gradient border on hover */
