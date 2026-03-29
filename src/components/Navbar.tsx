@@ -112,7 +112,7 @@ const Navbar = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.98 }}
             transition={{ duration: 0.2, ease: "easeInOut" }}
-            className="md:hidden mx-4 mt-2 rounded-2xl bg-white/95 border border-black/[0.07] backdrop-blur-xl shadow-[0_8px_40px_rgba(0,0,0,0.1)] overflow-hidden"
+            className="md:hidden mx-4 mt-2 rounded-2xl bg-background/95 border border-border backdrop-blur-xl shadow-[0_8px_40px_rgba(0,0,0,0.4)] overflow-hidden"
           >
             <ul className="flex flex-col gap-1 p-3">
               {navLinks.map((link) => (
