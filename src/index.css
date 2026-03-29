@@ -70,18 +70,18 @@
   }
 
   input, select, textarea {
-    color: hsl(224 71.4% 4.1%);
-    color-scheme: light;
+    color: hsl(0 0% 95%);
+    color-scheme: dark;
   }
 
   input::placeholder {
-    color: hsl(220 8.9% 62%) !important;
+    color: hsl(240 5% 45%) !important;
     opacity: 1;
   }
 
   ::selection {
-    background: hsl(271 81% 56% / 0.15);
-    color: hsl(271 81% 30%);
+    background: hsl(271 81% 56% / 0.3);
+    color: hsl(271 81% 85%);
   }
 }
 
