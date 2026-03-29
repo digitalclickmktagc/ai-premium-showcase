@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 
 const QuoteSection = () => {
   return (
-    <section className="relative overflow-hidden bg-white">
+    <section className="relative overflow-hidden">
       <div className="container mx-auto px-4 lg:px-8 relative z-10 py-28 lg:py-40">
         <motion.div
           initial={{ opacity: 0, y: 30, filter: "blur(12px)" }}

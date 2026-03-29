@@ -103,9 +103,9 @@ const BenefitsSection = () => {
                   <span
                     className="text-[10px] font-semibold tracking-wide rounded-full px-2.5 py-1"
                     style={{
-                      color: "#7c3aed",
-                      border: "1px solid rgba(147,51,234,0.15)",
-                      background: "rgba(147,51,234,0.05)",
+                      color: "#a855f7",
+                      border: "1px solid rgba(147,51,234,0.2)",
+                      background: "rgba(147,51,234,0.08)",
                     }}
                   >
                     {b.highlight}

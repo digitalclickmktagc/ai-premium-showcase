@@ -135,7 +135,7 @@ const TechWallSection = () => {
             <div className="pt-4">
               <a
                 href="#diagnostico"
-                className="inline-flex items-center px-6 py-2.5 rounded-full border border-black/10 text-sm font-display font-medium text-foreground hover:border-primary/30 hover:bg-primary/[0.03] transition-all duration-200"
+                className="inline-flex items-center px-6 py-2.5 rounded-full border border-white/10 text-sm font-display font-medium text-foreground hover:border-primary/30 hover:bg-primary/[0.06] transition-all duration-200"
               >
                 Explorar Stack Completo
               </a>

@@ -87,7 +87,7 @@ const Footer = () => {
         {/* Bottom bar */}
         <div
           className="pt-8 flex flex-col md:flex-row items-center justify-between gap-4"
-          style={{ borderTop: "1px solid rgba(0,0,0,0.06)" }}
+          style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
         >
           <p className="text-xs text-muted-foreground">
             © 2026 Nexa AI. Todos os direitos reservados.

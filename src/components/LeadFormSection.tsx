@@ -80,8 +80,8 @@ const LeadFormSection = () => {
           <div
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6"
             style={{
-              background: "rgba(147,51,234,0.06)",
-              border: "1px solid rgba(147,51,234,0.15)",
+              background: "rgba(147,51,234,0.1)",
+              border: "1px solid rgba(147,51,234,0.2)",
             }}
           >
             <Sparkles size={13} className="text-primary" />

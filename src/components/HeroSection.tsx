@@ -170,7 +170,7 @@ const HeroSection = () => {
       </div>
 
       {/* Bottom fade — larger gradient to seamlessly blend into next section */}
-      <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none z-10" />
+      <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none z-10" />
     </section>
   );
 };

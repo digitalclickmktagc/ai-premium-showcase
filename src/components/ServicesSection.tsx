@@ -79,12 +79,12 @@ const ServicesSection = () => {
           transition={{ duration: 0.6, delay: 0.1 }}
           className="rounded-[24px] overflow-hidden"
           style={{
-            background: "#ffffff",
-            border: "1px solid rgba(0,0,0,0.08)",
+            background: "rgba(15, 15, 25, 0.8)",
+            border: "1px solid rgba(255,255,255,0.07)",
             boxShadow: `
-              0 1px 2px rgba(0,0,0,0.03),
-              0 4px 16px rgba(0,0,0,0.06),
-              0 16px 64px rgba(0,0,0,0.05)
+              0 1px 2px rgba(0,0,0,0.3),
+              0 4px 16px rgba(0,0,0,0.2),
+              0 16px 64px rgba(0,0,0,0.15)
             `,
           }}
         >
@@ -92,8 +92,8 @@ const ServicesSection = () => {
           <div
             className="flex items-center justify-between px-5 py-3.5"
             style={{
-              borderBottom: "1px solid rgba(0,0,0,0.06)",
-              background: "rgba(0,0,0,0.015)",
+              borderBottom: "1px solid rgba(255,255,255,0.06)",
+              background: "rgba(255,255,255,0.02)",
             }}
           >
             <div className="flex items-center gap-2">
@@ -103,12 +103,12 @@ const ServicesSection = () => {
                 <div className="w-3 h-3 rounded-full bg-[#28C840]" />
               </div>
               <div className="flex items-center gap-1.5 ml-3 text-xs"
-                style={{ color: "rgba(0,0,0,0.35)" }}>
+                style={{ color: "rgba(255,255,255,0.35)" }}>
                 <span>Nexa</span>
                 <ChevronRight size={10} />
                 <span>Soluções</span>
                 <ChevronRight size={10} />
-                <span style={{ color: "rgba(0,0,0,0.6)" }} className="font-medium">{active.title}</span>
+                <span style={{ color: "rgba(255,255,255,0.7)" }} className="font-medium">{active.title}</span>
               </div>
             </div>
           </div>
@@ -120,13 +120,13 @@ const ServicesSection = () => {
             <div
               className="md:w-56 lg:w-64 border-b md:border-b-0 md:border-r p-3"
               style={{
-                borderColor: "rgba(0,0,0,0.06)",
-                background: "rgba(0,0,0,0.015)",
+                borderColor: "rgba(255,255,255,0.06)",
+                background: "rgba(255,255,255,0.02)",
               }}
             >
               <p
                 className="text-[10px] font-semibold tracking-[0.2em] uppercase px-3 pt-2 pb-3"
-                style={{ color: "rgba(0,0,0,0.3)" }}
+                style={{ color: "rgba(255,255,255,0.3)" }}
               >
                 Módulos
               </p>
@@ -138,34 +138,34 @@ const ServicesSection = () => {
                     key={s.num}
                     onClick={() => setActiveIdx(i)}
                     className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl mb-1 text-left transition-all duration-200 group ${
-                      isActive ? "" : "hover:bg-black/[0.03] border border-transparent"
+                      isActive ? "" : "hover:bg-white/[0.04] border border-transparent"
                     }`}
                     style={isActive ? {
-                      background: "rgba(147,51,234,0.07)",
-                      border: "1px solid rgba(147,51,234,0.15)",
+                      background: "rgba(147,51,234,0.12)",
+                      border: "1px solid rgba(147,51,234,0.25)",
                     } : {}}
                   >
                     <div
                       className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors`}
                       style={isActive ? {
-                        background: "rgba(147,51,234,0.15)",
+                        background: "rgba(147,51,234,0.2)",
                       } : {
-                        background: "rgba(0,0,0,0.05)",
+                        background: "rgba(255,255,255,0.05)",
                       }}
                     >
                       <Icon
                         size={14}
-                        style={{ color: isActive ? "#9333ea" : "rgba(0,0,0,0.4)" }}
+                        style={{ color: isActive ? "#9333ea" : "rgba(255,255,255,0.4)" }}
                       />
                     </div>
                     <div className="min-w-0">
                       <p
                         className={`text-xs font-medium truncate transition-colors`}
-                        style={{ color: isActive ? "rgba(0,0,0,0.85)" : "rgba(0,0,0,0.5)" }}
+                        style={{ color: isActive ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.5)" }}
                       >
                         {s.title}
                       </p>
-                      <p className="text-[10px] truncate" style={{ color: "rgba(0,0,0,0.3)" }}>
+                      <p className="text-[10px] truncate" style={{ color: "rgba(255,255,255,0.3)" }}>
                         {s.badge}
                       </p>
                     </div>
@@ -176,7 +176,7 @@ const ServicesSection = () => {
             </div>
 
             {/* Main content */}
-            <div className="flex-1 p-6 lg:p-8 bg-white">
+            <div className="flex-1 p-6 lg:p-8">
               <motion.div
                 key={activeIdx}
                 initial={{ opacity: 0, y: 10, filter: "blur(4px)" }}
@@ -189,8 +189,8 @@ const ServicesSection = () => {
                     <div
                       className="w-12 h-12 rounded-2xl flex items-center justify-center"
                       style={{
-                        background: "rgba(147,51,234,0.07)",
-                        border: "1px solid rgba(147,51,234,0.15)",
+                        background: "rgba(147,51,234,0.12)",
+                        border: "1px solid rgba(147,51,234,0.2)",
                       }}
                     >
                       <ActiveIcon size={22} className="text-primary" />
@@ -206,9 +206,9 @@ const ServicesSection = () => {
                   <span
                     className="hidden sm:inline-flex text-[11px] font-semibold px-3 py-1.5 rounded-full flex-shrink-0 ml-4"
                     style={{
-                      background: "rgba(147,51,234,0.07)",
-                      color: "#7c3aed",
-                      border: "1px solid rgba(147,51,234,0.15)",
+                      background: "rgba(147,51,234,0.12)",
+                      color: "#a855f7",
+                      border: "1px solid rgba(147,51,234,0.2)",
                     }}
                   >
                     {active.badge}
@@ -226,16 +226,16 @@ const ServicesSection = () => {
                   <div
                     className="col-span-2 p-5 rounded-2xl relative overflow-hidden"
                     style={{
-                      background: "rgba(147,51,234,0.04)",
-                      border: "1px solid rgba(147,51,234,0.12)",
+                      background: "rgba(147,51,234,0.08)",
+                      border: "1px solid rgba(147,51,234,0.15)",
                     }}
                   >
                     <div
                       className="absolute top-0 right-0 w-20 h-20 rounded-full pointer-events-none"
-                      style={{ background: "rgba(147,51,234,0.08)", filter: "blur(24px)" }}
+                      style={{ background: "rgba(147,51,234,0.12)", filter: "blur(24px)" }}
                     />
                     <p className="text-[10px] tracking-[0.15em] uppercase mb-2"
-                      style={{ color: "rgba(0,0,0,0.35)" }}>
+                      style={{ color: "rgba(255,255,255,0.35)" }}>
                       {active.metricLabel}
                     </p>
                     <p
@@ -254,20 +254,20 @@ const ServicesSection = () => {
                   {/* Status */}
                   <div
                     className="p-4 rounded-2xl"
-                    style={{ background: "rgba(0,0,0,0.02)", border: "1px solid rgba(0,0,0,0.06)" }}
+                    style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}
                   >
                     <Activity size={14} className="text-primary/60 mb-3" />
-                    <p className="text-[10px] mb-1" style={{ color: "rgba(0,0,0,0.35)" }}>Status</p>
+                    <p className="text-[10px] mb-1" style={{ color: "rgba(255,255,255,0.35)" }}>Status</p>
                     <p className="text-sm font-semibold text-foreground">Ativo</p>
                   </div>
 
                   {/* Tipo */}
                   <div
                     className="p-4 rounded-2xl"
-                    style={{ background: "rgba(0,0,0,0.02)", border: "1px solid rgba(0,0,0,0.06)" }}
+                    style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}
                   >
                     <div className="w-3 h-3 rounded-full bg-primary/60 mb-3" />
-                    <p className="text-[10px] mb-1" style={{ color: "rgba(0,0,0,0.35)" }}>Tipo</p>
+                    <p className="text-[10px] mb-1" style={{ color: "rgba(255,255,255,0.35)" }}>Tipo</p>
                     <p className="text-sm font-semibold text-foreground">Custom</p>
                   </div>
                 </div>
