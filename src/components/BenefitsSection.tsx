@@ -94,8 +94,8 @@ const BenefitsSection = () => {
                   <div
                     className="w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300"
                     style={{
-                      background: `rgba(147,51,234,0.07)`,
-                      border: `1px solid rgba(147,51,234,0.12)`,
+                      background: `rgba(147,51,234,0.12)`,
+                      border: `1px solid rgba(147,51,234,0.2)`,
                     }}
                   >
                     <Icon size={22} className="text-primary" />
