@@ -49,7 +49,7 @@ const Navbar = () => {
           </a>
 
           {/* Pill nav — desktop */}
-          <div className="hidden md:flex items-center bg-black/[0.03] border border-black/[0.06] rounded-full px-1.5 py-1.5 backdrop-blur-sm gap-0.5">
+          <div className="hidden md:flex items-center bg-white/[0.04] border border-white/[0.06] rounded-full px-1.5 py-1.5 backdrop-blur-sm gap-0.5">
             {navLinks.map((link) => {
               const isActive = activeLink === link.href;
               return (
