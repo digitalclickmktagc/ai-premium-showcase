@@ -201,38 +201,38 @@
     background: var(--glass-bg);
     backdrop-filter: blur(24px) saturate(1.5);
     -webkit-backdrop-filter: blur(24px) saturate(1.5);
-    border: 1px solid rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.06);
   }
 
   .glass-card {
-    background: #ffffff;
-    border: 1px solid rgba(0, 0, 0, 0.07);
+    background: rgba(15, 15, 25, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.07);
     box-shadow:
-      0 1px 2px rgba(0, 0, 0, 0.04),
-      0 4px 20px rgba(0, 0, 0, 0.06),
-      0 0 0 1px rgba(0, 0, 0, 0.02);
+      0 1px 2px rgba(0, 0, 0, 0.3),
+      0 4px 20px rgba(0, 0, 0, 0.2),
+      0 0 0 1px rgba(255, 255, 255, 0.03);
     transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 
   .glass-card:hover {
-    border-color: rgba(147, 51, 234, 0.18);
+    border-color: rgba(147, 51, 234, 0.25);
     box-shadow:
-      0 1px 2px rgba(0, 0, 0, 0.04),
-      0 12px 50px rgba(147, 51, 234, 0.1),
-      0 0 0 1px rgba(147, 51, 234, 0.05);
+      0 1px 2px rgba(0, 0, 0, 0.3),
+      0 12px 50px rgba(147, 51, 234, 0.15),
+      0 0 0 1px rgba(147, 51, 234, 0.08);
     transform: translateY(-4px);
   }
 
   .glass-card-subtle {
-    background: #ffffff;
-    border: 1px solid rgba(0, 0, 0, 0.06);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    background: rgba(15, 15, 25, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
     transition: all 0.3s ease;
   }
 
   .glass-card-subtle:hover {
-    border-color: rgba(147, 51, 234, 0.18);
-    box-shadow: 0 4px 24px rgba(147, 51, 234, 0.1);
+    border-color: rgba(147, 51, 234, 0.25);
+    box-shadow: 0 4px 24px rgba(147, 51, 234, 0.15);
   }
 
   .glow-button {
