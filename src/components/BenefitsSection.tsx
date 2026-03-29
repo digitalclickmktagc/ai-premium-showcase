@@ -84,7 +84,7 @@ const BenefitsSection = () => {
                 {/* Watermark number */}
                 <span
                   className="absolute -bottom-4 -right-2 font-display font-black select-none pointer-events-none leading-none"
-                  style={{ fontSize: "6rem", color: "rgba(0,0,0,0.04)" }}
+                  style={{ fontSize: "6rem", color: "rgba(255,255,255,0.04)" }}
                 >
                   {String(i + 1).padStart(2, "0")}
                 </span>
