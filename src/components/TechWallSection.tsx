@@ -120,7 +120,7 @@ const TechWallSection = () => {
                 { icon: <img src={chatgptIcon} alt="OpenAI" className="w-[18px] h-[18px]" />, title: "IA Integrada", sub: "OpenAI / LangChain" },
               ].map((f) => (
                 <div key={f.title} className="group flex items-center gap-4 cursor-default">
-                  <div className="w-10 h-10 rounded-xl border border-black/[0.08] bg-primary/[0.03] flex items-center justify-center text-muted-foreground group-hover:text-primary group-hover:bg-primary/[0.06] group-hover:border-primary/20 transition-all duration-200">
+                  <div className="w-10 h-10 rounded-xl border border-white/[0.08] bg-primary/[0.06] flex items-center justify-center text-muted-foreground group-hover:text-primary group-hover:bg-primary/[0.1] group-hover:border-primary/20 transition-all duration-200">
                     {f.icon}
                   </div>
                   <div>
