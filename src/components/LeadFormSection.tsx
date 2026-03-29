@@ -61,8 +61,8 @@ const LeadFormSection = () => {
   };
 
   const inputClasses =
-    "w-full px-4 py-3.5 rounded-xl bg-white border text-foreground font-body text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all duration-200"
-    + " border-black/[0.08]";
+    "w-full px-4 py-3.5 rounded-xl bg-white/[0.06] border text-foreground font-body text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all duration-200"
+    + " border-white/[0.08]";
 
   return (
     <section
