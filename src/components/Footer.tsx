@@ -9,7 +9,7 @@ const WhatsAppIcon = ({ size = 18 }: { size?: number }) => (
 
 const Footer = () => {
   return (
-    <footer id="contato" className="pt-16 pb-8 bg-white relative overflow-hidden">
+    <footer id="contato" className="pt-16 pb-8 relative overflow-hidden">
       {/* Top divider */}
       <div className="absolute top-0 left-0 right-0 section-divider" />
 
