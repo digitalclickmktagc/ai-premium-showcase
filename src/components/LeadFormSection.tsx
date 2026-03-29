@@ -61,13 +61,13 @@ const LeadFormSection = () => {
   };
 
   const inputClasses =
-    "w-full px-4 py-3.5 rounded-xl bg-white border text-foreground font-body text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all duration-200"
-    + " border-black/[0.08]";
+    "w-full px-4 py-3.5 rounded-xl bg-white/[0.06] border text-foreground font-body text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all duration-200"
+    + " border-white/[0.08]";
 
   return (
     <section
       id="diagnostico"
-      className="py-24 lg:py-32 relative overflow-hidden bg-white"
+      className="py-24 lg:py-32 relative overflow-hidden"
     >
       <div className="container mx-auto px-4 lg:px-8 relative z-10">
         <motion.div
@@ -80,8 +80,8 @@ const LeadFormSection = () => {
           <div
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6"
             style={{
-              background: "rgba(147,51,234,0.06)",
-              border: "1px solid rgba(147,51,234,0.15)",
+              background: "rgba(147,51,234,0.1)",
+              border: "1px solid rgba(147,51,234,0.2)",
             }}
           >
             <Sparkles size={13} className="text-primary" />

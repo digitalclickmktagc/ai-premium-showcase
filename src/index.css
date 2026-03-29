@@ -6,25 +6,25 @@
 
 @layer base {
   :root {
-    /* ── Light Theme ── */
-    --background: 0 0% 100%;
-    --foreground: 224 71.4% 4.1%;
+    /* ── Dark Theme ── */
+    --background: 240 10% 4%;
+    --foreground: 0 0% 95%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 224 71.4% 4.1%;
+    --card: 240 8% 8%;
+    --card-foreground: 0 0% 95%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 224 71.4% 4.1%;
+    --popover: 240 8% 8%;
+    --popover-foreground: 0 0% 95%;
 
     /* ── NEXA Brand Colors ── */
     --primary: 271 81% 56%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 14.3% 95.9%;
-    --secondary-foreground: 220.9 39.3% 11%;
+    --secondary: 240 6% 14%;
+    --secondary-foreground: 0 0% 90%;
 
-    --muted: 220 14.3% 95.9%;
-    --muted-foreground: 220 8.9% 46.1%;
+    --muted: 240 6% 14%;
+    --muted-foreground: 240 5% 55%;
 
     --accent: 271 81% 56%;
     --accent-foreground: 0 0% 100%;
@@ -32,8 +32,8 @@
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
+    --border: 240 6% 14%;
+    --input: 240 6% 14%;
     --ring: 271 81% 56%;
 
     --radius: 0.75rem;
@@ -41,18 +41,18 @@
     /* ── NEXA Gradients ── */
     --gradient-nexa: linear-gradient(135deg, #6B21A8, #9333EA, #A855F7, #7C3AED);
     --gradient-nexa-hover: linear-gradient(135deg, #7C3AED, #A855F7, #C084FC, #8B5CF6);
-    --gradient-nexa-soft: linear-gradient(135deg, rgba(107, 33, 168, 0.06), rgba(147, 51, 234, 0.03), transparent);
+    --gradient-nexa-soft: linear-gradient(135deg, rgba(107, 33, 168, 0.12), rgba(147, 51, 234, 0.06), transparent);
 
-    /* ── Glows (light mode) ── */
-    --glow-primary: 0 4px 30px rgba(147, 51, 234, 0.22);
-    --glow-accent: 0 8px 50px rgba(147, 51, 234, 0.1);
-    --glow-strong: 0 8px 60px rgba(147, 51, 234, 0.28);
+    /* ── Glows ── */
+    --glow-primary: 0 4px 30px rgba(147, 51, 234, 0.35);
+    --glow-accent: 0 8px 50px rgba(147, 51, 234, 0.15);
+    --glow-strong: 0 8px 60px rgba(147, 51, 234, 0.4);
 
-    /* ── Glass (light mode) ── */
-    --glass-bg: rgba(255, 255, 255, 0.75);
-    --glass-bg-strong: rgba(255, 255, 255, 0.95);
-    --glass-border: rgba(0, 0, 0, 0.06);
-    --glass-border-hover: rgba(147, 51, 234, 0.22);
+    /* ── Glass ── */
+    --glass-bg: rgba(15, 15, 25, 0.75);
+    --glass-bg-strong: rgba(15, 15, 25, 0.95);
+    --glass-border: rgba(255, 255, 255, 0.06);
+    --glass-border-hover: rgba(147, 51, 234, 0.3);
   }
 }
 
@@ -70,18 +70,18 @@
   }
 
   input, select, textarea {
-    color: hsl(224 71.4% 4.1%);
-    color-scheme: light;
+    color: hsl(0 0% 95%);
+    color-scheme: dark;
   }
 
   input::placeholder {
-    color: hsl(220 8.9% 62%) !important;
+    color: hsl(240 5% 45%) !important;
     opacity: 1;
   }
 
   ::selection {
-    background: hsl(271 81% 56% / 0.15);
-    color: hsl(271 81% 30%);
+    background: hsl(271 81% 56% / 0.3);
+    color: hsl(271 81% 85%);
   }
 }
 
@@ -89,7 +89,7 @@
    Dot grid background
 ───────────────────────────────────────────── */
 .dot-grid {
-  background-image: radial-gradient(rgba(0, 0, 0, 0.07) 1px, transparent 1px);
+  background-image: radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px);
   background-size: 28px 28px;
 }
 
@@ -201,38 +201,38 @@
     background: var(--glass-bg);
     backdrop-filter: blur(24px) saturate(1.5);
     -webkit-backdrop-filter: blur(24px) saturate(1.5);
-    border: 1px solid rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.06);
   }
 
   .glass-card {
-    background: #ffffff;
-    border: 1px solid rgba(0, 0, 0, 0.07);
+    background: rgba(15, 15, 25, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.07);
     box-shadow:
-      0 1px 2px rgba(0, 0, 0, 0.04),
-      0 4px 20px rgba(0, 0, 0, 0.06),
-      0 0 0 1px rgba(0, 0, 0, 0.02);
+      0 1px 2px rgba(0, 0, 0, 0.3),
+      0 4px 20px rgba(0, 0, 0, 0.2),
+      0 0 0 1px rgba(255, 255, 255, 0.03);
     transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 
   .glass-card:hover {
-    border-color: rgba(147, 51, 234, 0.18);
+    border-color: rgba(147, 51, 234, 0.25);
     box-shadow:
-      0 1px 2px rgba(0, 0, 0, 0.04),
-      0 12px 50px rgba(147, 51, 234, 0.1),
-      0 0 0 1px rgba(147, 51, 234, 0.05);
+      0 1px 2px rgba(0, 0, 0, 0.3),
+      0 12px 50px rgba(147, 51, 234, 0.15),
+      0 0 0 1px rgba(147, 51, 234, 0.08);
     transform: translateY(-4px);
   }
 
   .glass-card-subtle {
-    background: #ffffff;
-    border: 1px solid rgba(0, 0, 0, 0.06);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    background: rgba(15, 15, 25, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
     transition: all 0.3s ease;
   }
 
   .glass-card-subtle:hover {
-    border-color: rgba(147, 51, 234, 0.18);
-    box-shadow: 0 4px 24px rgba(147, 51, 234, 0.1);
+    border-color: rgba(147, 51, 234, 0.25);
+    box-shadow: 0 4px 24px rgba(147, 51, 234, 0.15);
   }
 
   .glow-button {
@@ -272,29 +272,29 @@
 
   .section-divider {
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.08), transparent);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.06), transparent);
   }
 
   .stat-highlight {
-    background: linear-gradient(135deg, rgba(147, 51, 234, 0.05), rgba(107, 33, 168, 0.02));
-    border: 1px solid rgba(147, 51, 234, 0.1);
+    background: linear-gradient(135deg, rgba(147, 51, 234, 0.08), rgba(107, 33, 168, 0.04));
+    border: 1px solid rgba(147, 51, 234, 0.15);
     border-radius: 1rem;
     transition: all 0.3s ease;
   }
 
   .stat-highlight:hover {
-    border-color: rgba(147, 51, 234, 0.22);
-    box-shadow: 0 4px 24px rgba(147, 51, 234, 0.1);
-    background: linear-gradient(135deg, rgba(147, 51, 234, 0.08), rgba(107, 33, 168, 0.04));
+    border-color: rgba(147, 51, 234, 0.3);
+    box-shadow: 0 4px 24px rgba(147, 51, 234, 0.15);
+    background: linear-gradient(135deg, rgba(147, 51, 234, 0.12), rgba(107, 33, 168, 0.06));
   }
 
   /* Premium card with gradient border on hover */
   .premium-card {
-    background: #ffffff;
-    border: 1px solid rgba(0, 0, 0, 0.07);
+    background: rgba(15, 15, 25, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.07);
     box-shadow:
-      0 1px 3px rgba(0, 0, 0, 0.04),
-      0 6px 24px rgba(0, 0, 0, 0.05);
+      0 1px 3px rgba(0, 0, 0, 0.2),
+      0 6px 24px rgba(0, 0, 0, 0.15);
     transition: all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     position: relative;
   }
@@ -317,9 +317,9 @@
   .premium-card:hover {
     border-color: transparent;
     box-shadow:
-      0 1px 3px rgba(0, 0, 0, 0.04),
-      0 16px 60px rgba(147, 51, 234, 0.12),
-      0 0 0 1px rgba(147, 51, 234, 0.12);
+      0 1px 3px rgba(0, 0, 0, 0.2),
+      0 16px 60px rgba(147, 51, 234, 0.2),
+      0 0 0 1px rgba(147, 51, 234, 0.15);
     transform: translateY(-6px);
   }
 
@@ -356,11 +356,11 @@
 
 
   .tech-wall-card {
-    background: rgba(255, 255, 255, 1);
-    border: 1px solid rgba(0, 0, 0, 0.06);
+    background: rgba(15, 15, 25, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.06);
     box-shadow:
-      0 1px 2px rgba(0, 0, 0, 0.03),
-      0 2px 8px rgba(0, 0, 0, 0.04);
+      0 1px 2px rgba(0, 0, 0, 0.2),
+      0 2px 8px rgba(0, 0, 0, 0.15);
     transition: border-color 0.12s ease, background 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
     pointer-events: auto;
     cursor: default;
@@ -368,12 +368,12 @@
 
   .tech-wall-card:hover {
     border-color: rgba(147, 51, 234, 0.4);
-    background: rgba(255, 255, 255, 1);
+    background: rgba(20, 20, 35, 0.9);
     box-shadow:
-      0 0 20px rgba(147, 51, 234, 0.2),
-      0 0 40px rgba(147, 51, 234, 0.1),
-      0 8px 30px rgba(147, 51, 234, 0.15);
-    filter: drop-shadow(0 0 12px rgba(147, 51, 234, 0.2));
+      0 0 20px rgba(147, 51, 234, 0.25),
+      0 0 40px rgba(147, 51, 234, 0.12),
+      0 8px 30px rgba(147, 51, 234, 0.18);
+    filter: drop-shadow(0 0 12px rgba(147, 51, 234, 0.25));
   }
 }
 

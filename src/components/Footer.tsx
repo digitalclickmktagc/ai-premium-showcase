@@ -9,7 +9,7 @@ const WhatsAppIcon = ({ size = 18 }: { size?: number }) => (
 
 const Footer = () => {
   return (
-    <footer id="contato" className="pt-16 pb-8 bg-white relative overflow-hidden">
+    <footer id="contato" className="pt-16 pb-8 relative overflow-hidden">
       {/* Top divider */}
       <div className="absolute top-0 left-0 right-0 section-divider" />
 
@@ -63,17 +63,17 @@ const Footer = () => {
                   aria-label={label}
                   className="w-11 h-11 rounded-xl flex items-center justify-center text-muted-foreground hover:text-primary transition-all duration-300 cursor-pointer"
                   style={{
-                    border: "1px solid rgba(0,0,0,0.08)",
-                    background: "#ffffff",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                    background: "rgba(255,255,255,0.04)",
                   }}
                   onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.borderColor = "rgba(147,51,234,0.25)";
-                    (e.currentTarget as HTMLElement).style.background = "rgba(147,51,234,0.04)";
-                    (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 16px rgba(147,51,234,0.1)";
+                    (e.currentTarget as HTMLElement).style.borderColor = "rgba(147,51,234,0.3)";
+                    (e.currentTarget as HTMLElement).style.background = "rgba(147,51,234,0.08)";
+                    (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 16px rgba(147,51,234,0.15)";
                   }}
                   onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.borderColor = "rgba(0,0,0,0.08)";
-                    (e.currentTarget as HTMLElement).style.background = "#ffffff";
+                    (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.08)";
+                    (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.04)";
                     (e.currentTarget as HTMLElement).style.boxShadow = "none";
                   }}
                 >
@@ -87,7 +87,7 @@ const Footer = () => {
         {/* Bottom bar */}
         <div
           className="pt-8 flex flex-col md:flex-row items-center justify-between gap-4"
-          style={{ borderTop: "1px solid rgba(0,0,0,0.06)" }}
+          style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
         >
           <p className="text-xs text-muted-foreground">
             © 2026 Nexa AI. Todos os direitos reservados.

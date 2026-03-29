@@ -34,7 +34,7 @@ const Navbar = () => {
         <div
           className={`flex items-center justify-between h-14 px-4 rounded-2xl transition-all duration-500 ${
             scrolled
-              ? "bg-white/85 border border-black/[0.07] backdrop-blur-xl shadow-[0_2px_30px_rgba(0,0,0,0.08)]"
+              ? "bg-background/85 border border-border backdrop-blur-xl shadow-[0_2px_30px_rgba(0,0,0,0.3)]"
               : "bg-transparent border border-transparent"
           }`}
         >
@@ -49,7 +49,7 @@ const Navbar = () => {
           </a>
 
           {/* Pill nav — desktop */}
-          <div className="hidden md:flex items-center bg-black/[0.03] border border-black/[0.06] rounded-full px-1.5 py-1.5 backdrop-blur-sm gap-0.5">
+          <div className="hidden md:flex items-center bg-white/[0.04] border border-white/[0.06] rounded-full px-1.5 py-1.5 backdrop-blur-sm gap-0.5">
             {navLinks.map((link) => {
               const isActive = activeLink === link.href;
               return (
@@ -59,8 +59,8 @@ const Navbar = () => {
                   onClick={() => setActiveLink(link.href)}
                   className={`group relative flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 ${
                     isActive
-                      ? "bg-white text-foreground shadow-[0_1px_6px_rgba(0,0,0,0.1)]"
-                      : "text-muted-foreground hover:text-foreground hover:bg-white/60"
+                      ? "bg-white/10 text-foreground shadow-[0_1px_6px_rgba(0,0,0,0.3)]"
+                      : "text-muted-foreground hover:text-foreground hover:bg-white/[0.06]"
                   }`}
                 >
                   {isActive && (
@@ -112,14 +112,14 @@ const Navbar = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.98 }}
             transition={{ duration: 0.2, ease: "easeInOut" }}
-            className="md:hidden mx-4 mt-2 rounded-2xl bg-white/95 border border-black/[0.07] backdrop-blur-xl shadow-[0_8px_40px_rgba(0,0,0,0.1)] overflow-hidden"
+            className="md:hidden mx-4 mt-2 rounded-2xl bg-background/95 border border-border backdrop-blur-xl shadow-[0_8px_40px_rgba(0,0,0,0.4)] overflow-hidden"
           >
             <ul className="flex flex-col gap-1 p-3">
               {navLinks.map((link) => (
                 <li key={link.href}>
                   <a
                     href={link.href}
-                    className="flex items-center gap-2 px-4 py-3 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-black/[0.03] rounded-xl transition-all duration-200"
+                    className="flex items-center gap-2 px-4 py-3 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-white/[0.04] rounded-xl transition-all duration-200"
                     onClick={() => {
                       setActiveLink(link.href);
                       setOpen(false);

@@ -49,7 +49,8 @@ const WallCard = ({ card, isHovered }: { card: TechCard; isHovered: boolean }) =
     data-card-id={card.name}
     style={isHovered ? {
       borderColor: 'rgba(147, 51, 234, 0.4)',
-      boxShadow: '0 0 20px rgba(147, 51, 234, 0.2), 0 0 40px rgba(147, 51, 234, 0.1), 0 8px 30px rgba(147, 51, 234, 0.15)',
+      background: 'rgba(20, 20, 35, 0.9)',
+      boxShadow: '0 0 20px rgba(147, 51, 234, 0.25), 0 0 40px rgba(147, 51, 234, 0.12), 0 8px 30px rgba(147, 51, 234, 0.18)',
       filter: 'drop-shadow(0 0 12px rgba(147, 51, 234, 0.25))',
     } : {}}
   >
@@ -149,10 +150,10 @@ const HeroSection = () => {
               className="relative h-[650px] overflow-hidden"
             >
               {/* Fade edges */}
-              <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-white to-transparent z-10 pointer-events-none" />
-              <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-white to-transparent z-10 pointer-events-none" />
-              <div className="absolute top-0 bottom-0 right-0 w-24 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
-              <div className="absolute top-0 bottom-0 left-0 w-12 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
+              <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-background to-transparent z-10 pointer-events-none" />
+              <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent z-10 pointer-events-none" />
+              <div className="absolute top-0 bottom-0 right-0 w-24 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
+              <div className="absolute top-0 bottom-0 left-0 w-12 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
 
               {/* 3D Wall */}
               <div className="tech-wall-container h-full w-full">
@@ -170,7 +171,7 @@ const HeroSection = () => {
       </div>
 
       {/* Bottom fade — larger gradient to seamlessly blend into next section */}
-      <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none z-10" />
+      <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none z-10" />
     </section>
   );
 };

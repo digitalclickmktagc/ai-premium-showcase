@@ -43,8 +43,8 @@ const Avatar = ({ name }: { name: string }) => (
   <div
     className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
     style={{
-      background: "linear-gradient(135deg, rgba(147,51,234,0.12), rgba(109,40,217,0.06))",
-      border: "1px solid rgba(147,51,234,0.15)",
+      background: "linear-gradient(135deg, rgba(147,51,234,0.2), rgba(109,40,217,0.1))",
+      border: "1px solid rgba(147,51,234,0.25)",
     }}
   >
     <span className="text-xs font-display font-bold text-primary">
@@ -57,14 +57,14 @@ const TestimonialsSection = () => {
   const [featured, ...rest] = testimonials;
 
   return (
-    <section id="depoimentos" className="py-24 lg:py-32 relative overflow-hidden bg-white">
+    <section id="depoimentos" className="py-24 lg:py-32 relative overflow-hidden">
       {/* Ghost section number */}
       <div
         className="absolute -top-8 right-0 font-display font-black select-none pointer-events-none leading-none"
         style={{
           fontSize: "clamp(120px, 20vw, 240px)",
           color: "transparent",
-          WebkitTextStroke: "1px rgba(0,0,0,0.04)",
+          WebkitTextStroke: "1px rgba(255,255,255,0.04)",
         }}
       >
         03.
@@ -100,16 +100,16 @@ const TestimonialsSection = () => {
           <div
             className="lg:col-span-7 rounded-[24px] p-8 sm:p-10 relative overflow-hidden"
             style={{
-              background: "#ffffff",
-              border: "1px solid rgba(0,0,0,0.07)",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.04), 0 8px 40px rgba(147,51,234,0.07)",
+              background: "rgba(15, 15, 25, 0.8)",
+              border: "1px solid rgba(255,255,255,0.07)",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.3), 0 8px 40px rgba(147,51,234,0.1)",
             }}
           >
             {/* Gradient corner accent */}
             <div
               className="absolute top-0 left-0 w-48 h-48 rounded-full pointer-events-none"
               style={{
-                background: "radial-gradient(circle, rgba(147,51,234,0.08) 0%, transparent 70%)",
+                background: "radial-gradient(circle, rgba(147,51,234,0.12) 0%, transparent 70%)",
                 filter: "blur(40px)",
               }}
             />
@@ -122,14 +122,14 @@ const TestimonialsSection = () => {
               }}
             />
 
-            <Quote size={40} style={{ color: "rgba(147,51,234,0.18)" }} className="mb-6 mt-2" />
+            <Quote size={40} style={{ color: "rgba(147,51,234,0.25)" }} className="mb-6 mt-2" />
             <Stars count={featured.stars} />
             <blockquote className="font-display text-xl sm:text-2xl font-light leading-relaxed text-foreground/90 mt-5 mb-8">
               "{featured.quote}"
             </blockquote>
             <div
               className="flex items-center gap-3 pt-6"
-              style={{ borderTop: "1px solid rgba(0,0,0,0.06)" }}
+              style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
             >
               <Avatar name={featured.name} />
               <div>
@@ -150,13 +150,13 @@ const TestimonialsSection = () => {
             <div
               className="rounded-[20px] p-6 relative overflow-hidden"
               style={{
-                background: "#ffffff",
-                border: "1px solid rgba(0,0,0,0.07)",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+                background: "rgba(15, 15, 25, 0.8)",
+                border: "1px solid rgba(255,255,255,0.07)",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
               }}
             >
               <p className="text-xs tracking-[0.15em] uppercase mb-2"
-                style={{ color: "rgba(0,0,0,0.35)" }}>
+                style={{ color: "rgba(255,255,255,0.35)" }}>
                 Tarefas Automatizadas
               </p>
               <p
@@ -170,7 +170,7 @@ const TestimonialsSection = () => {
               >
                 80%
               </p>
-              <p className="text-xs mt-1" style={{ color: "rgba(0,0,0,0.35)" }}>
+              <p className="text-xs mt-1" style={{ color: "rgba(255,255,255,0.35)" }}>
                 das operações manuais
               </p>
             </div>
@@ -179,13 +179,13 @@ const TestimonialsSection = () => {
             <div
               className="rounded-[20px] p-6 relative overflow-hidden"
               style={{
-                background: "#ffffff",
-                border: "1px solid rgba(0,0,0,0.07)",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+                background: "rgba(15, 15, 25, 0.8)",
+                border: "1px solid rgba(255,255,255,0.07)",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
               }}
             >
               <p className="text-xs tracking-[0.15em] uppercase mb-2"
-                style={{ color: "rgba(0,0,0,0.35)" }}>
+                style={{ color: "rgba(255,255,255,0.35)" }}>
                 Crescimento em Faturamento
               </p>
               <p
@@ -199,7 +199,7 @@ const TestimonialsSection = () => {
               >
                 2×
               </p>
-              <p className="text-xs mt-1" style={{ color: "rgba(0,0,0,0.35)" }}>
+              <p className="text-xs mt-1" style={{ color: "rgba(255,255,255,0.35)" }}>
                 em apenas 6 meses
               </p>
             </div>
@@ -217,9 +217,9 @@ const TestimonialsSection = () => {
               transition={{ duration: 0.5, delay: i * 0.1 }}
               className="rounded-[20px] p-7 flex flex-col justify-between"
               style={{
-                background: "#ffffff",
-                border: "1px solid rgba(0,0,0,0.07)",
-                boxShadow: "0 1px 4px rgba(0,0,0,0.04), 0 4px 20px rgba(0,0,0,0.04)",
+                background: "rgba(15, 15, 25, 0.8)",
+                border: "1px solid rgba(255,255,255,0.07)",
+                boxShadow: "0 1px 4px rgba(0,0,0,0.2), 0 4px 20px rgba(0,0,0,0.15)",
                 transition: "all 0.3s ease",
               }}
             >
@@ -231,7 +231,7 @@ const TestimonialsSection = () => {
               </div>
               <div
                 className="flex items-center gap-3 pt-4"
-                style={{ borderTop: "1px solid rgba(0,0,0,0.06)" }}
+                style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
               >
                 <Avatar name={t.name} />
                 <div>

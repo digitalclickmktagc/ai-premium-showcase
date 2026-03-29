@@ -84,7 +84,7 @@ const BenefitsSection = () => {
                 {/* Watermark number */}
                 <span
                   className="absolute -bottom-4 -right-2 font-display font-black select-none pointer-events-none leading-none"
-                  style={{ fontSize: "6rem", color: "rgba(0,0,0,0.04)" }}
+                  style={{ fontSize: "6rem", color: "rgba(255,255,255,0.04)" }}
                 >
                   {String(i + 1).padStart(2, "0")}
                 </span>
@@ -94,8 +94,8 @@ const BenefitsSection = () => {
                   <div
                     className="w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300"
                     style={{
-                      background: `rgba(147,51,234,0.07)`,
-                      border: `1px solid rgba(147,51,234,0.12)`,
+                      background: `rgba(147,51,234,0.12)`,
+                      border: `1px solid rgba(147,51,234,0.2)`,
                     }}
                   >
                     <Icon size={22} className="text-primary" />
@@ -103,9 +103,9 @@ const BenefitsSection = () => {
                   <span
                     className="text-[10px] font-semibold tracking-wide rounded-full px-2.5 py-1"
                     style={{
-                      color: "#7c3aed",
-                      border: "1px solid rgba(147,51,234,0.15)",
-                      background: "rgba(147,51,234,0.05)",
+                      color: "#a855f7",
+                      border: "1px solid rgba(147,51,234,0.2)",
+                      background: "rgba(147,51,234,0.08)",
                     }}
                   >
                     {b.highlight}

@@ -70,7 +70,7 @@ const WallColumn = ({ cards, direction, className = "" }: { cards: TechCard[]; d
 
 const TechWallSection = () => {
   return (
-    <section className="relative py-24 lg:py-0 overflow-hidden bg-white">
+    <section className="relative py-24 lg:py-0 overflow-hidden">
       {/* Ambient purple glow */}
       <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/[0.06] blur-[120px] rounded-full pointer-events-none z-0" />
 
@@ -120,7 +120,7 @@ const TechWallSection = () => {
                 { icon: <img src={chatgptIcon} alt="OpenAI" className="w-[18px] h-[18px]" />, title: "IA Integrada", sub: "OpenAI / LangChain" },
               ].map((f) => (
                 <div key={f.title} className="group flex items-center gap-4 cursor-default">
-                  <div className="w-10 h-10 rounded-xl border border-black/[0.08] bg-primary/[0.03] flex items-center justify-center text-muted-foreground group-hover:text-primary group-hover:bg-primary/[0.06] group-hover:border-primary/20 transition-all duration-200">
+                  <div className="w-10 h-10 rounded-xl border border-white/[0.08] bg-primary/[0.06] flex items-center justify-center text-muted-foreground group-hover:text-primary group-hover:bg-primary/[0.1] group-hover:border-primary/20 transition-all duration-200">
                     {f.icon}
                   </div>
                   <div>
@@ -135,7 +135,7 @@ const TechWallSection = () => {
             <div className="pt-4">
               <a
                 href="#diagnostico"
-                className="inline-flex items-center px-6 py-2.5 rounded-full border border-black/10 text-sm font-display font-medium text-foreground hover:border-primary/30 hover:bg-primary/[0.03] transition-all duration-200"
+                className="inline-flex items-center px-6 py-2.5 rounded-full border border-white/10 text-sm font-display font-medium text-foreground hover:border-primary/30 hover:bg-primary/[0.06] transition-all duration-200"
               >
                 Explorar Stack Completo
               </a>

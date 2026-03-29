@@ -10,17 +10,15 @@ const SocialProof = () => {
       <div className="section-divider mb-8" />
       <div className="relative">
         {/* Fade edges */}
-        <div className="absolute left-0 top-0 bottom-0 w-32 z-10 pointer-events-none"
-          style={{ background: "linear-gradient(90deg, white, transparent)" }} />
-        <div className="absolute right-0 top-0 bottom-0 w-32 z-10 pointer-events-none"
-          style={{ background: "linear-gradient(270deg, white, transparent)" }} />
+        <div className="absolute left-0 top-0 bottom-0 w-32 z-10 pointer-events-none bg-gradient-to-r from-background to-transparent" />
+        <div className="absolute right-0 top-0 bottom-0 w-32 z-10 pointer-events-none bg-gradient-to-l from-background to-transparent" />
 
         <div className="flex animate-marquee whitespace-nowrap">
           {[...brands, ...brands].map((brand, i) => (
             <span
               key={i}
               className="mx-8 text-sm font-display font-bold tracking-[0.22em] flex items-center gap-3 select-none"
-              style={{ color: "rgba(0,0,0,0.25)" }}
+              style={{ color: "rgba(255,255,255,0.25)" }}
             >
               <span
                 className="w-1.5 h-1.5 rounded-full flex-shrink-0"

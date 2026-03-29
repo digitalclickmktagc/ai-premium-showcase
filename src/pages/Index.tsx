@@ -11,7 +11,7 @@ import FloatingParticles from "@/components/FloatingParticles";
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-white relative">
+    <div className="min-h-screen bg-background relative">
       <Navbar />
       <main>
         <HeroSection />
