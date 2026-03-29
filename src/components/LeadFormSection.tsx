@@ -67,7 +67,7 @@ const LeadFormSection = () => {
   return (
     <section
       id="diagnostico"
-      className="py-24 lg:py-32 relative overflow-hidden bg-white"
+      className="py-24 lg:py-32 relative overflow-hidden"
     >
       <div className="container mx-auto px-4 lg:px-8 relative z-10">
         <motion.div
