@@ -49,7 +49,8 @@ const WallCard = ({ card, isHovered }: { card: TechCard; isHovered: boolean }) =
     data-card-id={card.name}
     style={isHovered ? {
       borderColor: 'rgba(147, 51, 234, 0.4)',
-      boxShadow: '0 0 20px rgba(147, 51, 234, 0.2), 0 0 40px rgba(147, 51, 234, 0.1), 0 8px 30px rgba(147, 51, 234, 0.15)',
+      background: 'rgba(20, 20, 35, 0.9)',
+      boxShadow: '0 0 20px rgba(147, 51, 234, 0.25), 0 0 40px rgba(147, 51, 234, 0.12), 0 8px 30px rgba(147, 51, 234, 0.18)',
       filter: 'drop-shadow(0 0 12px rgba(147, 51, 234, 0.25))',
     } : {}}
   >
