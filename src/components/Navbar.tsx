@@ -59,8 +59,8 @@ const Navbar = () => {
                   onClick={() => setActiveLink(link.href)}
                   className={`group relative flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 ${
                     isActive
-                      ? "bg-white text-foreground shadow-[0_1px_6px_rgba(0,0,0,0.1)]"
-                      : "text-muted-foreground hover:text-foreground hover:bg-white/60"
+                      ? "bg-white/10 text-foreground shadow-[0_1px_6px_rgba(0,0,0,0.3)]"
+                      : "text-muted-foreground hover:text-foreground hover:bg-white/[0.06]"
                   }`}
                 >
                   {isActive && (
