@@ -123,11 +123,11 @@ const HeroSection = () => {
               initial={{ opacity: 0, y: 20, filter: "blur(6px)" }}
               animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
               transition={{ duration: 0.7, delay: 0.2 }}
-              className="mb-10 font-body font-normal max-w-[520px]"
+              className="mb-10 font-body font-normal whitespace-nowrap"
               style={{
                 color: "rgba(240,240,240,0.50)",
-                fontSize: "clamp(1rem, 2vw, 1.25rem)",
-                lineHeight: 1.65,
+                fontSize: "clamp(0.8rem, 1.3vw, 1rem)",
+                lineHeight: 1.5,
               }}
             >
               Automação inteligente para empresas que pensam grande.
