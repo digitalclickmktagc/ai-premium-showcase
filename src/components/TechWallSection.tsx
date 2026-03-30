@@ -71,8 +71,6 @@ const WallColumn = ({ cards, direction, className = "" }: { cards: TechCard[]; d
 const TechWallSection = () => {
   return (
     <section className="relative py-24 lg:py-0 overflow-hidden">
-      {/* Ambient purple glow */}
-      <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/[0.06] blur-[120px] rounded-full pointer-events-none z-0" />
 
       <div className="container mx-auto relative z-10 flex flex-col md:flex-row min-h-[700px] lg:min-h-[800px]">
         {/* LEFT — Content */}
