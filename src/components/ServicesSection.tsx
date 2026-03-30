@@ -178,7 +178,7 @@ const ServicesSection = () => {
                 transition={{ duration: 0.35, ease: "easeOut" }}
               >
                 {/* Content with metric on right */}
-                <div className="flex items-start justify-between gap-8">
+                <div className="flex items-center justify-between gap-8">
                   <div className="flex-1">
                     <div className="flex items-center gap-4 mb-4">
                       <div
