@@ -102,25 +102,6 @@ const HeroSection = () => {
           {/* LEFT — content */}
           <div className="lg:col-span-5 text-center lg:text-left flex flex-col items-center lg:items-start">
 
-            {/* Badge */}
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.05 }}
-              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-6"
-              style={{
-                background: "rgba(147,51,234,0.12)",
-                border: "1px solid rgba(147,51,234,0.30)",
-              }}
-            >
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400/60" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
-              </span>
-              <span className="text-[0.75rem] font-semibold tracking-[0.12em] uppercase" style={{ color: "#C084FC" }}>
-                Automação com Inteligência Artificial
-              </span>
-            </motion.div>
 
             <motion.h1
               initial={{ opacity: 0, y: 30, filter: "blur(10px)" }}
