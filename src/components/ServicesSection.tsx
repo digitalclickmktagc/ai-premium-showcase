@@ -53,7 +53,7 @@ const ServicesSection = () => {
   const { handleMouseMove } = useCardGlow();
 
   return (
-    <section id="solucoes" className="py-24 lg:py-32">
+    <section id="solucoes" className="py-16 lg:py-20">
       <div className="container mx-auto px-4 lg:px-8">
 
         {/* Header */}
