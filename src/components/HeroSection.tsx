@@ -94,7 +94,7 @@ const HeroSection = () => {
   }, []);
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center pt-24 pb-16 px-4 overflow-hidden">
+    <section className="relative min-h-screen flex items-center justify-center pt-36 pb-16 px-4 overflow-hidden">
 
       <div className="container mx-auto relative z-10">
         <div className="lg:grid lg:grid-cols-12 lg:gap-8 lg:items-center">
@@ -107,11 +107,10 @@ const HeroSection = () => {
               initial={{ opacity: 0, y: 30, filter: "blur(10px)" }}
               animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
               transition={{ duration: 0.8, delay: 0.1, ease: [0.25, 0.46, 0.45, 0.94] }}
-              className="font-display font-extrabold tracking-tight leading-[1.0] mb-6 uppercase text-foreground"
-              style={{ fontSize: "clamp(3rem, 8vw, 7rem)", letterSpacing: "-0.03em" }}
+              className="font-display font-extrabold tracking-tight leading-[1.05] mb-6 uppercase text-foreground"
+              style={{ fontSize: "clamp(2.2rem, 5vw, 4.5rem)", letterSpacing: "-0.03em" }}
             >
-              A IA EXECUTA
-              <br />
+              A IA EXECUTA<br />
               <span
                 className="text-gradient-nexa"
                 style={{ filter: "drop-shadow(0 0 30px rgba(147,51,234,0.5))" }}
