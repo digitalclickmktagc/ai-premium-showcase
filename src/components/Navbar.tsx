@@ -18,7 +18,7 @@ const Navbar = () => {
   const [activeLink, setActiveLink] = useState<string | null>(null);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
+    const onScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
@@ -32,12 +32,17 @@ const Navbar = () => {
     >
       <div className="container mx-auto px-4 lg:px-8 pt-4">
         <div
-          className={`flex items-center justify-between h-14 px-4 rounded-2xl transition-all duration-500 ${
-            scrolled
-              ? "border border-white/[0.06] backdrop-blur-xl shadow-[0_2px_30px_rgba(0,0,0,0.3)]"
-              : "bg-transparent border border-transparent"
-          }`}
-          style={scrolled ? { background: "rgba(0, 0, 0, 0.70)", backdropFilter: "blur(20px)" } : {}}
+          className="flex items-center justify-between h-14 px-4 rounded-2xl"
+          style={{
+            background: scrolled ? "rgba(0, 0, 0, 0.75)" : "transparent",
+            backdropFilter: scrolled ? "blur(30px) saturate(1.8)" : "none",
+            WebkitBackdropFilter: scrolled ? "blur(30px) saturate(1.8)" : "none",
+            borderBottom: scrolled ? "1px solid rgba(255,255,255,0.06)" : "1px solid transparent",
+            boxShadow: scrolled
+              ? "0 1px 0 rgba(255,255,255,0.04), 0 8px 32px rgba(0,0,0,0.4)"
+              : "none",
+            transition: "all 0.4s cubic-bezier(0.16,1,0.3,1)",
+          }}
         >
           {/* Logo */}
           <a href="#" className="flex items-center gap-2.5 flex-shrink-0">
@@ -61,8 +66,9 @@ const Navbar = () => {
                   className={`group relative flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 ${
                     isActive
                       ? "bg-white/10 text-foreground shadow-[0_1px_6px_rgba(0,0,0,0.3)]"
-                      : "text-muted-foreground hover:text-foreground hover:bg-white/[0.06]"
+                      : "text-[rgba(240,240,240,0.70)] hover:text-white"
                   }`}
+                  style={{ letterSpacing: "0.02em" }}
                 >
                   {isActive && (
                     <motion.span
@@ -75,9 +81,10 @@ const Navbar = () => {
                   <span className="relative">
                     {link.label}
                     <span
-                      className={`absolute -bottom-0.5 left-0 h-[1.5px] bg-primary rounded-full transition-all duration-300 ${
+                      className={`absolute -bottom-0.5 left-0 h-[1.5px] rounded-full transition-all duration-300 ${
                         isActive ? "w-full" : "w-0 group-hover:w-full"
                       }`}
+                      style={{ background: "#9333EA" }}
                     />
                   </span>
                 </a>
@@ -88,7 +95,14 @@ const Navbar = () => {
           {/* CTA */}
           <div className="hidden md:block flex-shrink-0">
             <a href="#diagnostico" onClick={() => setActiveLink("#diagnostico")}>
-              <Button variant="glow" size="sm" className="text-white cursor-pointer text-xs tracking-widest">
+              <Button
+                variant="glow"
+                size="sm"
+                className="text-white text-[0.8rem] tracking-[0.08em] font-semibold rounded-full px-5"
+                style={{
+                  boxShadow: "var(--glow-sm), inset 0 1px 0 rgba(255,255,255,0.15)",
+                }}
+              >
                 ESCALAR
               </Button>
             </a>
@@ -113,14 +127,20 @@ const Navbar = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.98 }}
             transition={{ duration: 0.2, ease: "easeInOut" }}
-            className="md:hidden mx-4 mt-2 rounded-2xl bg-background/95 border border-border backdrop-blur-xl shadow-[0_8px_40px_rgba(0,0,0,0.4)] overflow-hidden"
+            className="md:hidden mx-4 mt-2 rounded-2xl overflow-hidden"
+            style={{
+              background: "rgba(0,0,0,0.90)",
+              backdropFilter: "blur(30px)",
+              border: "1px solid rgba(255,255,255,0.07)",
+              boxShadow: "0 8px 40px rgba(0,0,0,0.5)",
+            }}
           >
             <ul className="flex flex-col gap-1 p-3">
               {navLinks.map((link) => (
                 <li key={link.href}>
                   <a
                     href={link.href}
-                    className="flex items-center gap-2 px-4 py-3 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-white/[0.04] rounded-xl transition-all duration-200"
+                    className="flex items-center gap-2 px-4 py-3 text-sm font-medium text-[rgba(240,240,240,0.70)] hover:text-white hover:bg-white/[0.04] rounded-xl transition-all duration-200"
                     onClick={() => {
                       setActiveLink(link.href);
                       setOpen(false);
@@ -135,7 +155,7 @@ const Navbar = () => {
               ))}
               <li className="mt-2 px-1">
                 <a href="#diagnostico" onClick={() => { setActiveLink("#diagnostico"); setOpen(false); }}>
-                  <Button variant="glow" size="sm" className="w-full text-white cursor-pointer">
+                  <Button variant="glow" size="sm" className="w-full text-white">
                     ESCALAR
                   </Button>
                 </a>
