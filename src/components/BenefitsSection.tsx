@@ -31,17 +31,6 @@ const BenefitsSection = () => {
 
   return (
     <section id="diferenciais" className="py-24 lg:py-32 relative overflow-hidden">
-      {/* Ghost section number */}
-      <div
-        className="absolute -top-8 left-0 font-display font-black select-none pointer-events-none leading-none"
-        style={{
-          fontSize: "clamp(120px, 20vw, 240px)",
-          color: "transparent",
-          WebkitTextStroke: "1px rgba(255,255,255,0.03)",
-        }}
-      >
-        02.
-      </div>
 
       <div className="container mx-auto px-4 lg:px-8 relative z-10">
 
@@ -79,13 +68,6 @@ const BenefitsSection = () => {
                 className="group relative rounded-2xl p-8 overflow-hidden premium-card"
                 onMouseMove={handleMouseMove}
               >
-                {/* Watermark number */}
-                <span
-                  className="absolute -bottom-4 -right-2 font-display font-black select-none pointer-events-none leading-none"
-                  style={{ fontSize: "6rem", color: "rgba(255,255,255,0.03)" }}
-                >
-                  {String(i + 1).padStart(2, "0")}
-                </span>
 
                 {/* Top row: icon + highlight tag */}
                 <div className="flex items-start justify-between mb-6 relative z-[1]">
