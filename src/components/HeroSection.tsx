@@ -50,8 +50,6 @@ const WallCard = ({ card, isHovered }: { card: TechCard; isHovered: boolean }) =
     style={isHovered ? {
       borderColor: 'rgba(147, 51, 234, 0.35)',
       background: 'rgba(255,255,255,0.06)',
-      boxShadow: '0 0 0 1px rgba(147,51,234,0.12), 0 20px 60px rgba(0,0,0,0.50), 0 0 20px rgba(147,51,234,0.25)',
-      filter: 'drop-shadow(0 0 12px rgba(147, 51, 234, 0.25))',
     } : {}}
   >
     <div className="flex justify-between items-start">
