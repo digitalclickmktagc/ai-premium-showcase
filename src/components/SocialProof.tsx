@@ -6,30 +6,37 @@ const brands = [
 
 const SocialProof = () => {
   return (
-    <section className="py-10 overflow-hidden relative">
-      <div className="section-divider mb-8" />
-      <div className="relative">
-        {/* Fade edges */}
-        <div className="absolute left-0 top-0 bottom-0 w-32 z-10 pointer-events-none bg-gradient-to-r from-background to-transparent" />
-        <div className="absolute right-0 top-0 bottom-0 w-32 z-10 pointer-events-none bg-gradient-to-l from-background to-transparent" />
-
+    <section
+      className="py-4 overflow-hidden relative"
+      style={{
+        background: "rgba(147,51,234,0.06)",
+        borderTop: "1px solid rgba(147,51,234,0.12)",
+        borderBottom: "1px solid rgba(147,51,234,0.12)",
+      }}
+    >
+      <div
+        className="relative"
+        style={{
+          maskImage: "linear-gradient(90deg, transparent, black 15%, black 85%, transparent)",
+          WebkitMaskImage: "linear-gradient(90deg, transparent, black 15%, black 85%, transparent)",
+        }}
+      >
         <div className="flex animate-marquee whitespace-nowrap">
           {[...brands, ...brands].map((brand, i) => (
             <span
               key={i}
-              className="mx-8 text-sm font-display font-bold tracking-[0.22em] flex items-center gap-3 select-none"
-              style={{ color: "rgba(255,255,255,0.25)" }}
+              className="mx-8 text-[0.7rem] font-display font-semibold tracking-[0.18em] flex items-center gap-3 select-none uppercase"
+              style={{ color: "rgba(240,240,240,0.45)" }}
             >
               <span
                 className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-                style={{ background: "linear-gradient(135deg, #9333EA, #7C3AED)", opacity: 0.5 }}
+                style={{ background: "#7C3AED" }}
               />
               {brand}
             </span>
           ))}
         </div>
       </div>
-      <div className="section-divider mt-8" />
     </section>
   );
 };

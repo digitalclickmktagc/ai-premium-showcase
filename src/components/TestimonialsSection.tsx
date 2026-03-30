@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Star, Quote } from "lucide-react";
+import { useCardGlow } from "@/hooks/use-card-glow";
 
 const testimonials = [
   {
@@ -25,13 +26,21 @@ const Stars = ({ count = 5 }: { count?: number }) => {
   return (
     <div className="flex gap-1">
       {Array.from({ length: full }).map((_, j) => (
-        <Star key={j} size={13} className="fill-primary/70 text-primary/70" />
+        <Star
+          key={j}
+          size={13}
+          style={{
+            fill: "#A855F7",
+            color: "#A855F7",
+            filter: "drop-shadow(0 0 6px rgba(168,85,247,0.6))",
+          }}
+        />
       ))}
       {hasHalf && (
         <div className="relative" style={{ width: 13, height: 13 }}>
-          <Star size={13} className="text-primary/30 absolute inset-0" />
+          <Star size={13} style={{ color: "rgba(168,85,247,0.30)" }} className="absolute inset-0" />
           <div className="overflow-hidden absolute inset-0" style={{ width: "50%" }}>
-            <Star size={13} className="fill-primary/70 text-primary/70" />
+            <Star size={13} style={{ fill: "#A855F7", color: "#A855F7", filter: "drop-shadow(0 0 6px rgba(168,85,247,0.6))" }} />
           </div>
         </div>
       )}
@@ -41,13 +50,13 @@ const Stars = ({ count = 5 }: { count?: number }) => {
 
 const Avatar = ({ name }: { name: string }) => (
   <div
-    className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+    className="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0"
     style={{
-      background: "linear-gradient(135deg, rgba(147,51,234,0.2), rgba(109,40,217,0.1))",
-      border: "1px solid rgba(147,51,234,0.25)",
+      background: "var(--gradient-nexa)",
+      boxShadow: "var(--glow-sm)",
     }}
   >
-    <span className="text-xs font-display font-bold text-primary">
+    <span className="text-xs font-display font-bold text-white">
       {name.split(" ").map((n) => n[0]).join("")}
     </span>
   </div>
@@ -55,6 +64,7 @@ const Avatar = ({ name }: { name: string }) => (
 
 const TestimonialsSection = () => {
   const [featured, ...rest] = testimonials;
+  const { handleMouseMove } = useCardGlow();
 
   return (
     <section id="depoimentos" className="py-24 lg:py-32 relative overflow-hidden">
@@ -64,7 +74,7 @@ const TestimonialsSection = () => {
         style={{
           fontSize: "clamp(120px, 20vw, 240px)",
           color: "transparent",
-          WebkitTextStroke: "1px rgba(255,255,255,0.04)",
+          WebkitTextStroke: "1px rgba(255,255,255,0.03)",
         }}
       >
         03.
@@ -80,7 +90,7 @@ const TestimonialsSection = () => {
           transition={{ duration: 0.5 }}
           className="text-center mb-14"
         >
-          <p className="text-sm font-medium tracking-[0.3em] uppercase text-gradient-nexa mb-4">
+          <p className="text-[0.7rem] font-semibold tracking-[0.20em] uppercase mb-4" style={{ color: "#A855F7" }}>
             Depoimentos
           </p>
           <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-light tracking-tight text-foreground">
@@ -98,12 +108,10 @@ const TestimonialsSection = () => {
         >
           {/* Left — large blockquote */}
           <div
-            className="lg:col-span-7 rounded-[24px] p-8 sm:p-10 relative overflow-hidden"
+            className="lg:col-span-7 glass-card rounded-[24px] p-8 sm:p-10 relative overflow-hidden"
+            onMouseMove={handleMouseMove}
             style={{
-              background: "rgba(23, 23, 23, 0.6)",
-              backdropFilter: "blur(12px)",
-              border: "1px solid rgba(255,255,255,0.08)",
-              boxShadow: "0 4px 30px rgba(0,0,0,0.30), inset 0 0 20px rgba(255,255,255,0.02)",
+              padding: "2rem 2rem 1.75rem",
             }}
           >
             {/* Gradient corner accent */}
@@ -123,18 +131,36 @@ const TestimonialsSection = () => {
               }}
             />
 
-            <Quote size={40} style={{ color: "rgba(147,51,234,0.25)" }} className="mb-6 mt-2" />
-            <Stars count={featured.stars} />
-            <blockquote className="font-display text-xl sm:text-2xl font-light leading-relaxed text-foreground/90 mt-5 mb-8">
+            <div
+              className="relative z-[1] mb-6 mt-2"
+              style={{
+                color: "rgba(147,51,234,0.25)",
+                fontSize: "5rem",
+                fontFamily: "Georgia, serif",
+                lineHeight: 0.5,
+              }}
+            >
+              "
+            </div>
+            <div className="relative z-[1]">
+              <Stars count={featured.stars} />
+            </div>
+            <blockquote
+              className="font-body text-xl sm:text-2xl font-light leading-relaxed mt-5 mb-8 relative z-[1] italic"
+              style={{ color: "rgba(240,240,240,0.80)" }}
+            >
               "{featured.quote}"
             </blockquote>
             <div
-              className="flex items-center gap-3 pt-6"
-              style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
+              className="flex items-center gap-3 pt-6 relative z-[1]"
+              style={{
+                borderTop: "1px solid transparent",
+                borderImage: "linear-gradient(90deg, rgba(147,51,234,0.3), rgba(147,51,234,0.05)) 1",
+              }}
             >
               <Avatar name={featured.name} />
               <div>
-                <p className="font-display font-bold text-sm text-foreground">{featured.name}</p>
+                <p className="font-display font-semibold text-[0.9rem] text-foreground">{featured.name}</p>
               </div>
             </div>
           </div>
@@ -149,22 +175,18 @@ const TestimonialsSection = () => {
           >
             {/* Top metric card */}
             <div
-              className="rounded-[20px] p-6 relative overflow-hidden"
-              style={{
-                background: "rgba(23, 23, 23, 0.6)",
-                backdropFilter: "blur(12px)",
-                border: "1px solid rgba(255,255,255,0.08)",
-                boxShadow: "0 4px 30px rgba(0,0,0,0.30), inset 0 0 20px rgba(255,255,255,0.02)",
-              }}
+              className="glass-card rounded-[20px] p-6 relative overflow-hidden"
+              onMouseMove={handleMouseMove}
             >
-              <p className="text-xs tracking-[0.15em] uppercase mb-2"
-                style={{ color: "rgba(255,255,255,0.35)" }}>
+              <p className="text-[0.7rem] tracking-[0.15em] uppercase mb-2"
+                style={{ color: "rgba(240,240,240,0.40)" }}>
                 Tarefas Automatizadas
               </p>
               <p
-                className="font-display text-5xl font-bold"
+                className="font-display font-extrabold animate-pulse-glow"
                 style={{
-                  background: "linear-gradient(135deg, #7C3AED, #9333EA)",
+                  fontSize: "clamp(2.5rem, 5vw, 4rem)",
+                  background: "var(--gradient-nexa)",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
                   backgroundClip: "text",
@@ -172,29 +194,25 @@ const TestimonialsSection = () => {
               >
                 80%
               </p>
-              <p className="text-xs mt-1" style={{ color: "rgba(255,255,255,0.35)" }}>
+              <p className="text-[0.8rem] mt-1" style={{ color: "rgba(240,240,240,0.50)" }}>
                 das operações manuais
               </p>
             </div>
 
             {/* Bottom metric card */}
             <div
-              className="rounded-[20px] p-6 relative overflow-hidden"
-              style={{
-                background: "rgba(23, 23, 23, 0.6)",
-                backdropFilter: "blur(12px)",
-                border: "1px solid rgba(255,255,255,0.08)",
-                boxShadow: "0 4px 30px rgba(0,0,0,0.30), inset 0 0 20px rgba(255,255,255,0.02)",
-              }}
+              className="glass-card rounded-[20px] p-6 relative overflow-hidden"
+              onMouseMove={handleMouseMove}
             >
-              <p className="text-xs tracking-[0.15em] uppercase mb-2"
-                style={{ color: "rgba(255,255,255,0.35)" }}>
+              <p className="text-[0.7rem] tracking-[0.15em] uppercase mb-2"
+                style={{ color: "rgba(240,240,240,0.40)" }}>
                 Crescimento em Faturamento
               </p>
               <p
-                className="font-display text-5xl font-bold"
+                className="font-display font-extrabold animate-pulse-glow"
                 style={{
-                  background: "linear-gradient(135deg, #7C3AED, #9333EA)",
+                  fontSize: "clamp(2.5rem, 5vw, 4rem)",
+                  background: "var(--gradient-nexa)",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
                   backgroundClip: "text",
@@ -202,7 +220,7 @@ const TestimonialsSection = () => {
               >
                 2×
               </p>
-              <p className="text-xs mt-1" style={{ color: "rgba(255,255,255,0.35)" }}>
+              <p className="text-[0.8rem] mt-1" style={{ color: "rgba(240,240,240,0.50)" }}>
                 em apenas 6 meses
               </p>
             </div>
@@ -214,32 +232,30 @@ const TestimonialsSection = () => {
           {rest.map((t, i) => (
             <motion.div
               key={t.name}
-              initial={{ opacity: 0, y: 24, filter: "blur(8px)" }}
+              initial={{ opacity: 0, y: 40, filter: "blur(8px)" }}
               whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
               viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.1 }}
-              className="rounded-[20px] p-7 flex flex-col justify-between"
-              style={{
-                background: "rgba(23, 23, 23, 0.6)",
-                backdropFilter: "blur(12px)",
-                border: "1px solid rgba(255,255,255,0.08)",
-                boxShadow: "0 4px 30px rgba(0,0,0,0.30), inset 0 0 20px rgba(255,255,255,0.02)",
-                transition: "all 0.3s ease",
-              }}
+              transition={{ duration: 0.6, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
+              className="glass-card rounded-[20px] p-7 flex flex-col justify-between"
+              onMouseMove={handleMouseMove}
+              style={{ padding: "2rem 2rem 1.75rem" }}
             >
-              <div>
+              <div className="relative z-[1]">
                 <Stars count={t.stars} />
-                <p className="text-muted-foreground font-body leading-relaxed my-5 text-sm">
+                <p className="font-body leading-[1.75] my-5 text-[1rem] italic" style={{ color: "rgba(240,240,240,0.80)" }}>
                   "{t.quote}"
                 </p>
               </div>
               <div
-                className="flex items-center gap-3 pt-4"
-                style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
+                className="flex items-center gap-3 pt-4 relative z-[1]"
+                style={{
+                  borderTop: "1px solid transparent",
+                  borderImage: "linear-gradient(90deg, rgba(147,51,234,0.3), rgba(147,51,234,0.05)) 1",
+                }}
               >
                 <Avatar name={t.name} />
                 <div>
-                   <p className="font-display font-bold text-sm text-foreground">{t.name}</p>
+                  <p className="font-display font-semibold text-[0.9rem] text-foreground">{t.name}</p>
                 </div>
               </div>
             </motion.div>

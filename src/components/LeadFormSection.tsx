@@ -60,9 +60,17 @@ const LeadFormSection = () => {
     }
   };
 
-  const inputClasses =
-    "w-full px-4 py-3.5 rounded-lg bg-white/[0.06] border text-foreground font-body text-sm placeholder:text-[rgba(255,255,255,0.35)] focus:outline-none focus:ring-[3px] focus:ring-[rgba(124,58,237,0.20)] focus:border-[#7C3AED] transition-all duration-200"
-    + " border-white/[0.12]";
+  const inputStyle: React.CSSProperties = {
+    background: "rgba(255,255,255,0.04)",
+    border: "1px solid rgba(255,255,255,0.10)",
+    borderRadius: "var(--radius-md)",
+    color: "#f0f0f0",
+    padding: "0.875rem 1rem",
+    fontSize: "0.95rem",
+    transition: "all 0.25s ease",
+    outline: "none",
+    width: "100%",
+  };
 
   return (
     <section
@@ -80,12 +88,12 @@ const LeadFormSection = () => {
           <div
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6"
             style={{
-              background: "rgba(147,51,234,0.1)",
-              border: "1px solid rgba(147,51,234,0.2)",
+              background: "rgba(147,51,234,0.12)",
+              border: "1px solid rgba(147,51,234,0.30)",
             }}
           >
-            <Sparkles size={13} className="text-primary" />
-            <span className="text-xs font-medium tracking-wide text-primary">
+            <Sparkles size={13} style={{ color: "#A855F7" }} />
+            <span className="text-xs font-medium tracking-wide" style={{ color: "#C084FC" }}>
               Diagnóstico Gratuito
             </span>
           </div>
@@ -93,7 +101,7 @@ const LeadFormSection = () => {
           <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-light tracking-tight text-foreground">
             Pronto para <span className="text-gradient-nexa font-bold">escalar?</span>
           </h2>
-          <p className="mt-4 text-sm max-w-lg mx-auto font-body text-muted-foreground">
+          <p className="mt-4 text-sm max-w-lg mx-auto font-body" style={{ color: "rgba(240,240,240,0.55)" }}>
             <span className="hidden sm:inline">Preencha os dados abaixo e escale o seu atendimento.</span>
             <span className="sm:hidden">Preencha os dados abaixo<br />e escale o seu atendimento.</span>
           </p>
@@ -107,12 +115,17 @@ const LeadFormSection = () => {
           className="max-w-2xl mx-auto"
         >
           <div
-            className="rounded-3xl p-8 sm:p-10"
+            className="p-8 sm:p-10"
             style={{
-              background: "rgba(15, 15, 15, 0.80)",
-              border: "1px solid rgba(255, 255, 255, 0.08)",
-              borderRadius: "1rem",
-              backdropFilter: "blur(20px)",
+              background: "rgba(10,10,10,0.80)",
+              border: "1px solid rgba(255,255,255,0.07)",
+              borderRadius: "var(--radius-xl)",
+              backdropFilter: "blur(40px)",
+              boxShadow: `
+                0 0 0 1px rgba(255,255,255,0.03),
+                0 40px 100px rgba(0,0,0,0.60),
+                inset 0 1px 0 rgba(255,255,255,0.05)
+              `,
             }}
           >
             <form onSubmit={handleSubmit} className="space-y-5">
@@ -125,7 +138,15 @@ const LeadFormSection = () => {
                   { label: "Segmento", name: "segmento", type: "text", placeholder: "Ex: Tecnologia, Varejo..." },
                 ].map(({ label, name, type, placeholder }) => (
                   <div key={name}>
-                    <label className="block text-xs font-semibold text-foreground/70 mb-2 font-body tracking-wide">
+                    <label
+                      className="block mb-1.5 font-body"
+                      style={{
+                        color: "rgba(240,240,240,0.55)",
+                        fontSize: "0.8rem",
+                        letterSpacing: "0.06em",
+                        fontWeight: 500,
+                      }}
+                    >
                       {label}
                     </label>
                     <input
@@ -135,12 +156,30 @@ const LeadFormSection = () => {
                       value={form[name as keyof typeof form]}
                       onChange={handleChange}
                       required
-                      className={inputClasses}
+                      style={inputStyle}
+                      onFocus={(e) => {
+                        e.currentTarget.style.background = "rgba(147,51,234,0.06)";
+                        e.currentTarget.style.borderColor = "rgba(147,51,234,0.50)";
+                        e.currentTarget.style.boxShadow = "0 0 0 3px rgba(147,51,234,0.15), 0 0 20px rgba(147,51,234,0.10)";
+                      }}
+                      onBlur={(e) => {
+                        e.currentTarget.style.background = "rgba(255,255,255,0.04)";
+                        e.currentTarget.style.borderColor = "rgba(255,255,255,0.10)";
+                        e.currentTarget.style.boxShadow = "none";
+                      }}
                     />
                   </div>
                 ))}
                 <div>
-                  <label className="block text-xs font-semibold text-foreground/70 mb-2 font-body tracking-wide">
+                  <label
+                    className="block mb-1.5 font-body"
+                    style={{
+                      color: "rgba(240,240,240,0.55)",
+                      fontSize: "0.8rem",
+                      letterSpacing: "0.06em",
+                      fontWeight: 500,
+                    }}
+                  >
                     Faturamento mensal
                   </label>
                   <select
@@ -148,7 +187,17 @@ const LeadFormSection = () => {
                     value={form.faturamento}
                     onChange={handleChange}
                     required
-                    className={inputClasses}
+                    style={inputStyle}
+                    onFocus={(e) => {
+                      e.currentTarget.style.background = "rgba(147,51,234,0.06)";
+                      e.currentTarget.style.borderColor = "rgba(147,51,234,0.50)";
+                      e.currentTarget.style.boxShadow = "0 0 0 3px rgba(147,51,234,0.15), 0 0 20px rgba(147,51,234,0.10)";
+                    }}
+                    onBlur={(e) => {
+                      e.currentTarget.style.background = "rgba(255,255,255,0.04)";
+                      e.currentTarget.style.borderColor = "rgba(255,255,255,0.10)";
+                      e.currentTarget.style.boxShadow = "none";
+                    }}
                   >
                     <option value="" disabled>Selecione...</option>
                     {faturamentoOptions.map((opt) => (
@@ -164,7 +213,11 @@ const LeadFormSection = () => {
                   variant="glow"
                   size="lg"
                   disabled={isSubmitting}
-                  className="w-full text-primary-foreground text-[10px] sm:text-sm tracking-widest uppercase font-extrabold py-4 h-auto cursor-pointer"
+                  className="w-full text-white text-[0.9rem] tracking-[0.08em] uppercase font-bold py-4 h-auto"
+                  style={{
+                    borderRadius: "var(--radius-md)",
+                    padding: "1rem 2rem",
+                  }}
                 >
                   {isSubmitting ? (
                     <>
@@ -180,7 +233,7 @@ const LeadFormSection = () => {
                 </Button>
               </div>
 
-              <p className="flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground/50 pt-1">
+              <p className="flex items-center justify-center gap-1.5 pt-1" style={{ color: "rgba(240,240,240,0.30)", fontSize: "0.75rem" }}>
                 <Shield size={12} />
                 Seus dados estão seguros e protegidos.
               </p>

@@ -9,7 +9,7 @@ const WhatsAppIcon = ({ size = 18 }: { size?: number }) => (
 
 const Footer = () => {
   return (
-    <footer id="contato" className="pt-16 pb-8 relative overflow-hidden">
+    <footer id="contato" className="pt-16 pb-8 relative overflow-hidden z-[2]">
       {/* Top divider */}
       <div className="absolute top-0 left-0 right-0 section-divider" />
 
@@ -26,7 +26,7 @@ const Footer = () => {
                 Nexa <span className="text-gradient-nexa">AI</span>
               </span>
             </a>
-            <p className="text-sm text-muted-foreground font-body text-center md:text-left leading-relaxed max-w-xs">
+            <p className="text-sm font-body text-center md:text-left leading-relaxed max-w-xs" style={{ color: "rgba(240,240,240,0.55)" }}>
               Automação inteligente para empresas que pensam grande.
             </p>
           </div>
@@ -34,15 +34,15 @@ const Footer = () => {
           {/* Contact */}
           <div className="text-center">
             <h4 className="font-display font-bold text-sm tracking-widest uppercase mb-5 text-foreground">Contato</h4>
-            <ul className="space-y-3 text-sm text-muted-foreground font-body">
-              <li className="flex items-center justify-center gap-2.5 hover:text-foreground transition-colors cursor-pointer">
-                <Mail size={14} className="text-primary" /> contato@nexaai.com.br
+            <ul className="space-y-3 text-sm font-body" style={{ color: "rgba(240,240,240,0.55)" }}>
+              <li className="flex items-center justify-center gap-2.5 hover:text-foreground transition-colors">
+                <Mail size={14} style={{ color: "#A855F7" }} /> contato@nexaai.com.br
               </li>
-              <li className="flex items-center justify-center gap-2.5 hover:text-foreground transition-colors cursor-pointer">
-                <Phone size={14} className="text-primary" /> (16) 99893-5289
+              <li className="flex items-center justify-center gap-2.5 hover:text-foreground transition-colors">
+                <Phone size={14} style={{ color: "#A855F7" }} /> (16) 99893-5289
               </li>
-              <li className="flex items-center justify-center gap-2.5 hover:text-foreground transition-colors cursor-pointer">
-                <MapPin size={14} className="text-primary" /> Brasília, Brasil
+              <li className="flex items-center justify-center gap-2.5 hover:text-foreground transition-colors">
+                <MapPin size={14} style={{ color: "#A855F7" }} /> Brasília, Brasil
               </li>
             </ul>
           </div>
@@ -61,20 +61,23 @@ const Footer = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={label}
-                  className="w-11 h-11 rounded-xl flex items-center justify-center text-muted-foreground hover:text-primary transition-all duration-300 cursor-pointer"
+                  className="w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-300"
                   style={{
-                    border: "1px solid rgba(255,255,255,0.08)",
-                    background: "rgba(255,255,255,0.04)",
+                    border: "1px solid rgba(255,255,255,0.07)",
+                    background: "rgba(255,255,255,0.03)",
+                    color: "rgba(240,240,240,0.55)",
                   }}
                   onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.borderColor = "rgba(147,51,234,0.3)";
+                    (e.currentTarget as HTMLElement).style.borderColor = "rgba(147,51,234,0.35)";
                     (e.currentTarget as HTMLElement).style.background = "rgba(147,51,234,0.08)";
                     (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 16px rgba(147,51,234,0.15)";
+                    (e.currentTarget as HTMLElement).style.color = "#A855F7";
                   }}
                   onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.08)";
-                    (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.04)";
+                    (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.07)";
+                    (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.03)";
                     (e.currentTarget as HTMLElement).style.boxShadow = "none";
+                    (e.currentTarget as HTMLElement).style.color = "rgba(240,240,240,0.55)";
                   }}
                 >
                   <Icon size={18} />
@@ -89,10 +92,10 @@ const Footer = () => {
           className="pt-8 flex flex-col md:flex-row items-center justify-between gap-4"
           style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
         >
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs" style={{ color: "rgba(240,240,240,0.40)" }}>
             © 2026 Nexa AI. Todos os direitos reservados.
           </p>
-          <div className="flex gap-6 text-xs text-muted-foreground">
+          <div className="flex gap-6 text-xs" style={{ color: "rgba(240,240,240,0.40)" }}>
             <a href="#" className="hover:text-foreground transition-colors">Privacidade</a>
             <a href="#" className="hover:text-foreground transition-colors">Termos</a>
           </div>

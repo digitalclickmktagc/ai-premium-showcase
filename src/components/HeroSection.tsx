@@ -48,9 +48,9 @@ const WallCard = ({ card, isHovered }: { card: TechCard; isHovered: boolean }) =
     className="tech-wall-card rounded-2xl p-5 aspect-[4/3] flex flex-col justify-between"
     data-card-id={card.name}
     style={isHovered ? {
-      borderColor: 'rgba(147, 51, 234, 0.30)',
-      background: 'rgba(30, 30, 30, 0.80)',
-      boxShadow: '0 20px 40px rgba(0, 0, 0, 0.50), 0 0 30px rgba(147, 51, 234, 0.10)',
+      borderColor: 'rgba(147, 51, 234, 0.35)',
+      background: 'rgba(255,255,255,0.06)',
+      boxShadow: '0 0 0 1px rgba(147,51,234,0.12), 0 20px 60px rgba(0,0,0,0.50), 0 0 20px rgba(147,51,234,0.25)',
       filter: 'drop-shadow(0 0 12px rgba(147, 51, 234, 0.25))',
     } : {}}
   >
@@ -101,22 +101,54 @@ const HeroSection = () => {
 
           {/* LEFT — content */}
           <div className="lg:col-span-5 text-center lg:text-left flex flex-col items-center lg:items-start">
+
+            {/* Badge */}
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.05 }}
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-6"
+              style={{
+                background: "rgba(147,51,234,0.12)",
+                border: "1px solid rgba(147,51,234,0.30)",
+              }}
+            >
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400/60" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
+              </span>
+              <span className="text-[0.75rem] font-semibold tracking-[0.12em] uppercase" style={{ color: "#C084FC" }}>
+                Automação com Inteligência Artificial
+              </span>
+            </motion.div>
+
             <motion.h1
               initial={{ opacity: 0, y: 30, filter: "blur(10px)" }}
               animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
               transition={{ duration: 0.8, delay: 0.1, ease: [0.25, 0.46, 0.45, 0.94] }}
-              className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-display font-light tracking-tight leading-[1.05] mb-6 uppercase text-foreground"
+              className="font-display font-extrabold tracking-tight leading-[1.0] mb-6 uppercase text-foreground"
+              style={{ fontSize: "clamp(3rem, 8vw, 7rem)", letterSpacing: "-0.03em" }}
             >
               A IA EXECUTA
               <br />
-              <span className="text-gradient-nexa font-bold">ENQUANTO VOCÊ LIDERA.</span>
+              <span
+                className="text-gradient-nexa"
+                style={{ filter: "drop-shadow(0 0 30px rgba(147,51,234,0.5))" }}
+              >
+                ENQUANTO VOCÊ LIDERA.
+              </span>
             </motion.h1>
 
             <motion.p
               initial={{ opacity: 0, y: 20, filter: "blur(6px)" }}
               animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
               transition={{ duration: 0.7, delay: 0.2 }}
-              className="text-lg md:text-xl text-muted-foreground mb-10 font-body font-light max-w-xl"
+              className="mb-10 font-body font-normal max-w-[520px]"
+              style={{
+                color: "rgba(240,240,240,0.50)",
+                fontSize: "clamp(1rem, 2vw, 1.25rem)",
+                lineHeight: 1.65,
+              }}
             >
               Automação inteligente para empresas que pensam grande.
             </motion.p>
@@ -128,7 +160,12 @@ const HeroSection = () => {
               className="flex flex-col sm:flex-row gap-4 items-center lg:items-start"
             >
               <a href="#diagnostico">
-                <Button variant="glow" size="lg" className="text-sm px-8 tracking-widest text-white cursor-pointer uppercase">
+                <Button
+                  variant="glow"
+                  size="lg"
+                  className="text-white text-[0.9rem] px-8 tracking-[0.06em] font-bold uppercase"
+                  style={{ padding: "0.9rem 2rem", borderRadius: "0.75rem" }}
+                >
                   ESCALAR MEU ATENDIMENTO
                   <ArrowRight className="ml-2" size={16} />
                 </Button>
@@ -170,7 +207,7 @@ const HeroSection = () => {
         </div>
       </div>
 
-      {/* Bottom fade — larger gradient to seamlessly blend into next section */}
+      {/* Bottom fade */}
       <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none z-10" />
     </section>
   );

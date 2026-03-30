@@ -27,7 +27,10 @@ const QuoteSection = () => {
 
           <p className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light leading-tight tracking-tight text-foreground">
             Tecnologia que devolve{" "}
-            <span className="text-gradient-nexa">
+            <span
+              className="text-gradient-nexa"
+              style={{ filter: "drop-shadow(0 0 20px rgba(147,51,234,0.4))" }}
+            >
               o seu tempo.
             </span>
           </p>
@@ -46,7 +49,8 @@ const QuoteSection = () => {
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.6 }}
-            className="text-sm tracking-[0.3em] font-medium text-muted-foreground"
+            className="text-sm tracking-[0.3em] font-medium"
+            style={{ color: "rgba(240,240,240,0.45)" }}
           >
             — NEXA AI
           </motion.footer>
