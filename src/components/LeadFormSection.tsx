@@ -61,8 +61,8 @@ const LeadFormSection = () => {
   };
 
   const inputClasses =
-    "w-full px-4 py-3.5 rounded-xl bg-white/[0.06] border text-foreground font-body text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all duration-200"
-    + " border-white/[0.08]";
+    "w-full px-4 py-3.5 rounded-lg bg-white/[0.06] border text-foreground font-body text-sm placeholder:text-[rgba(255,255,255,0.35)] focus:outline-none focus:ring-[3px] focus:ring-[rgba(124,58,237,0.20)] focus:border-[#7C3AED] transition-all duration-200"
+    + " border-white/[0.12]";
 
   return (
     <section
@@ -107,7 +107,13 @@ const LeadFormSection = () => {
           className="max-w-2xl mx-auto"
         >
           <div
-            className="glass-card rounded-3xl p-8 sm:p-10"
+            className="rounded-3xl p-8 sm:p-10"
+            style={{
+              background: "rgba(15, 15, 15, 0.80)",
+              border: "1px solid rgba(255, 255, 255, 0.08)",
+              borderRadius: "1rem",
+              backdropFilter: "blur(20px)",
+            }}
           >
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
