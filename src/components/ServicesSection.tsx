@@ -215,56 +215,32 @@ const ServicesSection = () => {
                 </p>
 
                 {/* Metric cards */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  {/* Primary metric */}
+                <div
+                  className="p-5 rounded-2xl relative overflow-hidden inline-block"
+                  style={{
+                    background: "rgba(107,33,168,0.08)",
+                    border: "1px solid rgba(147,51,234,0.18)",
+                  }}
+                >
                   <div
-                    className="col-span-2 p-5 rounded-2xl relative overflow-hidden"
+                    className="absolute top-0 right-0 w-20 h-20 rounded-full pointer-events-none"
+                    style={{ background: "rgba(147,51,234,0.12)", filter: "blur(24px)" }}
+                  />
+                  <p className="text-[0.7rem] tracking-[0.15em] uppercase mb-2"
+                    style={{ color: "rgba(240,240,240,0.40)" }}>
+                    {active.metricLabel}
+                  </p>
+                  <p
+                    className="font-display font-extrabold text-4xl leading-none animate-pulse-glow"
                     style={{
-                      background: "rgba(107,33,168,0.08)",
-                      border: "1px solid rgba(147,51,234,0.18)",
+                      background: "var(--gradient-nexa)",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
+                      backgroundClip: "text",
                     }}
                   >
-                    <div
-                      className="absolute top-0 right-0 w-20 h-20 rounded-full pointer-events-none"
-                      style={{ background: "rgba(147,51,234,0.12)", filter: "blur(24px)" }}
-                    />
-                    <p className="text-[0.7rem] tracking-[0.15em] uppercase mb-2"
-                      style={{ color: "rgba(240,240,240,0.40)" }}>
-                      {active.metricLabel}
-                    </p>
-                    <p
-                      className="font-display font-extrabold leading-none animate-pulse-glow"
-                      style={{
-                        fontSize: "clamp(2.5rem, 5vw, 4rem)",
-                        background: "var(--gradient-nexa)",
-                        WebkitBackgroundClip: "text",
-                        WebkitTextFillColor: "transparent",
-                        backgroundClip: "text",
-                      }}
-                    >
-                      {active.metric}
-                    </p>
-                  </div>
-
-                  {/* Status */}
-                  <div
-                    className="p-4 rounded-2xl"
-                    style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}
-                  >
-                    <Activity size={14} className="text-primary/60 mb-3" />
-                    <p className="text-[10px] mb-1" style={{ color: "rgba(240,240,240,0.40)" }}>Status</p>
-                    <p className="text-sm font-semibold text-foreground">Ativo</p>
-                  </div>
-
-                  {/* Tipo */}
-                  <div
-                    className="p-4 rounded-2xl"
-                    style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}
-                  >
-                    <div className="w-3 h-3 rounded-full bg-primary/60 mb-3" />
-                    <p className="text-[10px] mb-1" style={{ color: "rgba(240,240,240,0.40)" }}>Tipo</p>
-                    <p className="text-sm font-semibold text-foreground">Custom</p>
-                  </div>
+                    {active.metric}
+                  </p>
                 </div>
               </motion.div>
             </div>
