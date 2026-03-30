@@ -31,17 +31,6 @@ const BenefitsSection = () => {
 
   return (
     <section id="diferenciais" className="py-24 lg:py-32 relative overflow-hidden">
-      {/* Ghost section number */}
-      <div
-        className="absolute -top-8 left-0 font-display font-black select-none pointer-events-none leading-none"
-        style={{
-          fontSize: "clamp(120px, 20vw, 240px)",
-          color: "transparent",
-          WebkitTextStroke: "1px rgba(255,255,255,0.03)",
-        }}
-      >
-        02.
-      </div>
 
       <div className="container mx-auto px-4 lg:px-8 relative z-10">
 
