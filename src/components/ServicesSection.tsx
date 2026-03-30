@@ -170,7 +170,7 @@ const ServicesSection = () => {
             </div>
 
             {/* Main content */}
-            <div className="flex-1 p-5 lg:p-6">
+            <div className="flex-1 p-6 lg:p-8">
               <motion.div
                 key={activeIdx}
                 initial={{ opacity: 0, y: 10, filter: "blur(4px)" }}
@@ -178,27 +178,27 @@ const ServicesSection = () => {
                 transition={{ duration: 0.35, ease: "easeOut" }}
               >
                 {/* Service header */}
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center gap-3">
+                <div className="flex items-start justify-between mb-6">
+                  <div className="flex items-center gap-4">
                     <div
-                      className="w-10 h-10 rounded-xl flex items-center justify-center"
+                      className="w-12 h-12 rounded-2xl flex items-center justify-center"
                       style={{
                         background: "rgba(147,51,234,0.12)",
                         border: "1px solid rgba(147,51,234,0.2)",
                       }}
                     >
-                      <ActiveIcon size={18} className="text-primary" />
+                      <ActiveIcon size={22} className="text-primary" />
                     </div>
                     <div>
-                      <div className="flex items-center gap-2 mb-0.5">
+                      <div className="flex items-center gap-2 mb-1">
                         <span className="text-[10px] font-mono text-primary/40">{active.num}</span>
-                        <h3 className="font-display text-lg font-bold text-foreground">{active.title}</h3>
+                        <h3 className="font-display text-xl font-bold text-foreground">{active.title}</h3>
                       </div>
-                      <p className="text-xs text-muted-foreground font-body">{active.desc}</p>
+                      <p className="text-sm text-muted-foreground font-body">{active.desc}</p>
                     </div>
                   </div>
                   <span
-                    className="hidden sm:inline-flex text-[10px] font-semibold px-2.5 py-1 rounded-full flex-shrink-0 ml-4"
+                    className="hidden sm:inline-flex text-[11px] font-semibold px-3 py-1.5 rounded-full flex-shrink-0 ml-4"
                     style={{
                       background: "rgba(147,51,234,0.12)",
                       color: "#a855f7",
@@ -210,28 +210,28 @@ const ServicesSection = () => {
                 </div>
 
                 {/* Detail text */}
-                <p className="text-xs text-muted-foreground font-body leading-relaxed mb-5">
+                <p className="text-sm text-muted-foreground font-body leading-relaxed mb-8 max-w-lg">
                   {active.detail}
                 </p>
 
-                {/* Metric card */}
+                {/* Metric cards */}
                 <div
-                  className="p-4 rounded-xl relative overflow-hidden inline-block"
+                  className="p-5 rounded-2xl relative overflow-hidden inline-block"
                   style={{
                     background: "rgba(107,33,168,0.08)",
                     border: "1px solid rgba(147,51,234,0.18)",
                   }}
                 >
                   <div
-                    className="absolute top-0 right-0 w-16 h-16 rounded-full pointer-events-none"
-                    style={{ background: "rgba(147,51,234,0.12)", filter: "blur(20px)" }}
+                    className="absolute top-0 right-0 w-20 h-20 rounded-full pointer-events-none"
+                    style={{ background: "rgba(147,51,234,0.12)", filter: "blur(24px)" }}
                   />
-                  <p className="text-[0.65rem] tracking-[0.15em] uppercase mb-1.5"
+                  <p className="text-[0.7rem] tracking-[0.15em] uppercase mb-2"
                     style={{ color: "rgba(240,240,240,0.40)" }}>
                     {active.metricLabel}
                   </p>
                   <p
-                    className="font-display font-extrabold text-3xl leading-none animate-pulse-glow"
+                    className="font-display font-extrabold text-4xl leading-none animate-pulse-glow"
                     style={{
                       background: "var(--gradient-nexa)",
                       WebkitBackgroundClip: "text",
