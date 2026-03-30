@@ -177,70 +177,58 @@ const ServicesSection = () => {
                 animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                 transition={{ duration: 0.35, ease: "easeOut" }}
               >
-                {/* Service header */}
-                <div className="flex items-start justify-between mb-6">
-                  <div className="flex items-center gap-4">
+                {/* Content with metric on right */}
+                <div className="flex items-start justify-between gap-8">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-4 mb-4">
+                      <div
+                        className="w-14 h-14 rounded-2xl flex items-center justify-center"
+                        style={{
+                          background: "rgba(147,51,234,0.12)",
+                          border: "1px solid rgba(147,51,234,0.2)",
+                        }}
+                      >
+                        <ActiveIcon size={26} className="text-primary" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-xs font-mono text-primary/40">{active.num}</span>
+                          <h3 className="font-display text-2xl font-bold text-foreground">{active.title}</h3>
+                        </div>
+                        <p className="text-base text-muted-foreground font-body">{active.desc}</p>
+                      </div>
+                    </div>
+                    <p className="text-base text-muted-foreground font-body leading-relaxed max-w-lg">
+                      {active.detail}
+                    </p>
+                  </div>
+                  <div
+                    className="p-6 rounded-2xl relative overflow-hidden flex-shrink-0"
+                    style={{
+                      background: "rgba(107,33,168,0.08)",
+                      border: "1px solid rgba(147,51,234,0.18)",
+                    }}
+                  >
                     <div
-                      className="w-12 h-12 rounded-2xl flex items-center justify-center"
+                      className="absolute top-0 right-0 w-20 h-20 rounded-full pointer-events-none"
+                      style={{ background: "rgba(147,51,234,0.12)", filter: "blur(24px)" }}
+                    />
+                    <p className="text-[0.7rem] tracking-[0.15em] uppercase mb-2"
+                      style={{ color: "rgba(240,240,240,0.40)" }}>
+                      {active.metricLabel}
+                    </p>
+                    <p
+                      className="font-display font-extrabold text-5xl leading-none animate-pulse-glow"
                       style={{
-                        background: "rgba(147,51,234,0.12)",
-                        border: "1px solid rgba(147,51,234,0.2)",
+                        background: "var(--gradient-nexa)",
+                        WebkitBackgroundClip: "text",
+                        WebkitTextFillColor: "transparent",
+                        backgroundClip: "text",
                       }}
                     >
-                      <ActiveIcon size={22} className="text-primary" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-[10px] font-mono text-primary/40">{active.num}</span>
-                        <h3 className="font-display text-xl font-bold text-foreground">{active.title}</h3>
-                      </div>
-                      <p className="text-sm text-muted-foreground font-body">{active.desc}</p>
-                    </div>
+                      {active.metric}
+                    </p>
                   </div>
-                  <span
-                    className="hidden sm:inline-flex text-[11px] font-semibold px-3 py-1.5 rounded-full flex-shrink-0 ml-4"
-                    style={{
-                      background: "rgba(147,51,234,0.12)",
-                      color: "#a855f7",
-                      border: "1px solid rgba(147,51,234,0.2)",
-                    }}
-                  >
-                    {active.badge}
-                  </span>
-                </div>
-
-                {/* Detail text */}
-                <p className="text-sm text-muted-foreground font-body leading-relaxed mb-8 max-w-lg">
-                  {active.detail}
-                </p>
-
-                {/* Metric cards */}
-                <div
-                  className="p-5 rounded-2xl relative overflow-hidden inline-block"
-                  style={{
-                    background: "rgba(107,33,168,0.08)",
-                    border: "1px solid rgba(147,51,234,0.18)",
-                  }}
-                >
-                  <div
-                    className="absolute top-0 right-0 w-20 h-20 rounded-full pointer-events-none"
-                    style={{ background: "rgba(147,51,234,0.12)", filter: "blur(24px)" }}
-                  />
-                  <p className="text-[0.7rem] tracking-[0.15em] uppercase mb-2"
-                    style={{ color: "rgba(240,240,240,0.40)" }}>
-                    {active.metricLabel}
-                  </p>
-                  <p
-                    className="font-display font-extrabold text-4xl leading-none animate-pulse-glow"
-                    style={{
-                      background: "var(--gradient-nexa)",
-                      WebkitBackgroundClip: "text",
-                      WebkitTextFillColor: "transparent",
-                      backgroundClip: "text",
-                    }}
-                  >
-                    {active.metric}
-                  </p>
                 </div>
               </motion.div>
             </div>
