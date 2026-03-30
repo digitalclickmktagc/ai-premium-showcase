@@ -170,12 +170,13 @@ const ServicesSection = () => {
             </div>
 
             {/* Main content */}
-            <div className="flex-1 p-6 lg:p-8">
+            <div className="flex-1 p-6 lg:p-8 flex items-center">
               <motion.div
                 key={activeIdx}
                 initial={{ opacity: 0, y: 10, filter: "blur(4px)" }}
                 animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                 transition={{ duration: 0.35, ease: "easeOut" }}
+                className="w-full"
               >
                 {/* Content with metric on right */}
                 <div className="flex items-center justify-between gap-8">
