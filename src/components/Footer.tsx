@@ -26,9 +26,6 @@ const Footer = () => {
                 Nexa <span className="text-gradient-nexa">AI</span>
               </span>
             </a>
-            <p className="text-sm font-body text-center md:text-left leading-relaxed max-w-xs" style={{ color: "rgba(240,240,240,0.55)" }}>
-              Automação inteligente para empresas que pensam grande.
-            </p>
           </div>
 
           {/* Contact */}
