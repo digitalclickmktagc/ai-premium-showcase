@@ -100,9 +100,10 @@ const TestimonialsSection = () => {
           <div
             className="lg:col-span-7 rounded-[24px] p-8 sm:p-10 relative overflow-hidden"
             style={{
-              background: "rgba(15, 15, 25, 0.8)",
-              border: "1px solid rgba(255,255,255,0.07)",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.3), 0 8px 40px rgba(147,51,234,0.1)",
+              background: "rgba(23, 23, 23, 0.6)",
+              backdropFilter: "blur(12px)",
+              border: "1px solid rgba(255,255,255,0.08)",
+              boxShadow: "0 4px 30px rgba(0,0,0,0.30), inset 0 0 20px rgba(255,255,255,0.02)",
             }}
           >
             {/* Gradient corner accent */}
