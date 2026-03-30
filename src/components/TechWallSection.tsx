@@ -143,9 +143,6 @@ const TechWallSection = () => {
 
         {/* RIGHT — 3D animated wall */}
         <div className="absolute right-[-10%] md:right-[-5%] top-[-10%] bottom-[-10%] w-[120%] md:w-[65%] tech-wall-container overflow-hidden">
-          {/* Fade edges */}
-          <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-background to-transparent z-10 pointer-events-none" />
-          <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent z-10 pointer-events-none" />
           <div className="tech-wall-grid h-full w-full flex gap-5 px-8">
             <WallColumn cards={col1Cards} direction="up" />
             <WallColumn cards={col2Cards} direction="down" className="pt-12" />
