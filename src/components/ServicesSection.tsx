@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Settings, Bot, Users, TrendingUp, ChevronRight, Activity } from "lucide-react";
 import { useState } from "react";
+import { useCardGlow } from "@/hooks/use-card-glow";
 
 const services = [
   {
@@ -49,6 +50,7 @@ const ServicesSection = () => {
   const [activeIdx, setActiveIdx] = useState(0);
   const active = services[activeIdx];
   const ActiveIcon = active.icon;
+  const { handleMouseMove } = useCardGlow();
 
   return (
     <section id="solucoes" className="py-24 lg:py-32">
@@ -62,7 +64,7 @@ const ServicesSection = () => {
           transition={{ duration: 0.5 }}
           className="mb-12 text-center"
         >
-          <p className="text-sm font-medium tracking-[0.3em] uppercase text-gradient-nexa mb-4">
+          <p className="text-[0.7rem] font-semibold tracking-[0.20em] uppercase mb-4" style={{ color: "#A855F7" }}>
             Soluções
           </p>
           <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-light leading-tight tracking-tight text-foreground">
@@ -77,16 +79,8 @@ const ServicesSection = () => {
           whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.1 }}
-          className="rounded-[24px] overflow-hidden"
-          style={{
-            background: "rgba(23, 23, 23, 0.6)",
-            backdropFilter: "blur(12px)",
-            border: "1px solid rgba(255,255,255,0.08)",
-            boxShadow: `
-              0 4px 30px rgba(0,0,0,0.30),
-              inset 0 0 20px rgba(255,255,255,0.02)
-            `,
-          }}
+          className="glass-card rounded-[24px] overflow-hidden"
+          onMouseMove={handleMouseMove}
         >
           {/* Top bar (macOS style) */}
           <div
@@ -103,12 +97,12 @@ const ServicesSection = () => {
                 <div className="w-3 h-3 rounded-full bg-[#28C840]" />
               </div>
               <div className="flex items-center gap-1.5 ml-3 text-xs"
-                style={{ color: "rgba(255,255,255,0.35)" }}>
+                style={{ color: "rgba(240,240,240,0.35)" }}>
                 <span>Nexa</span>
                 <ChevronRight size={10} />
                 <span>Soluções</span>
                 <ChevronRight size={10} />
-                <span style={{ color: "rgba(255,255,255,0.7)" }} className="font-medium">{active.title}</span>
+                <span style={{ color: "rgba(240,240,240,0.70)" }} className="font-medium">{active.title}</span>
               </div>
             </div>
           </div>
@@ -126,7 +120,7 @@ const ServicesSection = () => {
             >
               <p
                 className="text-[10px] font-semibold tracking-[0.2em] uppercase px-3 pt-2 pb-3"
-                style={{ color: "rgba(255,255,255,0.3)" }}
+                style={{ color: "rgba(240,240,240,0.30)" }}
               >
                 Módulos
               </p>
@@ -146,7 +140,7 @@ const ServicesSection = () => {
                     } : {}}
                   >
                     <div
-                      className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors`}
+                      className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors"
                       style={isActive ? {
                         background: "rgba(147,51,234,0.2)",
                       } : {
@@ -155,17 +149,17 @@ const ServicesSection = () => {
                     >
                       <Icon
                         size={14}
-                        style={{ color: isActive ? "#9333ea" : "rgba(255,255,255,0.4)" }}
+                        style={{ color: isActive ? "#9333ea" : "rgba(240,240,240,0.40)" }}
                       />
                     </div>
                     <div className="min-w-0">
                       <p
-                        className={`text-xs font-medium truncate transition-colors`}
-                        style={{ color: isActive ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.5)" }}
+                        className="text-xs font-medium truncate transition-colors"
+                        style={{ color: isActive ? "rgba(240,240,240,0.90)" : "rgba(240,240,240,0.50)" }}
                       >
                         {s.title}
                       </p>
-                      <p className="text-[10px] truncate" style={{ color: "rgba(255,255,255,0.3)" }}>
+                      <p className="text-[10px] truncate" style={{ color: "rgba(240,240,240,0.30)" }}>
                         {s.badge}
                       </p>
                     </div>
@@ -226,22 +220,23 @@ const ServicesSection = () => {
                   <div
                     className="col-span-2 p-5 rounded-2xl relative overflow-hidden"
                     style={{
-                      background: "rgba(147,51,234,0.08)",
-                      border: "1px solid rgba(147,51,234,0.15)",
+                      background: "rgba(107,33,168,0.08)",
+                      border: "1px solid rgba(147,51,234,0.18)",
                     }}
                   >
                     <div
                       className="absolute top-0 right-0 w-20 h-20 rounded-full pointer-events-none"
                       style={{ background: "rgba(147,51,234,0.12)", filter: "blur(24px)" }}
                     />
-                    <p className="text-[10px] tracking-[0.15em] uppercase mb-2"
-                      style={{ color: "rgba(255,255,255,0.35)" }}>
+                    <p className="text-[0.7rem] tracking-[0.15em] uppercase mb-2"
+                      style={{ color: "rgba(240,240,240,0.40)" }}>
                       {active.metricLabel}
                     </p>
                     <p
-                      className="font-display text-4xl font-bold leading-none"
+                      className="font-display font-extrabold leading-none animate-pulse-glow"
                       style={{
-                        background: "linear-gradient(135deg, #7C3AED, #9333EA, #A855F7)",
+                        fontSize: "clamp(2.5rem, 5vw, 4rem)",
+                        background: "var(--gradient-nexa)",
                         WebkitBackgroundClip: "text",
                         WebkitTextFillColor: "transparent",
                         backgroundClip: "text",
@@ -254,20 +249,20 @@ const ServicesSection = () => {
                   {/* Status */}
                   <div
                     className="p-4 rounded-2xl"
-                    style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}
+                    style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}
                   >
                     <Activity size={14} className="text-primary/60 mb-3" />
-                    <p className="text-[10px] mb-1" style={{ color: "rgba(255,255,255,0.35)" }}>Status</p>
+                    <p className="text-[10px] mb-1" style={{ color: "rgba(240,240,240,0.40)" }}>Status</p>
                     <p className="text-sm font-semibold text-foreground">Ativo</p>
                   </div>
 
                   {/* Tipo */}
                   <div
                     className="p-4 rounded-2xl"
-                    style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}
+                    style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}
                   >
                     <div className="w-3 h-3 rounded-full bg-primary/60 mb-3" />
-                    <p className="text-[10px] mb-1" style={{ color: "rgba(255,255,255,0.35)" }}>Tipo</p>
+                    <p className="text-[10px] mb-1" style={{ color: "rgba(240,240,240,0.40)" }}>Tipo</p>
                     <p className="text-sm font-semibold text-foreground">Custom</p>
                   </div>
                 </div>
