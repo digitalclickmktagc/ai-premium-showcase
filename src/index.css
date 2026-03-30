@@ -519,7 +519,11 @@
   .tech-wall-card {
     background: rgba(255,255,255,0.03);
     border: 1px solid rgba(255,255,255,0.07);
-    transition: border-color 0.12s ease, background 0.12s ease;
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,0.03),
+      0 8px 32px rgba(0,0,0,0.40),
+      inset 0 1px 0 rgba(255,255,255,0.06);
+    transition: border-color 0.12s ease, background 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
     pointer-events: auto;
     cursor: none !important;
   }
@@ -527,6 +531,11 @@
   .tech-wall-card:hover {
     border-color: rgba(147,51,234,0.35);
     background: rgba(255,255,255,0.06);
+    box-shadow:
+      0 0 0 1px rgba(147,51,234,0.12),
+      0 20px 60px rgba(0,0,0,0.50),
+      var(--glow-sm);
+    filter: drop-shadow(0 0 12px rgba(147, 51, 234, 0.25));
   }
 
   /* ── Noise Overlay ── */
