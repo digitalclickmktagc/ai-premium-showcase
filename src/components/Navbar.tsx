@@ -34,9 +34,10 @@ const Navbar = () => {
         <div
           className={`flex items-center justify-between h-14 px-4 rounded-2xl transition-all duration-500 ${
             scrolled
-              ? "bg-background/85 border border-border backdrop-blur-xl shadow-[0_2px_30px_rgba(0,0,0,0.3)]"
+              ? "border border-white/[0.06] backdrop-blur-xl shadow-[0_2px_30px_rgba(0,0,0,0.3)]"
               : "bg-transparent border border-transparent"
           }`}
+          style={scrolled ? { background: "rgba(0, 0, 0, 0.70)", backdropFilter: "blur(20px)" } : {}}
         >
           {/* Logo */}
           <a href="#" className="flex items-center gap-2.5 flex-shrink-0">

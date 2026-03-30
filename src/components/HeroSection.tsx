@@ -48,9 +48,9 @@ const WallCard = ({ card, isHovered }: { card: TechCard; isHovered: boolean }) =
     className="tech-wall-card rounded-2xl p-5 aspect-[4/3] flex flex-col justify-between"
     data-card-id={card.name}
     style={isHovered ? {
-      borderColor: 'rgba(147, 51, 234, 0.4)',
-      background: 'rgba(20, 20, 35, 0.9)',
-      boxShadow: '0 0 20px rgba(147, 51, 234, 0.25), 0 0 40px rgba(147, 51, 234, 0.12), 0 8px 30px rgba(147, 51, 234, 0.18)',
+      borderColor: 'rgba(147, 51, 234, 0.30)',
+      background: 'rgba(30, 30, 30, 0.80)',
+      boxShadow: '0 20px 40px rgba(0, 0, 0, 0.50), 0 0 30px rgba(147, 51, 234, 0.10)',
       filter: 'drop-shadow(0 0 12px rgba(147, 51, 234, 0.25))',
     } : {}}
   >

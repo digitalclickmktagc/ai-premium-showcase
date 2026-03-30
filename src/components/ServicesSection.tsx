@@ -79,12 +79,12 @@ const ServicesSection = () => {
           transition={{ duration: 0.6, delay: 0.1 }}
           className="rounded-[24px] overflow-hidden"
           style={{
-            background: "rgba(15, 15, 25, 0.8)",
-            border: "1px solid rgba(255,255,255,0.07)",
+            background: "rgba(23, 23, 23, 0.6)",
+            backdropFilter: "blur(12px)",
+            border: "1px solid rgba(255,255,255,0.08)",
             boxShadow: `
-              0 1px 2px rgba(0,0,0,0.3),
-              0 4px 16px rgba(0,0,0,0.2),
-              0 16px 64px rgba(0,0,0,0.15)
+              0 4px 30px rgba(0,0,0,0.30),
+              inset 0 0 20px rgba(255,255,255,0.02)
             `,
           }}
         >
