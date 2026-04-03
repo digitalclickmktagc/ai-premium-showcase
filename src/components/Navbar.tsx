@@ -23,6 +23,59 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Detecta a section visível ao scrollar
+  useEffect(() => {
+    const sectionIds = navLinks.map((link) => link.href.replace("#", ""));
+
+    let atBottom = false;
+
+    const handleScroll = () => {
+      // Topo da página: desmarca tudo
+      const firstSection = document.getElementById(sectionIds[0]);
+      if (firstSection && window.scrollY < firstSection.offsetTop - window.innerHeight * 0.5) {
+        setActiveLink(null);
+        atBottom = false;
+        return;
+      }
+      // Final da página: marca contato apenas no fundo absoluto
+      const isAtBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 10;
+      if (isAtBottom && !atBottom) {
+        atBottom = true;
+        setActiveLink("#contato");
+      } else if (!isAtBottom && atBottom) {
+        atBottom = false;
+        // Ao sair do fundo, volta para formulário imediatamente
+        setActiveLink("#diagnostico");
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    // Observa todas as sections exceto contato (controlado pelo scroll)
+    const observedIds = sectionIds.filter((id) => id !== "contato");
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (atBottom) return;
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            setActiveLink(`#${entry.target.id}`);
+          }
+        }
+      },
+      { rootMargin: "-40% 0px -55% 0px" }
+    );
+
+    for (const id of observedIds) {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    }
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      observer.disconnect();
+    };
+  }, []);
+
   return (
     <motion.nav
       initial={{ opacity: 0, y: -16 }}
