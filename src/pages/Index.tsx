@@ -10,11 +10,13 @@ import FloatingParticles from "@/components/FloatingParticles";
 import AuroraBackground from "@/components/AuroraBackground";
 import CustomCursor from "@/components/CustomCursor";
 import PageReveal from "@/components/PageReveal";
+import HardwareAccelerationPopup from "@/components/HardwareAccelerationPopup";
 
 const Index = () => {
   return (
     <div className="min-h-screen bg-background relative">
       <PageReveal />
+      <HardwareAccelerationPopup />
       <CustomCursor />
       <AuroraBackground />
       <FloatingParticles />
