@@ -61,6 +61,88 @@
     --radius-lg: 1.25rem;
     --radius-xl: 2rem;
 
+    /* ── Brand Purple Palette ── */
+    --nexa-purple-950: #3B0764;
+    --nexa-purple-800: #6B21A8;
+    --nexa-purple-600: #9333EA;
+    --nexa-purple-500: #A855F7;
+    --nexa-violet-600: #7C3AED;
+    --nexa-violet-500: #8B5CF6;
+    --nexa-purple-300: #C084FC;
+
+    /* ── Neutral Colors ── */
+    --nexa-black: #000000;
+    --nexa-white: #FFFFFF;
+    --nexa-text: #F0F0F0;
+
+    /* ── Text Opacities ── */
+    --nexa-text-90: rgba(240, 240, 240, 0.90);
+    --nexa-text-80: rgba(240, 240, 240, 0.80);
+    --nexa-text-70: rgba(240, 240, 240, 0.70);
+    --nexa-text-55: rgba(240, 240, 240, 0.55);
+    --nexa-text-50: rgba(240, 240, 240, 0.50);
+    --nexa-text-45: rgba(240, 240, 240, 0.45);
+    --nexa-text-40: rgba(240, 240, 240, 0.40);
+    --nexa-text-30: rgba(240, 240, 240, 0.30);
+    --nexa-text-25: rgba(240, 240, 240, 0.25);
+
+    /* ── Purple Opacities (com base no --nexa-purple-600: #9333EA) ── */
+    --nexa-purple-a06: rgba(147, 51, 234, 0.06);
+    --nexa-purple-a08: rgba(147, 51, 234, 0.08);
+    --nexa-purple-a10: rgba(147, 51, 234, 0.10);
+    --nexa-purple-a12: rgba(147, 51, 234, 0.12);
+    --nexa-purple-a15: rgba(147, 51, 234, 0.15);
+    --nexa-purple-a18: rgba(147, 51, 234, 0.18);
+    --nexa-purple-a20: rgba(147, 51, 234, 0.20);
+    --nexa-purple-a25: rgba(147, 51, 234, 0.25);
+    --nexa-purple-a30: rgba(147, 51, 234, 0.30);
+    --nexa-purple-a35: rgba(147, 51, 234, 0.35);
+    --nexa-purple-a40: rgba(147, 51, 234, 0.40);
+    --nexa-purple-a50: rgba(147, 51, 234, 0.50);
+    --nexa-purple-a60: rgba(147, 51, 234, 0.60);
+
+    /* ── Purple-500 Opacities (com base no --nexa-purple-500: #A855F7) ── */
+    --nexa-purple500-a08: rgba(168, 85, 247, 0.08);
+    --nexa-purple500-a10: rgba(168, 85, 247, 0.10);
+    --nexa-purple500-a30: rgba(168, 85, 247, 0.30);
+    --nexa-purple500-a60: rgba(168, 85, 247, 0.60);
+
+    /* ── Purple-800 Opacities (com base no --nexa-purple-800: #6B21A8) ── */
+    --nexa-purple800-a08: rgba(107, 33, 168, 0.08);
+    --nexa-purple800-a15: rgba(107, 33, 168, 0.15);
+    --nexa-purple800-a18: rgba(107, 33, 168, 0.18);
+
+    /* ── White Opacities (superfícies glass) ── */
+    --nexa-white-a02: rgba(255, 255, 255, 0.02);
+    --nexa-white-a03: rgba(255, 255, 255, 0.03);
+    --nexa-white-a04: rgba(255, 255, 255, 0.04);
+    --nexa-white-a05: rgba(255, 255, 255, 0.05);
+    --nexa-white-a06: rgba(255, 255, 255, 0.06);
+    --nexa-white-a07: rgba(255, 255, 255, 0.07);
+    --nexa-white-a08: rgba(255, 255, 255, 0.08);
+    --nexa-white-a10: rgba(255, 255, 255, 0.10);
+    --nexa-white-a15: rgba(255, 255, 255, 0.15);
+    --nexa-white-a18: rgba(255, 255, 255, 0.18);
+    --nexa-white-a25: rgba(255, 255, 255, 0.25);
+
+    /* ── Black Opacities (sombras) ── */
+    --nexa-black-a30: rgba(0, 0, 0, 0.30);
+    --nexa-black-a40: rgba(0, 0, 0, 0.40);
+    --nexa-black-a50: rgba(0, 0, 0, 0.50);
+    --nexa-black-a60: rgba(0, 0, 0, 0.60);
+    --nexa-black-a75: rgba(0, 0, 0, 0.75);
+    --nexa-black-a85: rgba(0, 0, 0, 0.85);
+    --nexa-black-a90: rgba(0, 0, 0, 0.90);
+
+    /* ── Surface Colors ── */
+    --nexa-surface-dark: rgba(10, 10, 10, 0.80);
+    --nexa-surface-solid: rgba(10, 10, 10, 0.95);
+
+    /* ── macOS Traffic Lights ── */
+    --nexa-dot-red: #FF5F57;
+    --nexa-dot-yellow: #FEBC2E;
+    --nexa-dot-green: #28C840;
+
     /* ── Gradients ── */
     --gradient-nexa: linear-gradient(135deg, #6B21A8, #9333EA, #A855F7, #7C3AED);
     --gradient-nexa-hover: linear-gradient(135deg, #7C3AED, #A855F7, #C084FC, #8B5CF6);

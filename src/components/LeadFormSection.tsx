@@ -1,11 +1,169 @@
-import { useState } from "react";
-import { motion } from "framer-motion";
-import { Send, Loader2, Shield, Sparkles } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Send, Loader2, Shield, Sparkles, ChevronDown, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 
 const WEBHOOK_URL = "https://infrasynaiadvanced-n8n.cloudfy.live/webhook/49662b45-e787-451f-af90-248998c29c4d";
 const faturamentoOptions = ["Até R$ 50k", "R$ 50k - R$ 100k", "R$ 100k - R$ 500k", "Mais de R$ 500k"];
+
+/* ── Custom Select ── */
+interface CustomSelectProps {
+  value: string;
+  onChange: (value: string) => void;
+  options: string[];
+  placeholder?: string;
+  inputStyle: React.CSSProperties;
+}
+
+const CustomSelect = ({ value, onChange, options, placeholder = "Selecione...", inputStyle }: CustomSelectProps) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setIsOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  return (
+    <div ref={ref} style={{ position: "relative" }}>
+      <button
+        type="button"
+        onClick={() => setIsOpen((o) => !o)}
+        style={{
+          ...inputStyle,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          textAlign: "left",
+          cursor: "pointer",
+          ...(isOpen
+            ? {
+                background: "rgba(147,51,234,0.06)",
+                borderColor: "rgba(147,51,234,0.50)",
+                boxShadow: "0 0 0 3px rgba(147,51,234,0.15), 0 0 20px rgba(147,51,234,0.10)",
+              }
+            : {}),
+        }}
+        onFocus={(e) => {
+          if (!isOpen) {
+            e.currentTarget.style.background = "rgba(147,51,234,0.06)";
+            e.currentTarget.style.borderColor = "rgba(147,51,234,0.50)";
+            e.currentTarget.style.boxShadow = "0 0 0 3px rgba(147,51,234,0.15), 0 0 20px rgba(147,51,234,0.10)";
+          }
+        }}
+        onBlur={(e) => {
+          if (!isOpen) {
+            e.currentTarget.style.background = "rgba(255,255,255,0.04)";
+            e.currentTarget.style.borderColor = "rgba(255,255,255,0.10)";
+            e.currentTarget.style.boxShadow = "none";
+          }
+        }}
+      >
+        <span style={{ color: value ? "#f0f0f0" : "rgba(240,240,240,0.25)" }}>
+          {value || placeholder}
+        </span>
+        <ChevronDown
+          size={16}
+          style={{
+            color: "rgba(168,85,247,0.7)",
+            transition: "transform 0.25s ease",
+            transform: isOpen ? "rotate(180deg)" : "rotate(0)",
+            flexShrink: 0,
+          }}
+        />
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.ul
+            initial={{ opacity: 0, y: -6, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -6, scale: 0.97 }}
+            transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+            style={{
+              position: "absolute",
+              top: "calc(100% + 6px)",
+              left: 0,
+              right: 0,
+              zIndex: 50,
+              listStyle: "none",
+              margin: 0,
+              padding: "6px",
+              background: "rgba(12,12,12,0.96)",
+              border: "1px solid rgba(147,51,234,0.25)",
+              borderRadius: "var(--radius-md)",
+              backdropFilter: "blur(40px)",
+              boxShadow:
+                "0 0 0 1px rgba(255,255,255,0.03), 0 20px 60px rgba(0,0,0,0.70), 0 0 40px rgba(147,51,234,0.08)",
+              overflow: "hidden",
+            }}
+          >
+            {options.map((opt) => {
+              const selected = opt === value;
+              return (
+                <li key={opt}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onChange(opt);
+                      setIsOpen(false);
+                    }}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      width: "100%",
+                      padding: "0.7rem 0.85rem",
+                      fontSize: "0.9rem",
+                      fontFamily: "'Inter', sans-serif",
+                      color: selected ? "#C084FC" : "rgba(240,240,240,0.80)",
+                      background: selected ? "rgba(147,51,234,0.10)" : "transparent",
+                      border: "none",
+                      borderRadius: "calc(var(--radius-md) - 4px)",
+                      cursor: "pointer",
+                      transition: "all 0.15s ease",
+                      textAlign: "left",
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!selected) {
+                        e.currentTarget.style.background = "rgba(147,51,234,0.08)";
+                        e.currentTarget.style.color = "#f0f0f0";
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!selected) {
+                        e.currentTarget.style.background = "transparent";
+                        e.currentTarget.style.color = "rgba(240,240,240,0.80)";
+                      }
+                    }}
+                  >
+                    <span>{opt}</span>
+                    {selected && <Check size={14} style={{ color: "#A855F7" }} />}
+                  </button>
+                </li>
+              );
+            })}
+          </motion.ul>
+        )}
+      </AnimatePresence>
+
+      {/* Hidden input for form validation */}
+      <input
+        type="text"
+        name="faturamento"
+        value={value}
+        required
+        tabIndex={-1}
+        onChange={() => {}}
+        style={{ position: "absolute", opacity: 0, height: 0, width: 0, pointerEvents: "none" }}
+      />
+    </div>
+  );
+};
 
 const LeadFormSection = () => {
   const { toast } = useToast();
@@ -182,28 +340,13 @@ const LeadFormSection = () => {
                   >
                     Faturamento mensal
                   </label>
-                  <select
-                    name="faturamento"
+                  <CustomSelect
                     value={form.faturamento}
-                    onChange={handleChange}
-                    required
-                    style={inputStyle}
-                    onFocus={(e) => {
-                      e.currentTarget.style.background = "rgba(147,51,234,0.06)";
-                      e.currentTarget.style.borderColor = "rgba(147,51,234,0.50)";
-                      e.currentTarget.style.boxShadow = "0 0 0 3px rgba(147,51,234,0.15), 0 0 20px rgba(147,51,234,0.10)";
-                    }}
-                    onBlur={(e) => {
-                      e.currentTarget.style.background = "rgba(255,255,255,0.04)";
-                      e.currentTarget.style.borderColor = "rgba(255,255,255,0.10)";
-                      e.currentTarget.style.boxShadow = "none";
-                    }}
-                  >
-                    <option value="" disabled>Selecione...</option>
-                    {faturamentoOptions.map((opt) => (
-                      <option key={opt} value={opt}>{opt}</option>
-                    ))}
-                  </select>
+                    onChange={(val) => setForm({ ...form, faturamento: val })}
+                    options={faturamentoOptions}
+                    placeholder="Selecione..."
+                    inputStyle={inputStyle}
+                  />
                 </div>
               </div>
 
