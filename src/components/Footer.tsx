@@ -86,16 +86,18 @@ const Footer = () => {
 
         {/* Bottom bar */}
         <div
-          className="pt-8 flex flex-col md:flex-row items-center justify-between gap-4"
+          className="pt-8 flex flex-col items-center justify-center gap-4 text-center"
           style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
         >
           <p className="text-xs" style={{ color: "rgba(240,240,240,0.40)" }}>
             © 2026 Nexa AI. Todos os direitos reservados.
           </p>
+          {/*
           <div className="flex gap-6 text-xs" style={{ color: "rgba(240,240,240,0.40)" }}>
             <a href="#" className="hover:text-foreground transition-colors">Privacidade</a>
             <a href="#" className="hover:text-foreground transition-colors">Termos</a>
           </div>
+          */}
         </div>
       </div>
     </footer>
