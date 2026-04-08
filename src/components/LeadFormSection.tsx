@@ -376,10 +376,12 @@ const LeadFormSection = () => {
                 </Button>
               </div>
 
+              {/*
               <p className="flex items-center justify-center gap-1.5 pt-1" style={{ color: "rgba(240,240,240,0.30)", fontSize: "0.75rem" }}>
                 <Shield size={12} />
                 Seus dados estão seguros e protegidos.
               </p>
+              */}
             </form>
           </div>
         </motion.div>
