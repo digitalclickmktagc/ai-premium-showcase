@@ -83,7 +83,7 @@ const TestimonialsSection = () => {
             Depoimentos
           </p>
           <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-light tracking-tight text-foreground">
-            Quem <span className="text-gradient-nexa">confia.</span>
+            Quem <span className="text-gradient-nexa font-bold">confia.</span>
           </h2>
         </motion.div>
 
