@@ -1,0 +1,22 @@
+# SPA fallback for Apache / Hostinger.
+# Serves index.html for client-side routes (e.g. /app/*, /c/:token) so deep
+# links and the client share link work when opened or refreshed directly.
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Do not rewrite existing files or directories (assets, icons, manifest, sw).
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # Everything else -> index.html (React Router handles the route).
+  RewriteRule ^ index.html [L]
+</IfModule>
+
+# The service worker must always revalidate so updates are picked up.
+<IfModule mod_headers.c>
+  <FilesMatch "sw\.js$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+  </FilesMatch>
+</IfModule>

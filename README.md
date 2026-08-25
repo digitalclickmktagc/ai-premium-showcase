@@ -1,5 +1,18 @@
 # Welcome to your Lovable project
 
+## 📅 Editorial Calendar app
+
+This repo also contains a **Calendário Editorial** — a responsive, installable
+PWA for managing social-media editorial calendars for multiple clients (one
+calendar per client), with per-calendar client sharing.
+
+- Admin: **`/app`** (login at **`/app/login`**)
+- Client share view: **`/c/:token`** (isolated, read-only)
+- Demo login: `admin@digitalclick.com` / `nexa2026`
+
+Full documentation: **[`docs/EDITORIAL_CALENDAR.md`](docs/EDITORIAL_CALENDAR.md)**.
+Source lives under `src/calendar-app/`. The landing page (`/`) is unchanged.
+
 ## Project info
 
 **URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID

@@ -5,7 +5,11 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  base: "./",
+  // Absolute base so SPA deep links (e.g. the client share link /c/:token and
+  // /app/*) resolve their assets when opened directly. Assumes deploy at the
+  // domain root (Hostinger public_html). For a sub-directory deploy, set this
+  // to the sub-path (e.g. "/app-folder/").
+  base: "/",
   server: {
     host: "::",
     port: 8080,

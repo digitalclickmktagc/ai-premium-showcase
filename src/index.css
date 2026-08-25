@@ -660,3 +660,39 @@
     box-shadow: inset 0 0 200px rgba(0,0,0,0.85);
   }
 }
+
+/* ─────────────────────────────────────────────
+   Editorial Calendar app
+   The landing page hides the native cursor (custom cursor component).
+   On calendar routes we restore real cursors — including portalled
+   dialogs / dropdowns / toasts, which mount under <body>.
+───────────────────────────────────────────── */
+body.calendar-route,
+body.calendar-route * {
+  cursor: auto !important;
+}
+body.calendar-route a,
+body.calendar-route button,
+body.calendar-route [role="button"],
+body.calendar-route [role="option"],
+body.calendar-route label[for],
+body.calendar-route summary,
+body.calendar-route select,
+body.calendar-route [data-radix-collection-item] {
+  cursor: pointer !important;
+}
+body.calendar-route input,
+body.calendar-route textarea,
+body.calendar-route [contenteditable="true"] {
+  cursor: text !important;
+}
+body.calendar-route input[type="checkbox"],
+body.calendar-route input[type="radio"],
+body.calendar-route input[type="color"],
+body.calendar-route input[type="date"] {
+  cursor: pointer !important;
+}
+body.calendar-route :disabled,
+body.calendar-route [aria-disabled="true"] {
+  cursor: not-allowed !important;
+}
