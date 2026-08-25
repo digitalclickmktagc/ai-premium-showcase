@@ -85,6 +85,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     let active = true;
     (async () => {
       try {
+        // Resolve the session first (async for Supabase; instant for demo),
+        // then load data with the right credentials in place.
+        const s = service.initSession
+          ? await service.initSession()
+          : service.getSession();
+        if (active) setSession(s);
         await refresh();
       } finally {
         if (active) setLoading(false);
@@ -93,7 +99,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return () => {
       active = false;
     };
-  }, [refresh]);
+  }, [refresh, service]);
 
   // Restore the real cursor on calendar routes (the landing page hides it).
   useEffect(() => {
@@ -145,12 +151,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
     async (email: string, password: string) => {
       const s = await service.login(email, password);
       setSession(s);
+      await refresh(); // load data with the new credentials
     },
-    [service],
+    [service, refresh],
   );
   const logout = useCallback(() => {
     service.logout();
     setSession(null);
+    // Drop any loaded data so nothing lingers after signing out.
+    setClients([]);
+    setCalendars([]);
+    setPosts([]);
   }, [service]);
 
   // ── mutations (each refreshes local state) ─────────────────

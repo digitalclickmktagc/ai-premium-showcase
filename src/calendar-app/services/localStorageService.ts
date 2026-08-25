@@ -94,6 +94,10 @@ export class LocalStorageService implements DataService {
     return session;
   }
 
+  async initSession(): Promise<Session | null> {
+    return this.getSession();
+  }
+
   logout(): void {
     localStorage.removeItem(SESSION_KEY);
   }

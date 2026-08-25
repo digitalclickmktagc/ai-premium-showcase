@@ -28,7 +28,14 @@ export interface DataService {
   readonly name: string;
 
   // ── Admin auth ────────────────────────────────────────────────
+  /** Synchronous read of the cached session (may be stale before init). */
   getSession(): Session | null;
+  /**
+   * Resolve the current session asynchronously (rehydrating / refreshing
+   * tokens where the backend requires it). Optional — falls back to
+   * getSession(). Called once on app mount.
+   */
+  initSession?(): Promise<Session | null>;
   login(email: string, password: string): Promise<Session>;
   logout(): void;
 
