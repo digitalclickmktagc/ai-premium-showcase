@@ -1,0 +1,28 @@
+{
+  "name": "Calendário Editorial",
+  "short_name": "Calendário",
+  "description": "Gestão de calendários editoriais de social media, um por cliente.",
+  "start_url": "/app",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "background_color": "#000000",
+  "theme_color": "#0b0b0f",
+  "categories": ["productivity", "business"],
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

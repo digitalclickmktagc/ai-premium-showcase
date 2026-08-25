@@ -1,0 +1,284 @@
+/*
+ * Supabase adapter — production data layer (TEMPLATE).
+ *
+ * To enable real, multi-device, isolated storage:
+ *   1. Create a Supabase project and run supabase/schema.sql.
+ *   2. Create your admin user in Supabase Auth (email/password).
+ *   3. `bun add @supabase/supabase-js`
+ *   4. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY (see .env.example).
+ *   5. Rename this file to `supabaseService.ts` and wire it up in
+ *      `services/index.ts` (the commented block there).
+ *
+ * This is a working starting point — review the auth/session handling for your
+ * needs before shipping.
+ */
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import type {
+  Calendar,
+  Client,
+  CreateClientInput,
+  CreatePostInput,
+  Database,
+  Post,
+  PostStatus,
+  PublicCalendarView,
+  Session,
+  UpdateClientInput,
+  UpdatePostInput,
+} from "../types";
+import { shareToken } from "../utils";
+import type { DataService } from "./DataService";
+
+// ── row <-> domain mappers ───────────────────────────────────────
+/* eslint-disable @typescript-eslint/no-explicit-any */
+const toClient = (r: any): Client => ({
+  id: r.id,
+  name: r.name,
+  color: r.color,
+  logoUrl: r.logo_url ?? undefined,
+  handle: r.handle ?? undefined,
+  active: r.active,
+  createdAt: r.created_at,
+});
+const toCalendar = (r: any): Calendar => ({
+  id: r.id,
+  clientId: r.client_id,
+  name: r.name,
+  shareToken: r.share_token,
+  createdAt: r.created_at,
+});
+const toPost = (r: any): Post => ({
+  id: r.id,
+  calendarId: r.calendar_id,
+  title: r.title,
+  date: r.date,
+  status: r.status,
+  description: r.description ?? "",
+  contentType: r.content_type ?? undefined,
+  referenceLink: r.reference_link ?? undefined,
+  internalNotes: r.internal_notes ?? undefined,
+  rescheduleHistory: r.reschedule_history ?? [],
+  createdAt: r.created_at,
+  updatedAt: r.updated_at,
+});
+/* eslint-enable @typescript-eslint/no-explicit-any */
+
+export class SupabaseService implements DataService {
+  readonly name = "supabase";
+  private sb: SupabaseClient;
+  private session: Session | null = null;
+
+  constructor() {
+    this.sb = createClient(
+      import.meta.env.VITE_SUPABASE_URL as string,
+      import.meta.env.VITE_SUPABASE_ANON_KEY as string,
+    );
+    // Cache the session so getSession() can stay synchronous.
+    this.sb.auth.getSession().then(({ data }) => {
+      if (data.session?.user) this.session = this.mapSession(data.session.user);
+    });
+    this.sb.auth.onAuthStateChange((_e, s) => {
+      this.session = s?.user ? this.mapSession(s.user) : null;
+    });
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private mapSession(user: any): Session {
+    return {
+      role: "admin",
+      email: user.email ?? "",
+      name: user.user_metadata?.name ?? user.email ?? "Admin",
+    };
+  }
+
+  getSession(): Session | null {
+    return this.session;
+  }
+
+  async login(email: string, password: string): Promise<Session> {
+    const { data, error } = await this.sb.auth.signInWithPassword({ email, password });
+    if (error || !data.user) throw new Error(error?.message ?? "Falha no login.");
+    this.session = this.mapSession(data.user);
+    return this.session;
+  }
+
+  logout(): void {
+    void this.sb.auth.signOut();
+    this.session = null;
+  }
+
+  async getDatabase(): Promise<Database> {
+    const [clients, calendars, posts] = await Promise.all([
+      this.sb.from("clients").select("*"),
+      this.sb.from("calendars").select("*"),
+      this.sb.from("posts").select("*"),
+    ]);
+    if (clients.error) throw clients.error;
+    if (calendars.error) throw calendars.error;
+    if (posts.error) throw posts.error;
+    return {
+      clients: (clients.data ?? []).map(toClient),
+      calendars: (calendars.data ?? []).map(toCalendar),
+      posts: (posts.data ?? []).map(toPost),
+    };
+  }
+
+  async createClient(
+    input: CreateClientInput,
+  ): Promise<{ client: Client; calendar: Calendar }> {
+    const { data: c, error: ce } = await this.sb
+      .from("clients")
+      .insert({
+        name: input.name.trim(),
+        color: input.color ?? "#8b5cf6",
+        logo_url: input.logoUrl ?? null,
+        handle: input.handle ?? null,
+        active: input.active ?? true,
+      })
+      .select()
+      .single();
+    if (ce) throw ce;
+    const { data: cal, error: cale } = await this.sb
+      .from("calendars")
+      .insert({
+        client_id: c.id,
+        name: input.calendarName?.trim() || `Calendário ${input.name.trim()}`,
+        share_token: shareToken(),
+      })
+      .select()
+      .single();
+    if (cale) throw cale;
+    return { client: toClient(c), calendar: toCalendar(cal) };
+  }
+
+  async updateClient(id: string, patch: UpdateClientInput): Promise<Client> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const row: any = {};
+    if (patch.name !== undefined) row.name = patch.name.trim();
+    if (patch.color !== undefined) row.color = patch.color;
+    if (patch.logoUrl !== undefined) row.logo_url = patch.logoUrl || null;
+    if (patch.handle !== undefined) row.handle = patch.handle || null;
+    if (patch.active !== undefined) row.active = patch.active;
+    const { data, error } = await this.sb
+      .from("clients")
+      .update(row)
+      .eq("id", id)
+      .select()
+      .single();
+    if (error) throw error;
+    return toClient(data);
+  }
+
+  async regenerateShareToken(calendarId: string): Promise<Calendar> {
+    const { data, error } = await this.sb
+      .from("calendars")
+      .update({ share_token: shareToken() })
+      .eq("id", calendarId)
+      .select()
+      .single();
+    if (error) throw error;
+    return toCalendar(data);
+  }
+
+  async createPost(input: CreatePostInput): Promise<Post> {
+    const { data, error } = await this.sb
+      .from("posts")
+      .insert({
+        calendar_id: input.calendarId,
+        title: input.title.trim(),
+        date: input.date,
+        status: input.status ?? "todo",
+        description: input.description ?? "",
+        content_type: input.contentType ?? null,
+        reference_link: input.referenceLink ?? null,
+        internal_notes: input.internalNotes ?? null,
+        reschedule_history: [],
+      })
+      .select()
+      .single();
+    if (error) throw error;
+    return toPost(data);
+  }
+
+  private async getPost(id: string): Promise<Post> {
+    const { data, error } = await this.sb.from("posts").select("*").eq("id", id).single();
+    if (error) throw error;
+    return toPost(data);
+  }
+
+  async updatePost(id: string, patch: UpdatePostInput): Promise<Post> {
+    const current = await this.getPost(id);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const row: any = {};
+    if (patch.title !== undefined) row.title = patch.title.trim();
+    if (patch.status !== undefined) row.status = patch.status;
+    if (patch.description !== undefined) row.description = patch.description;
+    if (patch.contentType !== undefined) row.content_type = patch.contentType || null;
+    if (patch.referenceLink !== undefined) row.reference_link = patch.referenceLink || null;
+    if (patch.internalNotes !== undefined) row.internal_notes = patch.internalNotes || null;
+    if (patch.date !== undefined && patch.date !== current.date) {
+      row.date = patch.date;
+      row.reschedule_history = [
+        ...current.rescheduleHistory,
+        { from: current.date, to: patch.date, at: new Date().toISOString() },
+      ];
+    } else if (patch.date !== undefined) {
+      row.date = patch.date;
+    }
+    const { data, error } = await this.sb
+      .from("posts")
+      .update(row)
+      .eq("id", id)
+      .select()
+      .single();
+    if (error) throw error;
+    return toPost(data);
+  }
+
+  async reschedulePost(id: string, newDate: string): Promise<Post> {
+    const current = await this.getPost(id);
+    const history =
+      newDate !== current.date
+        ? [
+            ...current.rescheduleHistory,
+            { from: current.date, to: newDate, at: new Date().toISOString() },
+          ]
+        : current.rescheduleHistory;
+    const { data, error } = await this.sb
+      .from("posts")
+      .update({ date: newDate, status: "rescheduled", reschedule_history: history })
+      .eq("id", id)
+      .select()
+      .single();
+    if (error) throw error;
+    return toPost(data);
+  }
+
+  async deletePost(id: string): Promise<Post> {
+    const { data, error } = await this.sb
+      .from("posts")
+      .update({ status: "deleted" })
+      .eq("id", id)
+      .select()
+      .single();
+    if (error) throw error;
+    return toPost(data);
+  }
+
+  async restorePost(id: string, status: PostStatus = "todo"): Promise<Post> {
+    const { data, error } = await this.sb
+      .from("posts")
+      .update({ status })
+      .eq("id", id)
+      .select()
+      .single();
+    if (error) throw error;
+    return toPost(data);
+  }
+
+  async getPublicView(token: string): Promise<PublicCalendarView | null> {
+    const { data, error } = await this.sb.rpc("get_public_calendar", { p_token: token });
+    if (error) throw error;
+    return (data as PublicCalendarView | null) ?? null;
+  }
+}
