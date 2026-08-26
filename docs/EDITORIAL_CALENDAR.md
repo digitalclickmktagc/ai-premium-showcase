@@ -19,19 +19,17 @@ under `src/calendar-app/`. The marketing landing page (`/`) is untouched.
 | `/c/:token` | Client | **Isolated, read-only** view of a single calendar via its share token. No login, no other clients, no internal notes. |
 | `/` | Public | The original landing page (unchanged). |
 
-### Demo access
+### Access
 
-The app ships in **demo mode** (data stored in the browser via `localStorage`)
-and is seeded with example clients and posts on first load.
+This deployment is connected to **Supabase** (see `.env`), so sign in at
+`/app/login` with the admin user created in the Supabase dashboard
+(**Authentication → Users**). Data is shared across devices and isolation is
+enforced server-side by RLS.
 
-- **E-mail:** `admin@digitalclick.com`
-- **Senha:** `nexa2026`
-
-(Configurable via `VITE_ADMIN_EMAIL` / `VITE_ADMIN_PASSWORD`.)
-
-> In demo mode data is per-browser. A client share link opens the seeded data in
-> the **same** browser only. For real cross-device sharing, connect Supabase
-> (below).
+If the Supabase env vars are removed, the app automatically falls back to
+**demo mode** (per-browser `localStorage`, seeded with example data), whose
+credentials default to `admin@digitalclick.com` / `nexa2026` and are
+configurable via `VITE_ADMIN_EMAIL` / `VITE_ADMIN_PASSWORD`.
 
 ---
 

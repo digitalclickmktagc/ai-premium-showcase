@@ -115,12 +115,27 @@ export class SupabaseService implements DataService {
     };
   }
 
+  /**
+   * fetch wrapper that turns a network-level failure ("Failed to fetch" —
+   * offline, DNS, CORS, Supabase unreachable) into a message the operator can
+   * act on, instead of a raw browser string.
+   */
+  private async http(input: string, init?: RequestInit): Promise<Response> {
+    try {
+      return await fetch(input, init);
+    } catch {
+      throw new Error(
+        "Não foi possível conectar ao servidor. Verifique sua conexão com a internet e tente novamente.",
+      );
+    }
+  }
+
   private async rest<T>(
     path: string,
     init: RequestInit & { useUser?: boolean } = {},
   ): Promise<T> {
     const { useUser = true, headers, ...rest } = init;
-    const res = await fetch(`${this.base}/rest/v1/${path}`, {
+    const res = await this.http(`${this.base}/rest/v1/${path}`, {
       ...rest,
       headers: { ...this.headers(useUser), ...(headers as Record<string, string>) },
     });
@@ -182,7 +197,7 @@ export class SupabaseService implements DataService {
   }
 
   async login(email: string, password: string): Promise<Session> {
-    const res = await fetch(`${this.base}/auth/v1/token?grant_type=password`, {
+    const res = await this.http(`${this.base}/auth/v1/token?grant_type=password`, {
       method: "POST",
       headers: { apikey: this.anonKey, "Content-Type": "application/json" },
       body: JSON.stringify({ email: email.trim(), password }),
@@ -199,7 +214,7 @@ export class SupabaseService implements DataService {
 
   private async refresh(): Promise<void> {
     if (!this.session) throw new Error("Sem sessão para renovar.");
-    const res = await fetch(`${this.base}/auth/v1/token?grant_type=refresh_token`, {
+    const res = await this.http(`${this.base}/auth/v1/token?grant_type=refresh_token`, {
       method: "POST",
       headers: { apikey: this.anonKey, "Content-Type": "application/json" },
       body: JSON.stringify({ refresh_token: this.session.refresh_token }),

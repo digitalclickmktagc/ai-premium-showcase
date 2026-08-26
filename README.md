@@ -8,7 +8,9 @@ calendar per client), with per-calendar client sharing.
 
 - Admin: **`/app`** (login at **`/app/login`**)
 - Client share view: **`/c/:token`** (isolated, read-only)
-- Demo login: `admin@digitalclick.com` / `nexa2026`
+- Backed by **Supabase** (see `.env`); sign in with the admin user created in
+  the Supabase dashboard. Without those env vars it falls back to a
+  browser-local demo mode.
 
 Full documentation: **[`docs/EDITORIAL_CALENDAR.md`](docs/EDITORIAL_CALENDAR.md)**.
 Source lives under `src/calendar-app/`. The landing page (`/`) is unchanged.
