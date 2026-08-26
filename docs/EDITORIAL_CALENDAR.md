@@ -19,19 +19,17 @@ under `src/calendar-app/`. The marketing landing page (`/`) is untouched.
 | `/c/:token` | Client | **Isolated, read-only** view of a single calendar via its share token. No login, no other clients, no internal notes. |
 | `/` | Public | The original landing page (unchanged). |
 
-### Demo access
+### Access
 
-The app ships in **demo mode** (data stored in the browser via `localStorage`)
-and is seeded with example clients and posts on first load.
+This deployment is connected to **Supabase** (see `.env`), so sign in at
+`/app/login` with the admin user created in the Supabase dashboard
+(**Authentication → Users**). Data is shared across devices and isolation is
+enforced server-side by RLS.
 
-- **E-mail:** `admin@digitalclick.com`
-- **Senha:** `nexa2026`
-
-(Configurable via `VITE_ADMIN_EMAIL` / `VITE_ADMIN_PASSWORD`.)
-
-> In demo mode data is per-browser. A client share link opens the seeded data in
-> the **same** browser only. For real cross-device sharing, connect Supabase
-> (below).
+If the Supabase env vars are removed, the app automatically falls back to
+**demo mode** (per-browser `localStorage`, seeded with example data), whose
+credentials default to `admin@digitalclick.com` / `nexa2026` and are
+configurable via `VITE_ADMIN_EMAIL` / `VITE_ADMIN_PASSWORD`.
 
 ---
 
@@ -115,28 +113,27 @@ bun run preview # serve the production build locally
 
 ## Going to production with Supabase
 
-The demo `localStorage` layer implements the same `DataService` interface as a
-real backend, so switching is a drop-in.
+The Supabase adapter is already wired in (`src/calendar-app/services/supabaseService.ts`),
+implemented with plain `fetch` against Supabase's REST/Auth APIs — **no extra npm
+dependency**. It is selected automatically when the two env vars below are
+present; otherwise the app falls back to the localStorage demo.
 
 1. Create a Supabase project.
-2. Run `supabase/schema.sql` in the SQL editor (tables + RLS + the public
-   `get_public_calendar` function).
-3. In **Auth**, create your agency admin user (email/password).
-4. Install the client and rename the adapter template:
-   ```sh
-   bun add @supabase/supabase-js
-   mv src/calendar-app/services/supabaseService.ts.example \
-      src/calendar-app/services/supabaseService.ts
+2. In the **SQL Editor**, paste and run `supabase/schema.sql` (tables + RLS +
+   the public `get_public_calendar` function).
+3. In **Authentication → Users**, add your agency admin (email + password).
+4. Provide the env vars at build time — commit a `.env.production`, or set them
+   in your host's build settings. The anon key is public by design (protected by
+   RLS), so it is safe in the client bundle:
    ```
-5. Uncomment the Supabase branch in `src/calendar-app/services/index.ts`.
-6. Set env vars (see `.env.example`):
+   VITE_SUPABASE_URL=https://YOUR-PROJECT.supabase.co
+   VITE_SUPABASE_ANON_KEY=YOUR-ANON-PUBLIC-KEY
    ```
-   VITE_SUPABASE_URL=...
-   VITE_SUPABASE_ANON_KEY=...
-   ```
+5. Rebuild / redeploy.
 
 That's it — the same UI now runs on Postgres with real multi-device sharing and
-server-enforced isolation.
+server-enforced isolation. Log in at `/app/login` with the admin user from
+step 3. (The demo credentials only apply to the localStorage fallback.)
 
 ---
 
@@ -150,7 +147,7 @@ src/calendar-app/
 ├─ services/
 │  ├─ DataService.ts       # storage-agnostic contract
 │  ├─ localStorageService.ts (+ .test.ts)  # demo adapter (default)
-│  ├─ supabaseService.ts.example           # production adapter template
+│  ├─ supabaseService.ts    # production adapter (fetch-based, no deps)
 │  ├─ seed.ts              # demo data
 │  └─ index.ts             # adapter selector
 ├─ store/AppProvider.tsx   # React state, auth session, CRUD actions
