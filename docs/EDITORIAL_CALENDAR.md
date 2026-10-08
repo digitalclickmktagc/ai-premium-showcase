@@ -137,6 +137,25 @@ step 3. (The demo credentials only apply to the localStorage fallback.)
 
 ---
 
+## Keeping the Supabase project awake (free plan)
+
+Supabase's **free plan pauses a project after ~7 days of inactivity**. While
+paused the API is offline, so admin login fails and client share links stop
+working until someone resumes the project in the dashboard (Supabase →
+project → **Resume project**; the pt-BR UI mistranslates this button as
+"Projeto de currículo"). Resuming keeps the same URL, keys and data, so no
+redeploy is needed.
+
+To avoid it recurring, `.github/workflows/keep-supabase-awake.yml` pings the
+database once a day (it calls `get_public_calendar`, which runs a real query).
+Caveats:
+
+- It is a widely used but **unofficial** workaround — not guaranteed by Supabase.
+- GitHub disables scheduled workflows after 60 days with no repository
+  activity (it emails the owner; re-enable from the Actions tab).
+- For business-critical use, the **Pro plan never pauses** and is the only
+  guaranteed fix.
+
 ## Architecture
 
 ```
