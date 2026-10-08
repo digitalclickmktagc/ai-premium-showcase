@@ -1,0 +1,57 @@
+# Mantém o projeto Supabase ativo.
+#
+# O plano gratuito do Supabase pausa um projeto após ~7 dias SEM atividade.
+# Quando isso acontece a API sai do ar e o Calendário Editorial para de
+# funcionar (login falha, links de cliente não abrem) até alguém retomar o
+# projeto manualmente no painel.
+#
+# Este job faz uma chamada diária que executa uma consulta real no banco
+# (a função get_public_calendar), o que conta como atividade e evita a pausa.
+#
+# Observações:
+#  - É uma solução não-oficial, amplamente usada, mas não garantida pelo
+#    Supabase. Para uso crítico, o plano Pro é o caminho garantido.
+#  - O GitHub desativa workflows agendados após 60 dias sem nenhuma atividade
+#    no repositório (ele avisa por e-mail; basta reativar na aba Actions).
+name: Keep Supabase awake
+
+on:
+  schedule:
+    - cron: "23 13 * * *" # todo dia ~13:23 UTC (10:23 BRT)
+  workflow_dispatch: # permite rodar manualmente pela aba Actions
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Ping no Supabase (consulta real ao banco)
+        run: |
+          set -euo pipefail
+          # Lê a URL e a chave publishable do .env (fonte única de verdade).
+          set -a; source .env; set +a
+
+          if [ -z "${VITE_SUPABASE_URL:-}" ] || [ -z "${VITE_SUPABASE_ANON_KEY:-}" ]; then
+            echo "VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY ausentes no .env"
+            exit 1
+          fi
+
+          code=$(curl -sS -o /tmp/resp.txt -w '%{http_code}' \
+            -X POST "${VITE_SUPABASE_URL}/rest/v1/rpc/get_public_calendar" \
+            -H "apikey: ${VITE_SUPABASE_ANON_KEY}" \
+            -H "Authorization: Bearer ${VITE_SUPABASE_ANON_KEY}" \
+            -H "Content-Type: application/json" \
+            -d '{"p_token":"keep-alive-ping"}' \
+            --max-time 30)
+
+          echo "HTTP ${code}"
+          echo "Resposta: $(head -c 200 /tmp/resp.txt)"
+
+          # 200 = projeto ativo e respondendo (a função devolve null para um
+          # token inexistente, o que é o esperado neste ping).
+          if [ "$code" != "200" ]; then
+            echo "::error::Supabase não respondeu 200 — o projeto pode estar pausado."
+            exit 1
+          fi
+          echo "Projeto Supabase ativo."
