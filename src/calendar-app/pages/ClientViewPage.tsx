@@ -9,6 +9,7 @@ import MonthGrid from "../components/MonthGrid";
 import MonthNavigator from "../components/MonthNavigator";
 import StatusLegend from "../components/StatusLegend";
 import PostViewDialog from "../components/PostView";
+import { ThemeToggle } from "../theme";
 
 type LoadState = "loading" | "ready" | "not-found";
 
@@ -19,12 +20,6 @@ export default function ClientViewPage() {
   const [month, setMonth] = useState(() => startOfMonth(new Date()));
   const [selected, setSelected] = useState<PublicPost | null>(null);
   const [open, setOpen] = useState(false);
-
-  // Restore the real cursor (the landing page hides it globally).
-  useEffect(() => {
-    document.body.classList.add("calendar-route");
-    return () => document.body.classList.remove("calendar-route");
-  }, []);
 
   useEffect(() => {
     let active = true;
@@ -102,9 +97,12 @@ export default function ClientViewPage() {
               </p>
             </div>
           </div>
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-secondary/50 px-3 py-1 text-xs text-muted-foreground">
-            <Eye className="h-3.5 w-3.5" /> Somente leitura
-          </span>
+          <div className="flex items-center gap-1.5">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted px-3 py-1 text-xs text-muted-foreground">
+              <Eye className="h-3.5 w-3.5" /> Somente leitura
+            </span>
+            <ThemeToggle />
+          </div>
         </div>
       </header>
 

@@ -92,7 +92,7 @@ export default function DashboardPage() {
             return (
               <div
                 key={client.id}
-                className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card/50 transition-colors hover:border-primary/30"
+                className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card transition-colors hover:border-primary/30"
               >
                 <div className="h-1.5 w-full" style={{ backgroundColor: client.color }} />
                 <div className="flex flex-1 flex-col p-4">
@@ -104,7 +104,7 @@ export default function DashboardPage() {
                           {client.name}
                         </h3>
                         {!client.active && (
-                          <span className="shrink-0 rounded bg-white/5 px-1.5 py-0.5 text-[9px] uppercase text-muted-foreground">
+                          <span className="shrink-0 rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[9px] uppercase text-muted-foreground">
                             inativo
                           </span>
                         )}
@@ -172,7 +172,7 @@ export default function DashboardPage() {
 
 function StatCard({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-xl border border-border bg-card/40 px-4 py-3">
+    <div className="rounded-xl border border-border bg-card px-4 py-3">
       <p className="font-display text-2xl font-bold">{value}</p>
       <p className="text-xs text-muted-foreground">{label}</p>
     </div>

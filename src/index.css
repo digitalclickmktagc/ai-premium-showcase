@@ -696,3 +696,84 @@ body.calendar-route :disabled,
 body.calendar-route [aria-disabled="true"] {
   cursor: not-allowed !important;
 }
+
+/* ─────────────────────────────────────────────
+   Editorial Calendar — light theme
+   Variables are redefined on <body> (not :root) so the landing page stays
+   permanently dark, and so portalled dialogs/dropdowns/toasts — which mount
+   under <body> — inherit them too.
+───────────────────────────────────────────── */
+body.calendar-route[data-theme="light"] {
+  --background: 240 20% 98%;
+  --foreground: 240 10% 12%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 240 10% 12%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 240 10% 12%;
+
+  --primary: 271 76% 50%;
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 240 6% 95%;
+  --secondary-foreground: 240 6% 20%;
+
+  --muted: 240 6% 95%;
+  --muted-foreground: 240 4% 42%;
+
+  --accent: 271 76% 50%;
+  --accent-foreground: 0 0% 100%;
+
+  --destructive: 0 72% 48%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 240 6% 88%;
+  --input: 240 6% 86%;
+  --ring: 271 76% 50%;
+
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+
+/* The landing page forces light text and a dark color-scheme on every field;
+   undo that for light mode or inputs render white-on-white. */
+body.calendar-route[data-theme="light"] input,
+body.calendar-route[data-theme="light"] select,
+body.calendar-route[data-theme="light"] textarea {
+  color: hsl(var(--foreground));
+  color-scheme: light;
+}
+body.calendar-route[data-theme="light"] input::placeholder,
+body.calendar-route[data-theme="light"] textarea::placeholder {
+  color: hsl(var(--muted-foreground)) !important;
+  opacity: 0.75;
+}
+body.calendar-route[data-theme="light"] ::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+}
+body.calendar-route[data-theme="light"] ::selection {
+  background: hsl(var(--primary) / 0.18);
+  color: hsl(var(--foreground));
+}
+
+/* Status badge text needs more weight on a light background. */
+body.calendar-route[data-theme="light"] .status-badge {
+  filter: saturate(1.25) brightness(0.72);
+}
+
+/* ─────────────────────────────────────────────
+   Editorial Calendar — drag & drop
+───────────────────────────────────────────── */
+body.calendar-route.ec-dragging,
+body.calendar-route.ec-dragging * {
+  cursor: grabbing !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+}
+body.calendar-route .ec-draggable {
+  touch-action: manipulation;
+}
+body.calendar-route.ec-dragging .ec-draggable {
+  touch-action: none;
+}

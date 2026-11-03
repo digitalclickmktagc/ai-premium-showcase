@@ -12,7 +12,7 @@ export default function EmptyState({
   action?: ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border bg-card/30 px-6 py-14 text-center">
+    <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border bg-card px-6 py-14 text-center">
       {icon && <div className="text-muted-foreground">{icon}</div>}
       <div className="space-y-1">
         <h3 className="font-display text-lg font-semibold">{title}</h3>

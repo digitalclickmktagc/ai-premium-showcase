@@ -51,7 +51,7 @@ export default function ShareLink({
 
   return (
     <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-      <code className="flex-1 truncate rounded-lg border border-border bg-secondary/40 px-3 py-2 text-xs text-muted-foreground">
+      <code className="flex-1 truncate rounded-lg border border-border bg-muted px-3 py-2 text-xs text-muted-foreground">
         {url}
       </code>
       <div className="flex gap-2">

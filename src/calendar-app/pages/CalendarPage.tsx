@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { startOfMonth } from "date-fns";
+import { toast } from "sonner";
 import { CalendarX2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -14,7 +15,7 @@ import {
 import { Label } from "@/components/ui/label";
 import type { Post, PostStatus } from "../types";
 import { ALL_STATUSES, statusConfig } from "../status";
-import { initials } from "../utils";
+import { formatShortDay, initials } from "../utils";
 import { useApp } from "../store/AppProvider";
 import AdminLayout from "../components/AdminLayout";
 import MonthGrid from "../components/MonthGrid";
@@ -27,8 +28,13 @@ import EmptyState from "../components/EmptyState";
 export default function CalendarPage() {
   const { calendarId = "" } = useParams();
   const navigate = useNavigate();
-  const { getCalendar, getClientForCalendar, postsForCalendar, regenerateShareToken } =
-    useApp();
+  const {
+    getCalendar,
+    getClientForCalendar,
+    postsForCalendar,
+    regenerateShareToken,
+    movePost,
+  } = useApp();
 
   const calendar = getCalendar(calendarId);
   const client = getClientForCalendar(calendarId);
@@ -80,6 +86,28 @@ export default function CalendarPage() {
     setCreateDate(date);
     setModalOpen(true);
   };
+  /** Drag & drop: move a post to another day and persist it. */
+  const handleMovePost = async (post: Post, newDate: string) => {
+    const previousDate = post.date;
+    try {
+      await movePost(post.id, newDate);
+      toast.success(`"${post.title}" movido para ${formatShortDay(newDate)}`, {
+        action: {
+          label: "Desfazer",
+          onClick: () => {
+            movePost(post.id, previousDate).catch(() =>
+              toast.error("Não foi possível desfazer."),
+            );
+          },
+        },
+      });
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "Não foi possível mover o post.",
+      );
+    }
+  };
+
   const openEdit = (post: Post) => {
     setEditingPost(post);
     setCreateDate(undefined);
@@ -119,7 +147,7 @@ export default function CalendarPage() {
       </div>
 
       {/* Share link */}
-      <div className="mb-5 rounded-xl border border-border bg-card/40 p-3">
+      <div className="mb-5 rounded-xl border border-border bg-card p-3">
         <div className="mb-2 flex items-center gap-2">
           <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             Link de compartilhamento do cliente
@@ -196,6 +224,7 @@ export default function CalendarPage() {
         accentColor={client.color}
         onPostClick={openEdit}
         onDayClick={openCreate}
+        onMovePost={handleMovePost}
       />
 
       <div className="mt-4">
