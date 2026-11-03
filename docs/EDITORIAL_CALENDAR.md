@@ -137,6 +137,39 @@ step 3. (The demo credentials only apply to the localStorage fallback.)
 
 ---
 
+## Light / dark theme
+
+Both the admin area and the client share view have a sun/moon toggle. The
+choice is saved per browser (`editorial-calendar:theme:v1`); until the user
+picks one, the app follows the operating system.
+
+Implementation notes:
+
+- The palette is redefined on `body[data-theme="light"]`, not on `:root`, for
+  two reasons: the marketing landing page must stay permanently dark, and
+  dialogs/dropdowns/toasts render in portals attached to `<body>`, so they only
+  inherit the variables if the variables live there.
+- The landing page's global rules force light text and `color-scheme: dark` on
+  every field. Light mode overrides those, or inputs would render white on
+  white. Measured contrast is ~16:1 (light) and ~18:1 (dark).
+- Component surfaces use `foreground/<alpha>` rather than `white/<alpha>` so a
+  tint flips automatically with the theme.
+
+## Drag to reschedule
+
+On the admin calendar, posts can be dragged between days. The card moves
+immediately (optimistic update) and the write happens in the background; if it
+fails, the card snaps back and an error is shown. Each move appends to the
+post's reschedule history, and a toast offers **Desfazer**.
+
+- Built on Pointer Events, so one implementation covers mouse and touch with
+  no drag-and-drop dependency (`hooks/useDragToReschedule.ts`).
+- Mouse: a drag begins after ~5px of movement, so a plain click still opens the
+  post. Touch: a drag needs a ~260ms hold, so swiping still scrolls the page.
+- Dragging keeps the post's status — moving a published post does not silently
+  mark it "Reagendado". Change the status in the post dialog when you want that.
+- Deleted posts and the read-only client view are not draggable.
+
 ## Keeping the Supabase project awake (free plan)
 
 Supabase's **free plan pauses a project after ~7 days of inactivity**. While

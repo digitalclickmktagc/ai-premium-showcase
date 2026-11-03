@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   eachDayOfInterval,
   endOfMonth,
@@ -12,6 +12,8 @@ import { Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Post } from "../types";
 import { toDayISO } from "../utils";
+import { statusConfig } from "../status";
+import { useDragToReschedule } from "../hooks/useDragToReschedule";
 import PostChip from "./PostChip";
 
 const WEEKDAYS = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
@@ -38,6 +40,7 @@ export default function MonthGrid({
   readOnly,
   onPostClick,
   onDayClick,
+  onMovePost,
 }: {
   month: Date;
   posts: Post[];
@@ -45,8 +48,25 @@ export default function MonthGrid({
   readOnly?: boolean;
   onPostClick: (post: Post) => void;
   onDayClick?: (dayISO: string) => void;
+  /** Enables drag-to-reschedule. Omit for a read-only calendar. */
+  onMovePost?: (post: Post, newDate: string) => void;
 }) {
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
+
+  const canDrag = !readOnly && Boolean(onMovePost);
+
+  const handleDrop = useCallback(
+    (post: Post, dayISO: string) => {
+      if (dayISO === post.date) return; // dropped back where it started
+      onMovePost?.(post, dayISO);
+    },
+    [onMovePost],
+  );
+
+  const { drag, overDay, startDrag, consumeDragClick } = useDragToReschedule<Post>({
+    enabled: canDrag,
+    onDrop: handleDrop,
+  });
 
   const days = useMemo(() => {
     const gridStart = startOfWeek(startOfMonth(month), { weekStartsOn: 0 });
@@ -76,9 +96,9 @@ export default function MonthGrid({
     });
 
   return (
-    <div className="overflow-hidden rounded-xl border border-border bg-card/40">
+    <div className="overflow-hidden rounded-xl border border-border bg-card">
       {/* Weekday header */}
-      <div className="grid grid-cols-7 border-b border-border bg-secondary/30">
+      <div className="grid grid-cols-7 border-b border-border bg-muted">
         {WEEKDAYS.map((w) => (
           <div
             key={w}
@@ -100,13 +120,17 @@ export default function MonthGrid({
           const isExpanded = expanded.has(dayISO);
           const visible = isExpanded ? dayPosts : dayPosts.slice(0, COLLAPSED);
           const hidden = dayPosts.length - visible.length;
+          const isDropTarget =
+            Boolean(drag) && overDay === dayISO && drag?.item.date !== dayISO;
 
           return (
             <div
               key={dayISO}
+              data-day={dayISO}
               className={cn(
-                "group relative flex min-h-[92px] flex-col gap-1 border-b border-r border-border/60 p-1 sm:min-h-[120px] sm:p-1.5",
-                !inMonth && "bg-black/20",
+                "group relative flex min-h-[92px] flex-col gap-1 border-b border-r border-border/60 p-1 transition-colors sm:min-h-[120px] sm:p-1.5",
+                !inMonth && "bg-foreground/[0.03]",
+                isDropTarget && "bg-primary/15 ring-2 ring-inset ring-primary",
               )}
             >
               {/* Date number + add affordance */}
@@ -142,7 +166,18 @@ export default function MonthGrid({
                   <PostChip
                     key={post.id}
                     post={post}
-                    onClick={() => onPostClick(post)}
+                    draggable={canDrag && post.status !== "deleted"}
+                    dragging={drag?.item.id === post.id}
+                    onPointerDown={
+                      canDrag && post.status !== "deleted"
+                        ? (e) => startDrag(e, post)
+                        : undefined
+                    }
+                    onClick={() => {
+                      // Swallow the click that ends a drag.
+                      if (consumeDragClick()) return;
+                      onPostClick(post);
+                    }}
                   />
                 ))}
               </div>
@@ -172,7 +207,7 @@ export default function MonthGrid({
                   type="button"
                   aria-label={`Adicionar post em ${dayISO}`}
                   onClick={() => onDayClick(dayISO)}
-                  className="flex flex-1 items-center justify-center rounded-md text-[10px] text-muted-foreground/0 transition-colors group-hover:text-muted-foreground/70 group-hover:hover:bg-white/[0.03]"
+                  className="flex flex-1 items-center justify-center rounded-md text-[10px] text-muted-foreground/0 transition-colors group-hover:text-muted-foreground/70 group-hover:hover:bg-foreground/[0.04]"
                 >
                   + Post
                 </button>
@@ -181,6 +216,20 @@ export default function MonthGrid({
           );
         })}
       </div>
+
+      {/* Floating card that follows the pointer while dragging */}
+      {drag && (
+        <div
+          className="pointer-events-none fixed z-[60] max-w-[220px] rounded-md border border-border bg-popover px-2 py-1 text-[11px] font-medium text-popover-foreground shadow-lg"
+          style={{
+            left: drag.x + 12,
+            top: drag.y - 10,
+            borderLeft: `3px solid ${statusConfig(drag.item.status).color}`,
+          }}
+        >
+          <span className="block truncate">{drag.item.title}</span>
+        </div>
+      )}
     </div>
   );
 }

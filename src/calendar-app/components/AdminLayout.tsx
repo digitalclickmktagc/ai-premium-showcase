@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import { useApp } from "../store/AppProvider";
 import { initials } from "../utils";
 import ClientFormDialog from "./ClientFormDialog";
+import { ThemeToggle } from "../theme";
 
 function NavContent({
   activeClientId,
@@ -61,7 +62,7 @@ function NavContent({
             "flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
             !activeClientId
               ? "bg-primary/15 text-foreground"
-              : "text-muted-foreground hover:bg-white/5 hover:text-foreground",
+              : "text-muted-foreground hover:bg-foreground/[0.06] hover:text-foreground",
           )}
         >
           <LayoutGrid className="h-4 w-4" />
@@ -89,8 +90,8 @@ function NavContent({
               className={cn(
                 "flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm transition-colors",
                 active
-                  ? "bg-white/[0.07] text-foreground"
-                  : "text-muted-foreground hover:bg-white/5 hover:text-foreground",
+                  ? "bg-foreground/[0.08] text-foreground"
+                  : "text-muted-foreground hover:bg-foreground/[0.06] hover:text-foreground",
                 !client.active && "opacity-60",
               )}
             >
@@ -100,7 +101,7 @@ function NavContent({
               />
               <span className="truncate">{client.name}</span>
               {!client.active && (
-                <span className="ml-auto shrink-0 rounded bg-white/5 px-1.5 py-0.5 text-[9px] uppercase text-muted-foreground">
+                <span className="ml-auto shrink-0 rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[9px] uppercase text-muted-foreground">
                   inativo
                 </span>
               )}
@@ -130,6 +131,7 @@ function NavContent({
             <p className="truncate text-xs font-medium">{session?.name}</p>
             <p className="truncate text-[11px] text-muted-foreground">{session?.email}</p>
           </div>
+          <ThemeToggle className="h-8 w-8" />
           <Button
             variant="ghost"
             size="icon"
@@ -164,7 +166,7 @@ export default function AdminLayout({
   return (
     <div className="ce-app min-h-[100dvh] bg-background text-foreground">
       {/* Desktop sidebar */}
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 border-r border-border bg-card/40 lg:block">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 border-r border-border bg-card lg:block">
         <NavContent
           activeClientId={activeClientId}
           onNewClient={() => setNewClientOpen(true)}
@@ -193,6 +195,7 @@ export default function AdminLayout({
             {title ?? "Calendário Editorial"}
           </span>
         </div>
+        <ThemeToggle className="ml-auto" />
       </header>
 
       {/* Content */}

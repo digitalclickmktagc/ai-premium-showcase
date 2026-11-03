@@ -41,7 +41,7 @@ export function PostReadOnlyBody({ post }: { post: PostLike }) {
       <div className="flex flex-wrap items-center gap-2">
         <StatusBadge status={post.status} />
         {post.contentType && (
-          <span className="rounded-full border border-border bg-secondary/40 px-2.5 py-1 text-xs text-muted-foreground">
+          <span className="rounded-full border border-border bg-muted px-2.5 py-1 text-xs text-muted-foreground">
             {post.contentType}
           </span>
         )}

@@ -4,6 +4,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -58,6 +59,8 @@ interface AppContextValue {
   createPost: (input: CreatePostInput) => Promise<Post>;
   updatePost: (id: string, patch: UpdatePostInput) => Promise<Post>;
   reschedulePost: (id: string, newDate: string) => Promise<Post>;
+  /** Optimistically move a post to another day (used by drag & drop). */
+  movePost: (id: string, newDate: string) => Promise<void>;
   deletePost: (id: string) => Promise<Post>;
   restorePost: (id: string, status?: PostStatus) => Promise<Post>;
 
@@ -73,6 +76,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [clients, setClients] = useState<Client[]>([]);
   const [calendars, setCalendars] = useState<Calendar[]>([]);
   const [posts, setPosts] = useState<Post[]>([]);
+  // Mirrors `posts` synchronously so an optimistic update can roll back even
+  // when the write rejects before React has applied the state updater.
+  const postsRef = useRef<Post[]>(posts);
+  postsRef.current = posts;
 
   const refresh = useCallback(async () => {
     const db = await service.getDatabase();
@@ -102,10 +109,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [refresh, service]);
 
   // Restore the real cursor on calendar routes (the landing page hides it).
-  useEffect(() => {
-    document.body.classList.add("calendar-route");
-    return () => document.body.classList.remove("calendar-route");
-  }, []);
+  // The `calendar-route` body class and the theme are owned by ThemeProvider.
 
   // ── selectors ──────────────────────────────────────────────
   const getClient = useCallback(
@@ -213,6 +217,37 @@ export function AppProvider({ children }: { children: ReactNode }) {
     },
     [service, refresh],
   );
+  /**
+   * Move a post to another day, applied optimistically so a drag feels
+   * instant even when the backend is remote. Reverts if the write fails.
+   */
+  const movePost = useCallback(
+    async (id: string, newDate: string) => {
+      const snapshot = postsRef.current;
+      setPosts((current) =>
+        current.map((p) =>
+          p.id === id && p.date !== newDate
+            ? {
+                ...p,
+                date: newDate,
+                rescheduleHistory: [
+                  ...p.rescheduleHistory,
+                  { from: p.date, to: newDate, at: new Date().toISOString() },
+                ],
+              }
+            : p,
+        ),
+      );
+      try {
+        await service.updatePost(id, { date: newDate });
+        await refresh();
+      } catch (err) {
+        setPosts(snapshot); // put it back where it was
+        throw err;
+      }
+    },
+    [service, refresh],
+  );
   const deletePost = useCallback(
     async (id: string) => {
       const res = await service.deletePost(id);
@@ -250,6 +285,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     createPost,
     updatePost,
     reschedulePost,
+    movePost,
     deletePost,
     restorePost,
     refresh,

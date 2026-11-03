@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import { AppProvider } from "./calendar-app/store/AppProvider";
+import { ThemeProvider } from "./calendar-app/theme";
 import RequireAuth from "./calendar-app/components/RequireAuth";
 import LoginPage from "./calendar-app/pages/LoginPage";
 import DashboardPage from "./calendar-app/pages/DashboardPage";
@@ -16,28 +17,30 @@ const queryClient = new QueryClient();
 
 /** Admin area — a single AppProvider wraps all admin routes so state persists. */
 const AdminApp = () => (
-  <AppProvider>
-    <Routes>
-      <Route path="login" element={<LoginPage />} />
-      <Route
-        index
-        element={
-          <RequireAuth>
-            <DashboardPage />
-          </RequireAuth>
-        }
-      />
-      <Route
-        path="calendars/:calendarId"
-        element={
-          <RequireAuth>
-            <CalendarPage />
-          </RequireAuth>
-        }
-      />
-      <Route path="*" element={<NotFound />} />
-    </Routes>
-  </AppProvider>
+  <ThemeProvider>
+    <AppProvider>
+      <Routes>
+        <Route path="login" element={<LoginPage />} />
+        <Route
+          index
+          element={
+            <RequireAuth>
+              <DashboardPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="calendars/:calendarId"
+          element={
+            <RequireAuth>
+              <CalendarPage />
+            </RequireAuth>
+          }
+        />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </AppProvider>
+  </ThemeProvider>
 );
 
 const App = () => (
@@ -51,7 +54,14 @@ const App = () => (
           {/* Editorial calendar — admin area */}
           <Route path="/app/*" element={<AdminApp />} />
           {/* Editorial calendar — isolated client share view (token only) */}
-          <Route path="/c/:token" element={<ClientViewPage />} />
+          <Route
+            path="/c/:token"
+            element={
+              <ThemeProvider>
+                <ClientViewPage />
+              </ThemeProvider>
+            }
+          />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

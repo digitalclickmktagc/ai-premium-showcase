@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useApp } from "../store/AppProvider";
+import { ThemeToggle } from "../theme";
 
 const DEMO_EMAIL =
   (import.meta.env.VITE_ADMIN_EMAIL as string | undefined)?.trim() ||
@@ -48,6 +49,9 @@ export default function LoginPage() {
         className="pointer-events-none absolute inset-0 opacity-60"
         style={{ background: "var(--grad-aurora)" }}
       />
+      <div className="absolute right-4 top-4 z-10">
+        <ThemeToggle />
+      </div>
       <div className="relative w-full max-w-sm">
         <div className="mb-6 flex flex-col items-center text-center">
           <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-nexa shadow-[var(--glow-md)]">
@@ -61,7 +65,7 @@ export default function LoginPage() {
 
         <form
           onSubmit={submit}
-          className="space-y-4 rounded-2xl border border-border bg-card/60 p-6 backdrop-blur"
+          className="space-y-4 rounded-2xl border border-border bg-card p-6 backdrop-blur"
         >
           <div className="space-y-1.5">
             <Label htmlFor="email">E-mail</Label>

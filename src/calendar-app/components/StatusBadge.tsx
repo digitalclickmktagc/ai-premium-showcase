@@ -57,7 +57,7 @@ export function StatusPicker({
               "disabled:cursor-not-allowed disabled:opacity-50",
               active
                 ? "border-transparent text-white shadow-sm"
-                : "border-border bg-secondary/40 text-muted-foreground hover:bg-secondary hover:text-foreground",
+                : "border-border bg-muted text-muted-foreground hover:bg-secondary hover:text-foreground",
             )}
             style={
               active
