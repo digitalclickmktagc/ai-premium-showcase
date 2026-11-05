@@ -115,3 +115,33 @@ export function shareUrl(token: string): string {
   if (typeof window === "undefined") return `/c/${token}`;
   return `${window.location.origin}/c/${token}`;
 }
+
+/** URL schemes that are safe to put in an href we render for third parties. */
+const SAFE_LINK_SCHEMES = new Set(["http:", "https:", "mailto:"]);
+
+/**
+ * Validate a user-supplied reference link before rendering it as an anchor.
+ *
+ * The client portal shows this link to third parties, so a `javascript:` or
+ * `data:` value would run script in the client's browser. Returns the
+ * normalized URL when the scheme is safe, otherwise null so the caller can
+ * render it as inert text.
+ */
+export function safeExternalUrl(raw?: string | null): string | null {
+  if (!raw) return null;
+  const value = raw.trim();
+  if (!value) return null;
+
+  let url: URL;
+  try {
+    url = new URL(value);
+  } catch {
+    // Bare host like "drive.google.com/x" — assume https rather than reject.
+    try {
+      url = new URL(`https://${value}`);
+    } catch {
+      return null;
+    }
+  }
+  return SAFE_LINK_SCHEMES.has(url.protocol) ? url.href : null;
+}

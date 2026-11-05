@@ -10,6 +10,7 @@ import {
 import { Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import TestEnvBanner from "./components/TestEnvBanner";
 
 export type Theme = "light" | "dark";
 
@@ -96,6 +97,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   return (
     <ThemeContext.Provider value={{ theme, setTheme, toggleTheme }}>
       {children}
+      <TestEnvBanner />
     </ThemeContext.Provider>
   );
 }

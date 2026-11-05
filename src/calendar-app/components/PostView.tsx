@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { Post, PublicPost } from "../types";
 import { statusConfig } from "../status";
-import { formatLongDay, formatTimestamp } from "../utils";
+import { formatLongDay, formatTimestamp, safeExternalUrl } from "../utils";
 import { StatusBadge } from "./StatusBadge";
 
 type PostLike = Post | PublicPost;
@@ -60,17 +60,24 @@ export function PostReadOnlyBody({ post }: { post: PostLike }) {
         <p className="text-sm text-muted-foreground">Sem descrição.</p>
       )}
 
-      {post.referenceLink && (
-        <a
-          href={post.referenceLink}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
-        >
-          <ExternalLink className="h-3.5 w-3.5" />
-          Ver referência / anexo
-        </a>
-      )}
+      {post.referenceLink &&
+        (safeExternalUrl(post.referenceLink) ? (
+          <a
+            href={safeExternalUrl(post.referenceLink)!}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
+          >
+            <ExternalLink className="h-3.5 w-3.5" />
+            Ver referência / anexo
+          </a>
+        ) : (
+          // Unsafe scheme (javascript:, data:, ...) — show it, never link it.
+          <p className="text-xs text-muted-foreground">
+            Referência não reconhecida como link seguro:{" "}
+            <span className="break-all font-mono">{post.referenceLink}</span>
+          </p>
+        ))}
 
       {post.rescheduleHistory.length > 0 && (
         <RescheduleHistory history={post.rescheduleHistory} />

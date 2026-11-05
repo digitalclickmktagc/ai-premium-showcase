@@ -10,7 +10,10 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "dev:test": "vite --mode test",
+    "build:test": "vite build --mode test",
+    "preview:test": "vite preview --mode test"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
