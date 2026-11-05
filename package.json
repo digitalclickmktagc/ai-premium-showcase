@@ -13,7 +13,8 @@
     "test:watch": "vitest",
     "dev:test": "vite --mode test",
     "build:test": "vite build --mode test",
-    "preview:test": "vite preview --mode test"
+    "preview:test": "vite preview --mode test",
+    "build:preview": "vite build --mode preview"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

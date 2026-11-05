@@ -9,7 +9,8 @@ export default defineConfig(({ mode }) => ({
   // /app/*) resolve their assets when opened directly. Assumes deploy at the
   // domain root (Hostinger public_html). For a sub-directory deploy, set this
   // to the sub-path (e.g. "/app-folder/").
-  base: "/",
+  // Preview builds are served from a nested path, so assets must be relative.
+  base: mode === "preview" ? "./" : "/",
   server: {
     host: "::",
     port: 8080,

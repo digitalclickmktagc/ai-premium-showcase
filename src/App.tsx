@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, HashRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -15,6 +15,12 @@ import ClientViewPage from "./calendar-app/pages/ClientViewPage";
 import ClientHubPage from "./calendar-app/pages/ClientHubPage";
 
 const queryClient = new QueryClient();
+
+/**
+ * Hash routing for standalone preview builds, where there is no server to
+ * rewrite deep links onto index.html. Normal builds keep clean URLs.
+ */
+const Router = import.meta.env.VITE_ROUTER === "hash" ? HashRouter : BrowserRouter;
 
 /** Admin area — a single AppProvider wraps all admin routes so state persists. */
 const AdminApp = () => (
@@ -49,7 +55,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
+      <Router>
         <Routes>
           <Route path="/" element={<Index />} />
           {/* Editorial calendar — admin area */}
@@ -75,7 +81,7 @@ const App = () => (
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
-      </BrowserRouter>
+      </Router>
     </TooltipProvider>
   </QueryClientProvider>
 );
