@@ -14,10 +14,10 @@ export interface DragState<T> {
   y: number;
 }
 
-/** Finds the `data-day` cell under the pointer. */
-function dayUnderPointer(x: number, y: number): string | null {
+/** Finds the nearest drop target under the pointer, by dataset key. */
+function targetUnderPointer(x: number, y: number, attr: string): string | null {
   const el = document.elementFromPoint(x, y) as HTMLElement | null;
-  return el?.closest<HTMLElement>("[data-day]")?.dataset.day ?? null;
+  return el?.closest<HTMLElement>(`[data-${attr}]`)?.dataset[attr] ?? null;
 }
 
 /**
@@ -30,9 +30,12 @@ function dayUnderPointer(x: number, y: number): string | null {
 export function useDragToReschedule<T>({
   enabled,
   onDrop,
+  targetAttr = "day",
 }: {
   enabled: boolean;
-  onDrop: (item: T, dayISO: string) => void;
+  onDrop: (item: T, target: string) => void;
+  /** dataset key marking a drop zone: "day" on the calendar, "stage" on the board. */
+  targetAttr?: string;
 }) {
   const [press, setPress] = useState<{
     item: T;
@@ -41,7 +44,7 @@ export function useDragToReschedule<T>({
     touch: boolean;
   } | null>(null);
   const [drag, setDrag] = useState<DragState<T> | null>(null);
-  const [overDay, setOverDay] = useState<string | null>(null);
+  const [overTarget, setOverTarget] = useState<string | null>(null);
 
   // Held in a ref so a re-render mid-drag can't tear down the listeners.
   const onDropRef = useRef(onDrop);
@@ -77,15 +80,15 @@ export function useDragToReschedule<T>({
       draggedRef.current = true;
       document.body.classList.add("ec-dragging");
       setDrag({ item: press.item, x, y });
-      setOverDay(dayUnderPointer(x, y));
+      setOverTarget(targetUnderPointer(x, y, targetAttr));
     };
 
-    const finish = (dayISO: string | null) => {
-      if (started && dayISO) onDropRef.current(press.item, dayISO);
+    const finish = (target: string | null) => {
+      if (started && target) onDropRef.current(press.item, target);
       cleanup();
       setPress(null);
       setDrag(null);
-      setOverDay(null);
+      setOverTarget(null);
     };
 
     const move = (ev: PointerEvent) => {
@@ -101,11 +104,11 @@ export function useDragToReschedule<T>({
       }
       ev.preventDefault(); // stop text selection / touch scrolling mid-drag
       setDrag((d) => (d ? { ...d, x: ev.clientX, y: ev.clientY } : d));
-      setOverDay(dayUnderPointer(ev.clientX, ev.clientY));
+      setOverTarget(targetUnderPointer(ev.clientX, ev.clientY, targetAttr));
     };
 
     const up = (ev: PointerEvent) =>
-      finish(started ? dayUnderPointer(ev.clientX, ev.clientY) : null);
+      finish(started ? targetUnderPointer(ev.clientX, ev.clientY, targetAttr) : null);
     const cancel = () => finish(null);
 
     const cleanup = () => {
@@ -123,7 +126,7 @@ export function useDragToReschedule<T>({
     window.addEventListener("pointerup", up);
     window.addEventListener("pointercancel", cancel);
     return cleanup;
-  }, [press]);
+  }, [press, targetAttr]);
 
   /**
    * Returns true when the click that just fired was the tail of a drag, so the
@@ -135,5 +138,5 @@ export function useDragToReschedule<T>({
     return true;
   }, []);
 
-  return { drag, overDay, startDrag, consumeDragClick };
+  return { drag, overTarget, startDrag, consumeDragClick };
 }

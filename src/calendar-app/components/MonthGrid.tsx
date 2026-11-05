@@ -63,7 +63,7 @@ export default function MonthGrid({
     [onMovePost],
   );
 
-  const { drag, overDay, startDrag, consumeDragClick } = useDragToReschedule<Post>({
+  const { drag, overTarget, startDrag, consumeDragClick } = useDragToReschedule<Post>({
     enabled: canDrag,
     onDrop: handleDrop,
   });
@@ -121,7 +121,7 @@ export default function MonthGrid({
           const visible = isExpanded ? dayPosts : dayPosts.slice(0, COLLAPSED);
           const hidden = dayPosts.length - visible.length;
           const isDropTarget =
-            Boolean(drag) && overDay === dayISO && drag?.item.date !== dayISO;
+            Boolean(drag) && overTarget === dayISO && drag?.item.date !== dayISO;
 
           return (
             <div

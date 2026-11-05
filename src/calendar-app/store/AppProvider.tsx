@@ -61,6 +61,8 @@ interface AppContextValue {
   reschedulePost: (id: string, newDate: string) => Promise<Post>;
   /** Optimistically move a post to another day (used by drag & drop). */
   movePost: (id: string, newDate: string) => Promise<void>;
+  /** Optimistically change a post's stage (used by the board view). */
+  changeStatus: (id: string, status: PostStatus) => Promise<void>;
   /** Send a post to the client, opening a new review round. */
   requestApproval: (id: string, teamMessage?: string) => Promise<Post>;
   deletePost: (id: string) => Promise<Post>;
@@ -250,6 +252,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
     },
     [service, refresh],
   );
+  const changeStatus = useCallback(
+    async (id: string, status: PostStatus) => {
+      const snapshot = postsRef.current;
+      setPosts((current) =>
+        current.map((p) => (p.id === id ? { ...p, status } : p)),
+      );
+      try {
+        await service.updatePost(id, { status });
+        await refresh();
+      } catch (err) {
+        setPosts(snapshot); // put the card back in its column
+        throw err;
+      }
+    },
+    [service, refresh],
+  );
   const requestApproval = useCallback(
     async (id: string, teamMessage?: string) => {
       const res = await service.requestApproval(id, teamMessage);
@@ -296,6 +314,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     updatePost,
     reschedulePost,
     movePost,
+    changeStatus,
     requestApproval,
     deletePost,
     restorePost,

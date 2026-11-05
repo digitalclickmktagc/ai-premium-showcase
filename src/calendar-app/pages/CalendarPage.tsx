@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { startOfMonth } from "date-fns";
 import { toast } from "sonner";
-import { CalendarX2, Plus } from "lucide-react";
+import { CalendarDays, CalendarX2, Columns3, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -19,6 +19,7 @@ import { formatShortDay, initials } from "../utils";
 import { useApp } from "../store/AppProvider";
 import AdminLayout from "../components/AdminLayout";
 import MonthGrid from "../components/MonthGrid";
+import BoardView from "../components/BoardView";
 import MonthNavigator from "../components/MonthNavigator";
 import PostModal from "../components/PostModal";
 import ShareLink from "../components/ShareLink";
@@ -34,6 +35,7 @@ export default function CalendarPage() {
     postsForCalendar,
     regenerateShareToken,
     movePost,
+    changeStatus,
   } = useApp();
 
   const calendar = getCalendar(calendarId);
@@ -43,6 +45,7 @@ export default function CalendarPage() {
   const [statusFilter, setStatusFilter] = useState<PostStatus | "all">("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [showDeleted, setShowDeleted] = useState(false);
+  const [view, setView] = useState<"calendar" | "board">("calendar");
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingPostId, setEditingPostId] = useState<string | null>(null);
@@ -93,6 +96,28 @@ export default function CalendarPage() {
     setCreateDate(date);
     setModalOpen(true);
   };
+  /** Board drag & drop: change the post's stage. */
+  const handleChangeStatus = async (post: Post, status: PostStatus) => {
+    const previous = post.status;
+    try {
+      await changeStatus(post.id, status);
+      toast.success(`"${post.title}" → ${statusConfig(status).label}`, {
+        action: {
+          label: "Desfazer",
+          onClick: () => {
+            changeStatus(post.id, previous).catch(() =>
+              toast.error("Não foi possível desfazer."),
+            );
+          },
+        },
+      });
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "Não foi possível mover o post.",
+      );
+    }
+  };
+
   /** Drag & drop: move a post to another day and persist it. */
   const handleMovePost = async (post: Post, newDate: string) => {
     const previousDate = post.date;
@@ -176,7 +201,32 @@ export default function CalendarPage() {
 
       {/* Toolbar */}
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <MonthNavigator month={month} onChange={setMonth} />
+        <div className="flex items-center gap-3">
+          <MonthNavigator month={month} onChange={setMonth} />
+          <div className="flex rounded-lg border border-border p-0.5">
+            {([
+              ["calendar", "Calendário", CalendarDays],
+              ["board", "Quadro", Columns3],
+            ] as const).map(([key, label, Icon]) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setView(key)}
+                aria-pressed={view === key}
+                title={label}
+                className={
+                  "inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-colors " +
+                  (view === key
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground")
+                }
+              >
+                <Icon className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">{label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
         <div className="flex flex-wrap items-center gap-3">
           <Select
             value={statusFilter}
@@ -225,14 +275,24 @@ export default function CalendarPage() {
       </div>
 
       {/* Calendar grid */}
-      <MonthGrid
-        month={month}
-        posts={visiblePosts}
-        accentColor={client.color}
-        onPostClick={openEdit}
-        onDayClick={openCreate}
-        onMovePost={handleMovePost}
-      />
+      {view === "calendar" ? (
+        <MonthGrid
+          month={month}
+          posts={visiblePosts}
+          accentColor={client.color}
+          onPostClick={openEdit}
+          onDayClick={openCreate}
+          onMovePost={handleMovePost}
+        />
+      ) : (
+        <BoardView
+          posts={visiblePosts}
+          onPostClick={openEdit}
+          onCreate={() => openCreate()}
+          onChangeStatus={handleChangeStatus}
+          showDeleted={showDeleted}
+        />
+      )}
 
       <div className="mt-4">
         <StatusLegend />
