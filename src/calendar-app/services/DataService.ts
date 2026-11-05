@@ -1,3 +1,4 @@
+import type { AutomationRule, AutomationRun } from "../automation";
 import type {
   ApprovalResult,
   Calendar,
@@ -42,6 +43,7 @@ export interface DataService {
 
   // ── Admin reads ───────────────────────────────────────────────
   /** Full dataset for the authenticated admin. */
+  /** Everything the admin app renders, including the automation rules. */
   getDatabase(): Promise<Database>;
 
   // ── Clients (each client owns exactly one calendar) ───────────
@@ -91,6 +93,31 @@ export interface DataService {
       code?: string;
     },
   ): Promise<void>;
+
+  // ── Stage automations (admin only) ────────────────────────────
+  /**
+   * Rules and their execution log are admin-only on purpose: a share-link
+   * holder must never see how the agency's pipeline is wired, let alone
+   * change it. None of these methods is reachable from a client route.
+   */
+  createAutomationRule(
+    input: Omit<AutomationRule, "id" | "createdAt">,
+  ): Promise<AutomationRule>;
+  updateAutomationRule(
+    id: string,
+    patch: Partial<Pick<AutomationRule, "active" | "trigger" | "action">>,
+  ): Promise<AutomationRule>;
+  deleteAutomationRule(id: string): Promise<void>;
+  /** Appends to the insert-only log. Never updates or deletes a past run. */
+  logAutomationRun(run: AutomationRun): Promise<void>;
+  /** Most recent runs for a calendar, newest first. */
+  listAutomationRuns(calendarId: string, limit?: number): Promise<AutomationRun[]>;
+  /**
+   * Runs already recorded for these event keys — the lookup that keeps a
+   * client's decision from being acted on twice. Asking by key instead of
+   * reading the whole log keeps this cheap however long the log grows.
+   */
+  findAutomationRuns(eventKeys: string[]): Promise<AutomationRun[]>;
 
   // ── Public (client) share view ────────────────────────────────
   getPublicView(token: string): Promise<PublicCalendarView | null>;

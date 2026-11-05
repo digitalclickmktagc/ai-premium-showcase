@@ -23,6 +23,7 @@ import BoardView from "../components/BoardView";
 import MonthNavigator from "../components/MonthNavigator";
 import PostModal from "../components/PostModal";
 import ShareLink from "../components/ShareLink";
+import AutomationPanel from "../components/AutomationPanel";
 import StatusLegend from "../components/StatusLegend";
 import EmptyState from "../components/EmptyState";
 
@@ -197,6 +198,11 @@ export default function CalendarPage() {
             }
           }}
         />
+      </div>
+
+      {/* Stage automations */}
+      <div className="mb-5">
+        <AutomationPanel calendarId={calendar.id} />
       </div>
 
       {/* Toolbar */}

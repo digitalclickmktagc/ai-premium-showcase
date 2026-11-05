@@ -199,6 +199,39 @@ in the last 30 days (−10 each, max −20), and no client interaction for 21 da
 (−15). The spec's "overdue receivable" signal is deliberately absent — there is
 no financial module, so it could never fire and listing it would mislead.
 
+## Stage automations (benchmark spec 02)
+
+Each calendar can carry rules of the shape **"when X happens → do Y"**. They are
+stored as data (`automation_rule`), not code, so a new rule never means a
+deploy. Triggers: a post entering a stage, or the client deciding a review.
+Actions: move to a stage, send for client approval, reschedule in N days.
+
+Three presets cover what an agency almost always wants, creatable in one click:
+Feito → send for approval; approved → Publicado; changes requested → A Fazer.
+
+Only the triggers and actions the system can really honour are offered. Spec 02
+also lists assigning people, labels and checklists; none of those exist here, and
+offering them would promise behaviour that never fires.
+
+**Loops.** An action can raise a new event, so two rules pointing at each other
+would run forever. A chain stops at depth 5 and no rule runs twice in the same
+chain; both limits are recorded in the log as `skipped`, with the reason.
+
+**Failures never roll back the user's own action.** Dragging a card succeeds
+even if the automation it triggers fails; the failure is recorded in the log
+with its message, which is also what the panel shows.
+
+**Client decisions are applied late, on purpose.** The share link is allowed to
+do nothing but record a decision — it has no rights over the calendar — so
+"approved → Publicado" cannot run at the moment the client clicks. The agency's
+app applies it the next time it loads that calendar. Acting twice is prevented
+by the execution log: each run carries the decision's `eventKey`, and
+`automation_run` has a unique index on (rule, post, event key).
+
+The log (`automation_run`) is insert-only for the admin and invisible to clients;
+deleting a rule keeps its history. Apply
+`supabase/migrations/003_automacoes.sql` before using this against Supabase.
+
 ## Keeping the Supabase project awake (free plan)
 
 Supabase's **free plan pauses a project after ~7 days of inactivity**. While

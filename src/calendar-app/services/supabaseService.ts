@@ -26,6 +26,11 @@ import type {
 } from "../types";
 import { shareToken } from "../utils";
 import { validateDecision } from "../approval";
+import {
+  validateRule,
+  type AutomationRule,
+  type AutomationRun,
+} from "../automation";
 import type { DataService } from "./DataService";
 
 const SB_SESSION_KEY = "editorial-calendar:sb-session:v1";
@@ -74,6 +79,23 @@ const toPost = (r: any): Post => ({
   approval: r.approval ?? undefined,
   createdAt: r.created_at,
   updatedAt: r.updated_at,
+});
+const toRule = (r: any): AutomationRule => ({
+  id: r.id,
+  calendarId: r.calendar_id,
+  trigger: r.trigger,
+  action: r.action,
+  active: r.active !== false,
+  createdAt: r.created_at,
+});
+const toRun = (r: any): AutomationRun => ({
+  id: r.id,
+  ruleId: r.rule_id,
+  postId: r.post_id,
+  at: r.at,
+  result: r.result,
+  detail: r.detail ?? undefined,
+  eventKey: r.event_key ?? undefined,
 });
 // Note: no-explicit-any stays disabled below — this adapter is the boundary
 // that maps Supabase's untyped JSON rows to the domain model.
@@ -246,16 +268,21 @@ export class SupabaseService implements DataService {
 
   // ── Reads ─────────────────────────────────────────────────────
   async getDatabase(): Promise<Database> {
-    if (!this.session) return { clients: [], calendars: [], posts: [] };
-    const [clients, calendars, posts] = await Promise.all([
+    if (!this.session)
+      return { clients: [], calendars: [], posts: [], automationRules: [] };
+    const [clients, calendars, posts, rules] = await Promise.all([
       this.rest<any[]>("clients?select=*"),
       this.rest<any[]>("calendars?select=*"),
       this.rest<any[]>("posts?select=*"),
+      // Rules are small and bounded, so they travel with the first load. The
+      // execution log does not: it only grows, and is fetched on demand.
+      this.rest<any[]>("automation_rule?select=*&order=created_at.asc"),
     ]);
     return {
       clients: clients.map(toClient),
       calendars: calendars.map(toCalendar),
       posts: posts.map(toPost),
+      automationRules: rules.map(toRule),
     };
   }
 
@@ -471,6 +498,102 @@ export class SupabaseService implements DataService {
   }
 
   // ── Public share view (anon RPC, isolated + sanitized) ────────
+  // ── Stage automations ─────────────────────────────────────────
+  // Tables `automation_rule` / `automation_run`, readable and writable only by
+  // an authenticated admin (RLS in supabase/migrations/003_automacoes.sql).
+  // Anonymous share-link holders have no grant on either table.
+  async createAutomationRule(
+    input: Omit<AutomationRule, "id" | "createdAt">,
+  ): Promise<AutomationRule> {
+    const invalid = validateRule(input);
+    if (invalid) throw new Error(invalid);
+    const [row] = await this.rest<any[]>("automation_rule", {
+      method: "POST",
+      headers: { Prefer: "return=representation" },
+      body: JSON.stringify({
+        calendar_id: input.calendarId,
+        trigger: input.trigger,
+        action: input.action,
+        active: input.active,
+      }),
+    });
+    return toRule(row);
+  }
+
+  async updateAutomationRule(
+    id: string,
+    patch: Partial<Pick<AutomationRule, "active" | "trigger" | "action">>,
+  ): Promise<AutomationRule> {
+    const body: Record<string, unknown> = {};
+    if (patch.active !== undefined) body.active = patch.active;
+    if (patch.trigger !== undefined) body.trigger = patch.trigger;
+    if (patch.action !== undefined) body.action = patch.action;
+
+    const [row] = await this.rest<any[]>(
+      `automation_rule?id=eq.${encodeURIComponent(id)}`,
+      {
+        method: "PATCH",
+        headers: { Prefer: "return=representation" },
+        body: JSON.stringify(body),
+      },
+    );
+    if (!row) throw new Error("Regra não encontrada.");
+    const next = toRule(row);
+    const invalid = validateRule(next);
+    if (invalid) throw new Error(invalid);
+    return next;
+  }
+
+  async deleteAutomationRule(id: string): Promise<void> {
+    await this.rest<void>(`automation_rule?id=eq.${encodeURIComponent(id)}`, {
+      method: "DELETE",
+    });
+  }
+
+  async logAutomationRun(run: AutomationRun): Promise<void> {
+    // The log is an audit trail, not a precondition: if the insert is refused
+    // the automation itself still happened, so this must not throw upwards.
+    try {
+      await this.rest<void>("automation_run", {
+        method: "POST",
+        headers: { Prefer: "return=minimal" },
+        body: JSON.stringify({
+          rule_id: run.ruleId,
+          post_id: run.postId,
+          at: run.at,
+          result: run.result,
+          detail: run.detail ?? null,
+          event_key: run.eventKey ?? null,
+        }),
+      });
+    } catch (err) {
+      console.error("Falha ao registrar execução de automação", err);
+    }
+  }
+
+  async findAutomationRuns(eventKeys: string[]): Promise<AutomationRun[]> {
+    if (!this.session || eventKeys.length === 0) return [];
+    // PostgREST `in.(…)` wants the values quoted and comma-separated.
+    const list = eventKeys
+      .map((k) => `"${k.replace(/"/g, '\\"')}"`)
+      .join(",");
+    const rows = await this.rest<any[]>(
+      `automation_run?event_key=in.(${encodeURIComponent(list)})&select=*`,
+    );
+    return rows.map(toRun);
+  }
+
+  async listAutomationRuns(calendarId: string, limit = 50): Promise<AutomationRun[]> {
+    if (!this.session) return [];
+    // `post!inner` filters runs down to this calendar's posts server-side.
+    const rows = await this.rest<any[]>(
+      `automation_run?select=*,posts!inner(calendar_id)&posts.calendar_id=eq.${encodeURIComponent(
+        calendarId,
+      )}&order=at.desc&limit=${limit}`,
+    );
+    return rows.map(toRun);
+  }
+
   async getPublicView(token: string): Promise<PublicCalendarView | null> {
     const data = await this.rest<PublicCalendarView | null>("rpc/get_public_calendar", {
       method: "POST",

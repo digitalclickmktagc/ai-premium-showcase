@@ -1,3 +1,5 @@
+import type { AutomationRule, AutomationRun } from "./automation";
+
 /**
  * Domain model for the editorial calendar app.
  *
@@ -151,6 +153,10 @@ export interface Database {
   posts: Post[];
   /** Short-lived approval codes. Never exposed through the public view. */
   approvalCodes?: ApprovalCodeEntry[];
+  /** Stage automations, scoped per calendar. Admin-only. */
+  automationRules?: AutomationRule[];
+  /** Insert-only execution log for those automations. Admin-only. */
+  automationRuns?: AutomationRun[];
 }
 
 /**

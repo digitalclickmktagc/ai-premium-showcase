@@ -107,7 +107,7 @@ describe("SupabaseService — authenticated reads", () => {
     mockFetch([{ body: [] }]);
     await svc.getDatabase();
 
-    expect(calls).toHaveLength(3);
+    expect(calls).toHaveLength(4);
     for (const c of calls) {
       expect(c.headers.apikey).toBe(KEY);
       expect(c.headers.Authorization).toBe("Bearer user-access-token");
@@ -116,6 +116,7 @@ describe("SupabaseService — authenticated reads", () => {
       `${URL}/rest/v1/clients?select=*`,
       `${URL}/rest/v1/calendars?select=*`,
       `${URL}/rest/v1/posts?select=*`,
+      `${URL}/rest/v1/automation_rule?select=*&order=created_at.asc`,
     ]);
   });
 
@@ -123,7 +124,7 @@ describe("SupabaseService — authenticated reads", () => {
     const svc = new SupabaseService(URL, KEY);
     mockFetch([{ body: [] }]);
     const db = await svc.getDatabase();
-    expect(db).toEqual({ clients: [], calendars: [], posts: [] });
+    expect(db).toEqual({ clients: [], calendars: [], posts: [], automationRules: [] });
     expect(calls).toHaveLength(0);
   });
 });
@@ -216,5 +217,107 @@ describe("SupabaseService — public share view (isolation)", () => {
     const svc = new SupabaseService(URL, KEY);
     mockFetch([{ body: null }]);
     expect(await svc.getPublicView("nope")).toBeNull();
+  });
+});
+
+describe("SupabaseService — stage automations", () => {
+  it("creates a rule with snake_case columns and the jsonb trigger/action", async () => {
+    const svc = await loggedInService();
+    mockFetch([
+      {
+        body: [
+          {
+            id: "r1",
+            calendar_id: "cal1",
+            trigger: { type: "entered_stage", stage: "done" },
+            action: { type: "send_for_review" },
+            active: true,
+            created_at: "t",
+          },
+        ],
+      },
+    ]);
+
+    const rule = await svc.createAutomationRule({
+      calendarId: "cal1",
+      active: true,
+      trigger: { type: "entered_stage", stage: "done" },
+      action: { type: "send_for_review" },
+    });
+
+    expect(calls[0].url).toBe(`${URL}/rest/v1/automation_rule`);
+    expect(calls[0].method).toBe("POST");
+    expect(calls[0].body).toEqual({
+      calendar_id: "cal1",
+      trigger: { type: "entered_stage", stage: "done" },
+      action: { type: "send_for_review" },
+      active: true,
+    });
+    expect(rule).toMatchObject({ id: "r1", calendarId: "cal1", active: true });
+  });
+
+  it("never sends an invalid rule to the server", async () => {
+    const svc = await loggedInService();
+    mockFetch([{ body: [] }]);
+    await expect(
+      svc.createAutomationRule({
+        calendarId: "cal1",
+        active: true,
+        trigger: { type: "entered_stage", stage: "done" },
+        action: { type: "move_to_stage", stage: "done" },
+      }),
+    ).rejects.toThrow(/mesma etapa/);
+    expect(calls).toHaveLength(0);
+  });
+
+  it("looks runs up by event key in one request", async () => {
+    const svc = await loggedInService();
+    mockFetch([{ body: [] }]);
+    await svc.findAutomationRuns(["decision:d1", "decision:d2"]);
+
+    expect(calls).toHaveLength(1);
+    expect(decodeURIComponent(calls[0].url)).toBe(
+      `${URL}/rest/v1/automation_run?event_key=in.("decision:d1","decision:d2")&select=*`,
+    );
+  });
+
+  it("asks for nothing when there are no keys to check", async () => {
+    const svc = await loggedInService();
+    mockFetch([{ body: [] }]);
+    expect(await svc.findAutomationRuns([])).toEqual([]);
+    expect(calls).toHaveLength(0);
+  });
+
+  it("scopes the history to the calendar server-side, newest first", async () => {
+    const svc = await loggedInService();
+    mockFetch([{ body: [] }]);
+    await svc.listAutomationRuns("cal1", 10);
+
+    expect(decodeURIComponent(calls[0].url)).toContain("automation_run?select=*,posts!inner(calendar_id)");
+    expect(decodeURIComponent(calls[0].url)).toContain("posts.calendar_id=eq.cal1");
+    expect(calls[0].url).toContain("order=at.desc");
+    expect(calls[0].url).toContain("limit=10");
+  });
+
+  it("swallows a refused log insert — the automation already happened", async () => {
+    const svc = await loggedInService();
+    mockFetch([{ status: 403, body: { message: "no" } }]);
+    await expect(
+      svc.logAutomationRun({
+        id: "run1",
+        ruleId: "r1",
+        postId: "p1",
+        at: "t",
+        result: "applied",
+      }),
+    ).resolves.toBeUndefined();
+  });
+
+  it("reads nothing from these tables while signed out", async () => {
+    const svc = new SupabaseService(URL, KEY);
+    mockFetch([{ body: [] }]);
+    expect(await svc.listAutomationRuns("cal1")).toEqual([]);
+    expect(await svc.findAutomationRuns(["decision:d1"])).toEqual([]);
+    expect(calls).toHaveLength(0);
   });
 });

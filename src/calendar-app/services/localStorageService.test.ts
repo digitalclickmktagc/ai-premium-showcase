@@ -167,3 +167,126 @@ describe("LocalStorageService — auth", () => {
     await expect(svc.login("admin@digitalclick.com", "wrong")).rejects.toThrow();
   });
 });
+
+describe("LocalStorageService — stage automations", () => {
+  let svc: LocalStorageService;
+  let calendarId: string;
+  beforeEach(async () => {
+    svc = freshService();
+    const { calendar } = await svc.createClient({ name: "Cliente A" });
+    calendarId = calendar.id;
+  });
+
+  const draft = () => ({
+    calendarId,
+    active: true,
+    trigger: { type: "entered_stage", stage: "done" } as const,
+    action: { type: "send_for_review" } as const,
+  });
+
+  it("stores a rule and hands it back with the database", async () => {
+    const rule = await svc.createAutomationRule(draft());
+    expect(rule.id).toBeTruthy();
+    expect(rule.createdAt).toBeTruthy();
+
+    const db = await svc.getDatabase();
+    expect(db.automationRules).toEqual([rule]);
+  });
+
+  it("refuses a rule for a calendar that does not exist", async () => {
+    await expect(
+      svc.createAutomationRule({ ...draft(), calendarId: "nope" }),
+    ).rejects.toThrow(/Calendário não encontrado/);
+  });
+
+  it("refuses a rule that would move the post to the stage that triggered it", async () => {
+    await expect(
+      svc.createAutomationRule({
+        ...draft(),
+        action: { type: "move_to_stage", stage: "done" },
+      }),
+    ).rejects.toThrow(/mesma etapa/);
+  });
+
+  it("re-validates on edit, so a rule cannot be edited into nonsense", async () => {
+    const rule = await svc.createAutomationRule(draft());
+    await expect(
+      svc.updateAutomationRule(rule.id, {
+        action: { type: "move_to_stage", stage: "done" },
+      }),
+    ).rejects.toThrow(/mesma etapa/);
+
+    // The stored rule is untouched by the rejected edit.
+    const db = await svc.getDatabase();
+    expect(db.automationRules?.[0].action).toEqual({ type: "send_for_review" });
+  });
+
+  it("pauses a rule without deleting it", async () => {
+    const rule = await svc.createAutomationRule(draft());
+    const paused = await svc.updateAutomationRule(rule.id, { active: false });
+    expect(paused.active).toBe(false);
+    expect((await svc.getDatabase()).automationRules).toEqual([paused]);
+  });
+
+  it("keeps the execution log when the rule itself is deleted", async () => {
+    const rule = await svc.createAutomationRule(draft());
+    const post = await svc.createPost({
+      calendarId,
+      title: "Post",
+      date: "2026-06-10",
+    });
+    await svc.logAutomationRun({
+      id: "run1",
+      ruleId: rule.id,
+      postId: post.id,
+      at: "2026-06-10T10:00:00.000Z",
+      result: "applied",
+    });
+
+    await svc.deleteAutomationRule(rule.id);
+    expect((await svc.getDatabase()).automationRules).toEqual([]);
+    expect(await svc.listAutomationRuns(calendarId)).toHaveLength(1);
+  });
+
+  it("lists only the runs of this calendar's posts, newest first", async () => {
+    const mine = await svc.createPost({ calendarId, title: "Meu", date: "2026-06-10" });
+    const other = await svc.createClient({ name: "Cliente B" });
+    const theirs = await svc.createPost({
+      calendarId: other.calendar.id,
+      title: "Deles",
+      date: "2026-06-10",
+    });
+
+    const run = (id: string, postId: string, at: string) => ({
+      id,
+      ruleId: "r1",
+      postId,
+      at,
+      result: "applied" as const,
+    });
+    await svc.logAutomationRun(run("a", mine.id, "2026-06-10T10:00:00.000Z"));
+    await svc.logAutomationRun(run("b", theirs.id, "2026-06-10T11:00:00.000Z"));
+    await svc.logAutomationRun(run("c", mine.id, "2026-06-10T12:00:00.000Z"));
+
+    expect((await svc.listAutomationRuns(calendarId)).map((r) => r.id)).toEqual([
+      "c",
+      "a",
+    ]);
+  });
+
+  it("finds runs by event key — the lookup that prevents acting twice", async () => {
+    const post = await svc.createPost({ calendarId, title: "Post", date: "2026-06-10" });
+    await svc.logAutomationRun({
+      id: "run1",
+      ruleId: "r1",
+      postId: post.id,
+      at: "2026-06-10T10:00:00.000Z",
+      result: "applied",
+      eventKey: "decision:d1",
+    });
+
+    expect(await svc.findAutomationRuns([])).toEqual([]);
+    expect(await svc.findAutomationRuns(["decision:d2"])).toEqual([]);
+    expect(await svc.findAutomationRuns(["decision:d1"])).toHaveLength(1);
+  });
+});

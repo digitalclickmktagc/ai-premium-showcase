@@ -22,11 +22,19 @@ import {
   maskEmail,
   validateDecision,
 } from "../approval";
+import {
+  validateRule,
+  type AutomationRule,
+  type AutomationRun,
+} from "../automation";
 import { buildSeed } from "./seed";
 import type { DataService } from "./DataService";
 
 const DB_KEY = "editorial-calendar:db:v1";
 const SESSION_KEY = "editorial-calendar:session:v1";
+
+/** Keep the demo blob from growing without bound. */
+const AUTOMATION_LOG_MAX = 500;
 
 /**
  * Demo admin credentials. These are for the offline/localStorage demo only and
@@ -64,6 +72,8 @@ export class LocalStorageService implements DataService {
         parsed.clients ??= [];
         parsed.calendars ??= [];
         parsed.posts ??= [];
+        parsed.automationRules ??= [];
+        parsed.automationRuns ??= [];
         // Legacy records only had the boolean; derive the lifecycle from it.
         parsed.clients = parsed.clients.map((c) => {
           const status = normalizeStatus(c);
@@ -393,6 +403,75 @@ export class LocalStorageService implements DataService {
   }
 
   // ── Public share view (isolated + sanitized) ──────────────────
+  // ── Stage automations ─────────────────────────────────────────
+  async createAutomationRule(
+    input: Omit<AutomationRule, "id" | "createdAt">,
+  ): Promise<AutomationRule> {
+    const db = this.read();
+    if (!db.calendars.some((c) => c.id === input.calendarId)) {
+      throw new Error("Calendário não encontrado.");
+    }
+    const invalid = validateRule(input);
+    if (invalid) throw new Error(invalid);
+
+    const rule: AutomationRule = { ...input, id: uid("rule"), createdAt: nowISO() };
+    db.automationRules = [...(db.automationRules ?? []), rule];
+    this.write(db);
+    return rule;
+  }
+
+  async updateAutomationRule(
+    id: string,
+    patch: Partial<Pick<AutomationRule, "active" | "trigger" | "action">>,
+  ): Promise<AutomationRule> {
+    const db = this.read();
+    const rules = db.automationRules ?? [];
+    const rule = rules.find((r) => r.id === id);
+    if (!rule) throw new Error("Regra não encontrada.");
+
+    const next: AutomationRule = { ...rule, ...patch };
+    // Re-validate: a rule edited into nonsense is as bad as one created that way.
+    const invalid = validateRule(next);
+    if (invalid) throw new Error(invalid);
+
+    db.automationRules = rules.map((r) => (r.id === id ? next : r));
+    this.write(db);
+    return next;
+  }
+
+  async deleteAutomationRule(id: string): Promise<void> {
+    const db = this.read();
+    db.automationRules = (db.automationRules ?? []).filter((r) => r.id !== id);
+    // The log stays: it is the record of what already happened to real posts.
+    this.write(db);
+  }
+
+  async logAutomationRun(run: AutomationRun): Promise<void> {
+    const db = this.read();
+    const log = db.automationRuns ?? [];
+    // Append-only, and bounded so the demo blob cannot grow without end.
+    db.automationRuns = [...log, run].slice(-AUTOMATION_LOG_MAX);
+    this.write(db);
+  }
+
+  async findAutomationRuns(eventKeys: string[]): Promise<AutomationRun[]> {
+    if (eventKeys.length === 0) return [];
+    const wanted = new Set(eventKeys);
+    const db = this.read();
+    return (db.automationRuns ?? []).filter((r) => r.eventKey && wanted.has(r.eventKey));
+  }
+
+  async listAutomationRuns(calendarId: string, limit = 50): Promise<AutomationRun[]> {
+    const db = this.read();
+    const postIds = new Set(
+      db.posts.filter((p) => p.calendarId === calendarId).map((p) => p.id),
+    );
+    return (db.automationRuns ?? [])
+      .filter((r) => postIds.has(r.postId))
+      .sort((a, b) => b.at.localeCompare(a.at))
+      .slice(0, limit);
+  }
+
   async getPublicView(token: string): Promise<PublicCalendarView | null> {
     const db = this.read();
     const calendar = db.calendars.find((c) => c.shareToken === token);

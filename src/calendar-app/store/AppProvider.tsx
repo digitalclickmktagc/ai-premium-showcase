@@ -20,6 +20,17 @@ import type {
   UpdatePostInput,
 } from "../types";
 import { getDataService } from "../services";
+import {
+  newChain,
+  pendingReviewEvents,
+  runAutomations,
+  type AutomationAction,
+  type AutomationEvent,
+  type AutomationRule,
+  type AutomationRun,
+} from "../automation";
+import { addDays } from "date-fns";
+import { toDayISO } from "../utils";
 
 interface PostFilter {
   /** Include soft-deleted posts (default false). */
@@ -36,6 +47,7 @@ interface AppContextValue {
   clients: Client[];
   calendars: Calendar[];
   posts: Post[];
+  automationRules: AutomationRule[];
 
   // selectors
   getClient: (id: string) => Client | undefined;
@@ -43,6 +55,7 @@ interface AppContextValue {
   getCalendarByClient: (clientId: string) => Calendar | undefined;
   getClientForCalendar: (calendarId: string) => Client | undefined;
   postsForCalendar: (calendarId: string, filter?: PostFilter) => Post[];
+  rulesForCalendar: (calendarId: string) => AutomationRule[];
 
   // auth
   login: (email: string, password: string) => Promise<void>;
@@ -68,6 +81,16 @@ interface AppContextValue {
   deletePost: (id: string) => Promise<Post>;
   restorePost: (id: string, status?: PostStatus) => Promise<Post>;
 
+  // automation rules
+  createRule: (input: Omit<AutomationRule, "id" | "createdAt">) => Promise<AutomationRule>;
+  updateRule: (
+    id: string,
+    patch: Partial<Pick<AutomationRule, "active" | "trigger" | "action">>,
+  ) => Promise<AutomationRule>;
+  deleteRule: (id: string) => Promise<void>;
+  /** Recent executions for a calendar, newest first. */
+  listRuns: (calendarId: string, limit?: number) => Promise<AutomationRun[]>;
+
   refresh: () => Promise<void>;
 }
 
@@ -80,6 +103,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [clients, setClients] = useState<Client[]>([]);
   const [calendars, setCalendars] = useState<Calendar[]>([]);
   const [posts, setPosts] = useState<Post[]>([]);
+  const [automationRules, setAutomationRules] = useState<AutomationRule[]>([]);
   // Mirrors `posts` synchronously so an optimistic update can roll back even
   // when the write rejects before React has applied the state updater.
   const postsRef = useRef<Post[]>(posts);
@@ -90,6 +114,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setClients(db.clients);
     setCalendars(db.calendars);
     setPosts(db.posts);
+    setAutomationRules(db.automationRules ?? []);
   }, [service]);
 
   useEffect(() => {
@@ -154,6 +179,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [posts],
   );
 
+  const rulesForCalendar = useCallback(
+    (calendarId: string) => automationRules.filter((r) => r.calendarId === calendarId),
+    [automationRules],
+  );
+
   // ── auth ───────────────────────────────────────────────────
   const login = useCallback(
     async (email: string, password: string) => {
@@ -170,6 +200,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setClients([]);
     setCalendars([]);
     setPosts([]);
+    setAutomationRules([]);
   }, [service]);
 
   // ── mutations (each refreshes local state) ─────────────────
@@ -205,10 +236,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
     },
     [service, refresh],
   );
+  // The engine is declared further down (hooks may not be reordered), so the
+  // callbacks above it reach it through this ref.
+  const fireRef = useRef<((event: AutomationEvent) => void) | null>(null);
   const updatePost = useCallback(
     async (id: string, patch: UpdatePostInput) => {
+      const before = postsRef.current.find((p) => p.id === id);
       const res = await service.updatePost(id, patch);
       await refresh();
+      // A stage reached through the edit form is the same event as a stage
+      // reached by dragging a card: the rules must not care which it was.
+      if (patch.status && before && before.status !== patch.status) {
+        fireRef.current?.({
+          kind: "entered_stage",
+          calendarId: before.calendarId,
+          postId: id,
+          stage: patch.status,
+        });
+      }
       return res;
     },
     [service, refresh],
@@ -252,6 +297,71 @@ export function AppProvider({ children }: { children: ReactNode }) {
     },
     [service, refresh],
   );
+  // ── Stage automations ──────────────────────────────────────
+  // Rules are data (see ../automation.ts); this is the only place that knows
+  // how to turn an action into a real write.
+  const rulesRef = useRef<AutomationRule[]>(automationRules);
+  rulesRef.current = automationRules;
+
+  const applyAction = useCallback(
+    async (postId: string, action: AutomationAction): Promise<AutomationEvent | null> => {
+      const post = postsRef.current.find((p) => p.id === postId);
+      if (!post) throw new Error("Post não encontrado.");
+
+      switch (action.type) {
+        case "move_to_stage": {
+          if (post.status === action.stage) return null; // already there
+          await service.updatePost(postId, { status: action.stage });
+          // Landing on a stage is itself an event, so a chain can continue.
+          return {
+            kind: "entered_stage",
+            calendarId: post.calendarId,
+            postId,
+            stage: action.stage,
+          };
+        }
+        case "send_for_review":
+          await service.requestApproval(postId, action.message);
+          return null;
+        case "set_due_in_days": {
+          await service.updatePost(postId, {
+            date: toDayISO(addDays(new Date(), action.days)),
+          });
+          return null;
+        }
+      }
+    },
+    [service],
+  );
+
+  /**
+   * Run the rules for one event. Never throws: the user's own action already
+   * succeeded, and an automation failing is something to show in the log, not
+   * a reason to roll their change back.
+   */
+  const fireAutomations = useCallback(
+    async (event: AutomationEvent, eventKey?: string) => {
+      const rules = rulesRef.current.filter((r) => r.calendarId === event.calendarId);
+      if (rules.length === 0) return;
+      try {
+        const runs = await runAutomations(
+          event,
+          rules,
+          {
+            apply: applyAction,
+            eventKey,
+            log: (run) => void service.logAutomationRun(run).catch(() => undefined),
+          },
+          newChain(),
+        );
+        if (runs.some((r) => r.result === "applied")) await refresh();
+      } catch (err) {
+        console.error("Falha ao executar automações", err);
+      }
+    },
+    [applyAction, refresh, service],
+  );
+
   const changeStatus = useCallback(
     async (id: string, status: PostStatus) => {
       const snapshot = postsRef.current;
@@ -265,9 +375,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setPosts(snapshot); // put the card back in its column
         throw err;
       }
+      const post = snapshot.find((p) => p.id === id);
+      if (post && post.status !== status) {
+        await fireAutomations({
+          kind: "entered_stage",
+          calendarId: post.calendarId,
+          postId: id,
+          stage: status,
+        });
+      }
     },
-    [service, refresh],
+    [service, refresh, fireAutomations],
   );
+  fireRef.current = (event) => void fireAutomations(event);
+
   const requestApproval = useCallback(
     async (id: string, teamMessage?: string) => {
       const res = await service.requestApproval(id, teamMessage);
@@ -293,6 +414,76 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [service, refresh],
   );
 
+  // ── Automation rules (CRUD) ────────────────────────────────
+  const createRule = useCallback(
+    async (input: Omit<AutomationRule, "id" | "createdAt">) => {
+      const rule = await service.createAutomationRule(input);
+      await refresh();
+      return rule;
+    },
+    [service, refresh],
+  );
+  const updateRule = useCallback(
+    async (
+      id: string,
+      patch: Partial<Pick<AutomationRule, "active" | "trigger" | "action">>,
+    ) => {
+      const rule = await service.updateAutomationRule(id, patch);
+      await refresh();
+      return rule;
+    },
+    [service, refresh],
+  );
+  const deleteRule = useCallback(
+    async (id: string) => {
+      await service.deleteAutomationRule(id);
+      await refresh();
+    },
+    [service, refresh],
+  );
+  const listRuns = useCallback(
+    (calendarId: string, limit?: number) => service.listAutomationRuns(calendarId, limit),
+    [service],
+  );
+
+  /**
+   * Catch up on decisions the client took on their own.
+   *
+   * The share link is deliberately allowed to do nothing but record a
+   * decision, so "ao aprovar → Publicado" cannot run at the moment the client
+   * clicks. It runs here instead, the next time the agency's app has the
+   * calendar in front of it. The execution log is what makes this safe to
+   * repeat: a decision already acted on is skipped.
+   */
+  const attemptedKeys = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    if (!session || loading) return;
+    const candidates = pendingReviewEvents(posts, automationRules, []).filter(
+      (c) => !attemptedKeys.current.has(c.eventKey),
+    );
+    if (candidates.length === 0) return;
+
+    let active = true;
+    (async () => {
+      try {
+        const handled = await service.findAutomationRuns(candidates.map((c) => c.eventKey));
+        if (!active) return;
+        const todo = pendingReviewEvents(posts, automationRules, handled);
+        for (const { event, eventKey } of todo) {
+          // Claim it before firing: a re-render must not start it twice.
+          attemptedKeys.current.add(eventKey);
+          await fireAutomations(event, eventKey);
+          if (!active) return;
+        }
+      } catch (err) {
+        console.error("Falha ao recuperar decisões do cliente", err);
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [session, loading, posts, automationRules, service, fireAutomations]);
+
   const value: AppContextValue = {
     serviceName: service.name,
     loading,
@@ -300,11 +491,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     clients,
     calendars,
     posts,
+    automationRules,
     getClient,
     getCalendar,
     getCalendarByClient,
     getClientForCalendar,
     postsForCalendar,
+    rulesForCalendar,
     login,
     logout,
     createClient,
@@ -318,6 +511,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     requestApproval,
     deletePost,
     restorePost,
+    createRule,
+    updateRule,
+    deleteRule,
+    listRuns,
     refresh,
   };
 

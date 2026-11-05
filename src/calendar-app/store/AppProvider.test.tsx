@@ -49,6 +49,12 @@ function makeService(updatePost: DataService["updatePost"], db: Database): DataS
     deletePost: notUsed as unknown as DataService["deletePost"],
     restorePost: notUsed as unknown as DataService["restorePost"],
     getPublicView: async () => null,
+    createAutomationRule: notUsed as unknown as DataService["createAutomationRule"],
+    updateAutomationRule: notUsed as unknown as DataService["updateAutomationRule"],
+    deleteAutomationRule: notUsed as unknown as DataService["deleteAutomationRule"],
+    logAutomationRun: async () => undefined,
+    listAutomationRuns: async () => [],
+    findAutomationRuns: async () => [],
   };
 }
 
