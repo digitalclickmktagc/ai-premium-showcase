@@ -13,6 +13,7 @@ import { formatLongDay, formatTimestamp, todayISO } from "../utils";
 import { useApp } from "../store/AppProvider";
 import { StatusPicker } from "./StatusBadge";
 import { RescheduleHistory } from "./PostView";
+import ApprovalPanel from "./ApprovalPanel";
 
 const CONTENT_SUGGESTIONS = ["Feed", "Story", "Reels", "Carrossel", "Live", "Blog"];
 
@@ -243,6 +244,8 @@ export default function PostModal({
               Este campo é privado e não aparece na visão do cliente.
             </p>
           </div>
+
+          {isEdit && post && <ApprovalPanel post={post} />}
 
           {history.length > 0 && <RescheduleHistory history={history} />}
 

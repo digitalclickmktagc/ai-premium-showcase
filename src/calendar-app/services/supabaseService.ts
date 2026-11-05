@@ -11,6 +11,7 @@
  * RLS; anonymous clients can only call get_public_calendar(token).
  */
 import type {
+  ApprovalResult,
   Calendar,
   Client,
   CreateClientInput,
@@ -24,6 +25,7 @@ import type {
   UpdatePostInput,
 } from "../types";
 import { shareToken } from "../utils";
+import { validateDecision } from "../approval";
 import type { DataService } from "./DataService";
 
 const SB_SESSION_KEY = "editorial-calendar:sb-session:v1";
@@ -43,6 +45,7 @@ const toClient = (r: any): Client => ({
   color: r.color,
   logoUrl: r.logo_url ?? undefined,
   handle: r.handle ?? undefined,
+  email: r.email ?? undefined,
   active: r.active,
   createdAt: r.created_at,
 });
@@ -64,6 +67,7 @@ const toPost = (r: any): Post => ({
   referenceLink: r.reference_link ?? undefined,
   internalNotes: r.internal_notes ?? undefined,
   rescheduleHistory: r.reschedule_history ?? [],
+  approval: r.approval ?? undefined,
   createdAt: r.created_at,
   updatedAt: r.updated_at,
 });
@@ -264,6 +268,7 @@ export class SupabaseService implements DataService {
         color: input.color ?? "#8b5cf6",
         logo_url: input.logoUrl?.trim() || null,
         handle: input.handle?.trim() || null,
+        email: input.email?.trim() || null,
         active: input.active ?? true,
       }),
     });
@@ -285,6 +290,7 @@ export class SupabaseService implements DataService {
     if (patch.color !== undefined) row.color = patch.color;
     if (patch.logoUrl !== undefined) row.logo_url = patch.logoUrl.trim() || null;
     if (patch.handle !== undefined) row.handle = patch.handle.trim() || null;
+    if (patch.email !== undefined) row.email = patch.email.trim() || null;
     if (patch.active !== undefined) row.active = patch.active;
     const [updated] = await this.rest<any[]>(`clients?id=eq.${id}`, {
       method: "PATCH",
@@ -394,6 +400,62 @@ export class SupabaseService implements DataService {
       body: JSON.stringify({ status }),
     });
     return toPost(updated);
+  }
+
+  // ── External review (Spec 03) ─────────────────────────────────
+  async requestApproval(postId: string, teamMessage?: string): Promise<Post> {
+    const [row] = await this.rest<any[]>(`rpc/request_approval`, {
+      method: "POST",
+      body: JSON.stringify({
+        p_post_id: postId,
+        p_team_message: teamMessage?.trim() || null,
+      }),
+    }).then((r) => (Array.isArray(r) ? r : [r]));
+    if (!row) throw new Error("Não foi possível enviar para aprovação.");
+    return toPost(row);
+  }
+
+  async issueApprovalCode(
+    token: string,
+    postId: string,
+  ): Promise<{ maskedEmail?: string; devCode?: string }> {
+    const data = await this.rest<{ masked_email?: string } | null>(
+      "rpc/issue_approval_code",
+      {
+        method: "POST",
+        useUser: false, // the client is anonymous
+        body: JSON.stringify({ p_token: token, p_post_id: postId }),
+      },
+    );
+    // The code is never returned over the wire in production: the database
+    // stores only its hash and an out-of-band channel delivers it.
+    return { maskedEmail: data?.masked_email ?? undefined };
+  }
+
+  async submitApprovalDecision(
+    token: string,
+    postId: string,
+    input: {
+      result: ApprovalResult;
+      comment?: string;
+      decidedByName: string;
+      code?: string;
+    },
+  ): Promise<void> {
+    const invalid = validateDecision(input);
+    if (invalid) throw new Error(invalid); // fail fast before the round trip
+    await this.rest<unknown>("rpc/submit_approval_decision", {
+      method: "POST",
+      useUser: false,
+      body: JSON.stringify({
+        p_token: token,
+        p_post_id: postId,
+        p_result: input.result,
+        p_comment: input.comment?.trim() || null,
+        p_decided_by: input.decidedByName.trim(),
+        p_code: input.code?.trim() || null,
+      }),
+    });
   }
 
   // ── Public share view (anon RPC, isolated + sanitized) ────────

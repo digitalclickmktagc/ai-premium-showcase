@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { startOfMonth } from "date-fns";
 import { CalendarDays, Eye, Link2Off, Loader2 } from "lucide-react";
@@ -21,21 +21,29 @@ export default function ClientViewPage() {
   const [selected, setSelected] = useState<PublicPost | null>(null);
   const [open, setOpen] = useState(false);
 
-  useEffect(() => {
-    let active = true;
-    setState("loading");
-    getDataService()
-      .getPublicView(token)
-      .then((v) => {
-        if (!active) return;
+  /**
+   * Re-read the public view. Called on mount and again after the client
+   * records a decision, so the dialog and the grid show the new state.
+   */
+  const reload = useCallback(
+    async (opts: { silent?: boolean } = {}) => {
+      if (!opts.silent) setState("loading");
+      try {
+        const v = await getDataService().getPublicView(token);
         setView(v);
         setState(v ? "ready" : "not-found");
-      })
-      .catch(() => active && setState("not-found"));
-    return () => {
-      active = false;
-    };
-  }, [token]);
+        // keep the open dialog in sync with the refreshed data
+        setSelected((cur) => (cur ? (v?.posts.find((p) => p.id === cur.id) ?? cur) : cur));
+      } catch {
+        if (!opts.silent) setState("not-found");
+      }
+    },
+    [token],
+  );
+
+  useEffect(() => {
+    void reload();
+  }, [reload]);
 
   const accent = view?.client.color ?? "#8b5cf6";
 
@@ -141,6 +149,9 @@ export default function ClientViewPage() {
         onOpenChange={setOpen}
         post={selected}
         accentColor={accent}
+        token={token}
+        maskedEmail={view.client.maskedEmail}
+        onDecided={() => void reload({ silent: true })}
       />
     </div>
   );

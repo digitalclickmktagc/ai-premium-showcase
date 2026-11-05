@@ -23,6 +23,7 @@ export function buildSeed(): Database {
     name: "Aurora Café",
     color: "#f97316",
     handle: "@auroracafe",
+    email: "contato@auroracafe.com.br",
     active: true,
     createdAt: iso,
   };

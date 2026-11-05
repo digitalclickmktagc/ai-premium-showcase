@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import type { PostStatus } from "../types";
 import { SELECTABLE_STATUSES, statusConfig } from "../status";
+import { toneStyles } from "../approval";
 
 export function StatusBadge({
   status,
@@ -13,10 +14,10 @@ export function StatusBadge({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium",
-        cfg.badgeClass,
+        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium",
         className,
       )}
+      style={toneStyles(cfg.color)}
     >
       <span
         className="h-1.5 w-1.5 rounded-full"

@@ -667,6 +667,11 @@
    On calendar routes we restore real cursors — including portalled
    dialogs / dropdowns / toasts, which mount under <body>.
 ───────────────────────────────────────────── */
+body.calendar-route {
+  /* Badge text is mixed toward this; white keeps it legible on dark. */
+  --badge-ink: #ffffff;
+}
+
 body.calendar-route,
 body.calendar-route * {
   cursor: auto !important;
@@ -704,6 +709,8 @@ body.calendar-route [aria-disabled="true"] {
    under <body> — inherit them too.
 ───────────────────────────────────────────── */
 body.calendar-route[data-theme="light"] {
+  /* Badge text is mixed toward this, so it darkens on light backgrounds. */
+  --badge-ink: #000000;
   --background: 240 20% 98%;
   --foreground: 240 10% 12%;
 
@@ -755,11 +762,6 @@ body.calendar-route[data-theme="light"] ::-webkit-scrollbar-track {
 body.calendar-route[data-theme="light"] ::selection {
   background: hsl(var(--primary) / 0.18);
   color: hsl(var(--foreground));
-}
-
-/* Status badge text needs more weight on a light background. */
-body.calendar-route[data-theme="light"] .status-badge {
-  filter: saturate(1.25) brightness(0.72);
 }
 
 /* ─────────────────────────────────────────────

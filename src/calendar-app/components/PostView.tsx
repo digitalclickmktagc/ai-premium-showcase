@@ -6,6 +6,7 @@ import type { Post, PublicPost } from "../types";
 import { statusConfig } from "../status";
 import { formatLongDay, formatTimestamp, safeExternalUrl } from "../utils";
 import { StatusBadge } from "./StatusBadge";
+import ClientDecisionPanel from "./ClientDecisionPanel";
 
 type PostLike = Post | PublicPost;
 
@@ -92,11 +93,18 @@ export default function PostViewDialog({
   onOpenChange,
   post,
   accentColor = "#8b5cf6",
+  token,
+  maskedEmail,
+  onDecided,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   post?: PostLike | null;
   accentColor?: string;
+  /** Share token — enables the approval panel when present. */
+  token?: string;
+  maskedEmail?: string;
+  onDecided?: () => void;
 }) {
   if (!post) return null;
   const cfg = statusConfig(post.status);
@@ -125,8 +133,16 @@ export default function PostViewDialog({
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-5 py-4">
+        <div className="flex-1 space-y-5 overflow-y-auto px-5 py-4">
           <PostReadOnlyBody post={post} />
+          {token && (
+            <ClientDecisionPanel
+              post={post}
+              token={token}
+              maskedEmail={maskedEmail}
+              onDecided={() => onDecided?.()}
+            />
+          )}
         </div>
 
         <div className="flex border-t border-border px-5 py-3">

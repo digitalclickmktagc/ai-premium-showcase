@@ -1,4 +1,5 @@
 import type {
+  ApprovalResult,
   Calendar,
   Client,
   CreateClientInput,
@@ -61,6 +62,35 @@ export interface DataService {
   deletePost(id: string): Promise<Post>;
   /** Restore a soft-deleted post to the given status (default `todo`). */
   restorePost(id: string, status?: PostStatus): Promise<Post>;
+
+  // ── External review (Spec 03) ─────────────────────────────────
+  /** Admin: send a post to the client, opening a new review round. */
+  requestApproval(postId: string, teamMessage?: string): Promise<Post>;
+
+  /**
+   * Public: issue a verification code for a decision taken through the share
+   * link. Returns the masked destination; `devCode` is only populated when no
+   * e-mail transport is configured (test environment).
+   */
+  issueApprovalCode(
+    token: string,
+    postId: string,
+  ): Promise<{ maskedEmail?: string; devCode?: string }>;
+
+  /**
+   * Public: record the client's decision. Implementations must verify the
+   * code and must never accept a post that does not belong to `token`.
+   */
+  submitApprovalDecision(
+    token: string,
+    postId: string,
+    input: {
+      result: ApprovalResult;
+      comment?: string;
+      decidedByName: string;
+      code?: string;
+    },
+  ): Promise<void>;
 
   // ── Public (client) share view ────────────────────────────────
   getPublicView(token: string): Promise<PublicCalendarView | null>;

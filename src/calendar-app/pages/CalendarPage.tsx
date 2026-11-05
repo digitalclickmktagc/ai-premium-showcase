@@ -45,7 +45,7 @@ export default function CalendarPage() {
   const [showDeleted, setShowDeleted] = useState(false);
 
   const [modalOpen, setModalOpen] = useState(false);
-  const [editingPost, setEditingPost] = useState<Post | null>(null);
+  const [editingPostId, setEditingPostId] = useState<string | null>(null);
   const [createDate, setCreateDate] = useState<string | undefined>();
 
   const allPosts = useMemo(
@@ -58,6 +58,13 @@ export default function CalendarPage() {
     allPosts.forEach((p) => p.contentType && set.add(p.contentType));
     return [...set].sort();
   }, [allPosts]);
+
+  // Derive the open post from live state: holding the object would freeze the
+  // dialog on a stale copy after an approval round or a status change.
+  const editingPost = useMemo(
+    () => (editingPostId ? (allPosts.find((p) => p.id === editingPostId) ?? null) : null),
+    [editingPostId, allPosts],
+  );
 
   const visiblePosts = useMemo(() => {
     if (!calendar) return [];
@@ -82,7 +89,7 @@ export default function CalendarPage() {
   }
 
   const openCreate = (date?: string) => {
-    setEditingPost(null);
+    setEditingPostId(null);
     setCreateDate(date);
     setModalOpen(true);
   };
@@ -109,7 +116,7 @@ export default function CalendarPage() {
   };
 
   const openEdit = (post: Post) => {
-    setEditingPost(post);
+    setEditingPostId(post.id);
     setCreateDate(undefined);
     setModalOpen(true);
   };

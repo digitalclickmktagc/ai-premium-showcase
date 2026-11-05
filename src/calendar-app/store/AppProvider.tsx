@@ -61,6 +61,8 @@ interface AppContextValue {
   reschedulePost: (id: string, newDate: string) => Promise<Post>;
   /** Optimistically move a post to another day (used by drag & drop). */
   movePost: (id: string, newDate: string) => Promise<void>;
+  /** Send a post to the client, opening a new review round. */
+  requestApproval: (id: string, teamMessage?: string) => Promise<Post>;
   deletePost: (id: string) => Promise<Post>;
   restorePost: (id: string, status?: PostStatus) => Promise<Post>;
 
@@ -248,6 +250,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
     },
     [service, refresh],
   );
+  const requestApproval = useCallback(
+    async (id: string, teamMessage?: string) => {
+      const res = await service.requestApproval(id, teamMessage);
+      await refresh();
+      return res;
+    },
+    [service, refresh],
+  );
   const deletePost = useCallback(
     async (id: string) => {
       const res = await service.deletePost(id);
@@ -286,6 +296,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     updatePost,
     reschedulePost,
     movePost,
+    requestApproval,
     deletePost,
     restorePost,
     refresh,

@@ -33,6 +33,7 @@ export default function ClientFormDialog({
 
   const [name, setName] = useState("");
   const [handle, setHandle] = useState("");
+  const [email, setEmail] = useState("");
   const [color, setColor] = useState(CLIENT_COLORS[0]);
   const [logoUrl, setLogoUrl] = useState("");
   const [active, setActive] = useState(true);
@@ -42,6 +43,7 @@ export default function ClientFormDialog({
     if (!open) return;
     setName(client?.name ?? "");
     setHandle(client?.handle ?? "");
+    setEmail(client?.email ?? "");
     setColor(client?.color ?? randomClientColor());
     setLogoUrl(client?.logoUrl ?? "");
     setActive(client?.active ?? true);
@@ -58,6 +60,7 @@ export default function ClientFormDialog({
         await updateClient(client.id, {
           name,
           handle,
+          email,
           color,
           logoUrl,
           active,
@@ -68,6 +71,7 @@ export default function ClientFormDialog({
         const { client: created, calendar } = await createClient({
           name,
           handle,
+          email,
           color,
           logoUrl,
           active,
@@ -117,6 +121,20 @@ export default function ClientFormDialog({
               onChange={(e) => setHandle(e.target.value)}
               placeholder="Ex.: @auroracafe"
             />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="client-email">E-mail de contato</Label>
+            <Input
+              id="client-email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="contato@cliente.com"
+            />
+            <p className="text-xs text-muted-foreground">
+              Destino do código de verificação quando o cliente aprovar um post.
+            </p>
           </div>
 
           <div className="space-y-2">

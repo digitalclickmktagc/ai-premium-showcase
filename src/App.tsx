@@ -12,6 +12,7 @@ import LoginPage from "./calendar-app/pages/LoginPage";
 import DashboardPage from "./calendar-app/pages/DashboardPage";
 import CalendarPage from "./calendar-app/pages/CalendarPage";
 import ClientViewPage from "./calendar-app/pages/ClientViewPage";
+import ClientHubPage from "./calendar-app/pages/ClientHubPage";
 
 const queryClient = new QueryClient();
 
@@ -59,6 +60,15 @@ const App = () => (
             element={
               <ThemeProvider>
                 <ClientViewPage />
+              </ThemeProvider>
+            }
+          />
+          {/* Client hub — behind VITE_FEATURE_CLIENT_HUB, off by default */}
+          <Route
+            path="/c/:token/hub"
+            element={
+              <ThemeProvider>
+                <ClientHubPage />
               </ThemeProvider>
             }
           />

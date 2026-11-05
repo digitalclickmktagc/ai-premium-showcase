@@ -29,6 +29,44 @@ export interface RescheduleEntry {
   at: string;
 }
 
+/** Outcome a client can record on a review round. */
+export type ApprovalResult = "approved" | "changes" | "rejected";
+
+/**
+ * Derived review state. Per the spec this is computed from the decisions of
+ * the current round and is never written by hand.
+ */
+export type ApprovalState =
+  | "none" // never sent for review
+  | "pending" // sent, awaiting the client
+  | "approved"
+  | "changes" // adjustments requested
+  | "rejected";
+
+export interface ApprovalDecision {
+  id: string;
+  /** Round this decision belongs to (1-based). */
+  round: number;
+  result: ApprovalResult;
+  /** Mandatory for `changes` and `rejected` (1–2000 chars). */
+  comment?: string;
+  /** Name the decider typed. */
+  decidedByName?: string;
+  /** True when the decider proved control of the client's e-mail. */
+  verified: boolean;
+  at: string;
+}
+
+/** Review request attached to a post. */
+export interface ApprovalRequest {
+  /** Current round number; 0 means never sent. */
+  round: number;
+  requestedAt?: string;
+  /** Message the team attached to the latest round. */
+  teamMessage?: string;
+  decisions: ApprovalDecision[];
+}
+
 export interface Client {
   id: string;
   name: string;
@@ -38,6 +76,8 @@ export interface Client {
   logoUrl?: string;
   /** Optional short handle / social @ shown in the client view. */
   handle?: string;
+  /** Contact e-mail. Used to send the approval verification code. */
+  email?: string;
   active: boolean;
   createdAt: string;
 }
@@ -68,6 +108,8 @@ export interface Post {
   internalNotes?: string;
   /** Reschedule history (old date → new date). */
   rescheduleHistory: RescheduleEntry[];
+  /** External review. Absent means the post was never sent to the client. */
+  approval?: ApprovalRequest;
   createdAt: string;
   updatedAt: string;
 }
@@ -79,11 +121,23 @@ export interface Session {
   name: string;
 }
 
+/** A pending verification code for a link-based approval decision. */
+export interface ApprovalCodeEntry {
+  postId: string;
+  /** Share token the code was issued for; binds the code to one calendar. */
+  token: string;
+  code: string;
+  /** Epoch milliseconds. */
+  expiresAt: number;
+}
+
 /** Full persisted database shape (used by the localStorage adapter). */
 export interface Database {
   clients: Client[];
   calendars: Calendar[];
   posts: Post[];
+  /** Short-lived approval codes. Never exposed through the public view. */
+  approvalCodes?: ApprovalCodeEntry[];
 }
 
 /**
@@ -95,7 +149,11 @@ export type PublicPost = Omit<Post, "internalNotes">;
 
 export interface PublicCalendarView {
   calendar: Pick<Calendar, "id" | "name" | "shareToken">;
-  client: Pick<Client, "id" | "name" | "color" | "logoUrl" | "handle">;
+  client: Pick<Client, "id" | "name" | "color" | "logoUrl" | "handle"> & {
+    /** Masked contact e-mail (e.g. "ab***@dominio.com") so the client knows
+     * where the verification code goes. The full address is never exposed. */
+    maskedEmail?: string;
+  };
   posts: PublicPost[];
 }
 
@@ -105,13 +163,15 @@ export interface CreateClientInput {
   color?: string;
   logoUrl?: string;
   handle?: string;
+  /** Contact e-mail used for approval verification codes. */
+  email?: string;
   active?: boolean;
   /** Optional override for the auto-created calendar name. */
   calendarName?: string;
 }
 
 export type UpdateClientInput = Partial<
-  Pick<Client, "name" | "color" | "logoUrl" | "handle" | "active">
+  Pick<Client, "name" | "color" | "logoUrl" | "handle" | "email" | "active">
 >;
 
 export interface CreatePostInput {

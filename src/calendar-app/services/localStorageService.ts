@@ -1,4 +1,5 @@
 import type {
+  ApprovalResult,
   Calendar,
   Client,
   CreateClientInput,
@@ -12,6 +13,13 @@ import type {
   UpdatePostInput,
 } from "../types";
 import { randomClientColor, shareToken, uid } from "../utils";
+import {
+  APPROVAL_CODE_TTL_MS,
+  codesMatch,
+  generateApprovalCode,
+  maskEmail,
+  validateDecision,
+} from "../approval";
 import { buildSeed } from "./seed";
 import type { DataService } from "./DataService";
 
@@ -121,6 +129,7 @@ export class LocalStorageService implements DataService {
       color: input.color || randomClientColor(),
       logoUrl: input.logoUrl?.trim() || undefined,
       handle: input.handle?.trim() || undefined,
+      email: input.email?.trim() || undefined,
       active: input.active ?? true,
       createdAt: nowISO(),
     };
@@ -145,6 +154,7 @@ export class LocalStorageService implements DataService {
     if (patch.color !== undefined) client.color = patch.color;
     if (patch.logoUrl !== undefined) client.logoUrl = patch.logoUrl.trim() || undefined;
     if (patch.handle !== undefined) client.handle = patch.handle.trim() || undefined;
+    if (patch.email !== undefined) client.email = patch.email.trim() || undefined;
     if (patch.active !== undefined) client.active = patch.active;
     this.write(db);
     return client;
@@ -254,6 +264,118 @@ export class LocalStorageService implements DataService {
     return post;
   }
 
+  // ── External review (Spec 03) ─────────────────────────────────
+  async requestApproval(postId: string, teamMessage?: string): Promise<Post> {
+    const db = this.read();
+    const post = db.posts.find((p) => p.id === postId);
+    if (!post) throw new Error("Post não encontrado.");
+    if (post.status === "deleted")
+      throw new Error("Não é possível enviar um post deletado para aprovação.");
+
+    const previous = post.approval;
+    post.approval = {
+      round: (previous?.round ?? 0) + 1,
+      requestedAt: nowISO(),
+      teamMessage: teamMessage?.trim() || undefined,
+      decisions: previous?.decisions ?? [],
+    };
+    post.updatedAt = nowISO();
+    this.write(db);
+    return post;
+  }
+
+  /**
+   * Resolve a post strictly through its share token. Returning the calendar
+   * too lets callers assert the post really belongs to that token — the check
+   * that keeps one client from acting on another client's posts.
+   */
+  private resolveByToken(token: string, postId: string) {
+    const db = this.read();
+    const calendar = db.calendars.find((c) => c.shareToken === token);
+    if (!calendar) throw new Error("Link inválido ou expirado.");
+    const post = db.posts.find(
+      (p) => p.id === postId && p.calendarId === calendar.id && p.status !== "deleted",
+    );
+    if (!post) throw new Error("Post não encontrado neste calendário.");
+    const client = db.clients.find((c) => c.id === calendar.clientId);
+    return { db, calendar, post, client };
+  }
+
+  async issueApprovalCode(
+    token: string,
+    postId: string,
+  ): Promise<{ maskedEmail?: string; devCode?: string }> {
+    const { db, post, client } = this.resolveByToken(token, postId);
+    if (!post.approval || post.approval.round < 1)
+      throw new Error("Este post ainda não foi enviado para aprovação.");
+
+    const code = generateApprovalCode();
+    db.approvalCodes = (db.approvalCodes ?? []).filter(
+      // drop this post's previous codes and anything already expired
+      (c) => c.postId !== postId && c.expiresAt > Date.now(),
+    );
+    db.approvalCodes.push({
+      postId,
+      token,
+      code,
+      expiresAt: Date.now() + APPROVAL_CODE_TTL_MS,
+    });
+    this.write(db);
+
+    // No e-mail transport in the local adapter: hand the code back so the
+    // test environment can show it on screen.
+    return { maskedEmail: maskEmail(client?.email), devCode: code };
+  }
+
+  async submitApprovalDecision(
+    token: string,
+    postId: string,
+    input: {
+      result: ApprovalResult;
+      comment?: string;
+      decidedByName: string;
+      code?: string;
+    },
+  ): Promise<void> {
+    const { db, post } = this.resolveByToken(token, postId);
+    if (!post.approval || post.approval.round < 1)
+      throw new Error("Este post ainda não foi enviado para aprovação.");
+
+    const invalid = validateDecision(input);
+    if (invalid) throw new Error(invalid);
+
+    // Verification is mandatory for link-based decisions (decision A2).
+    const entry = (db.approvalCodes ?? []).find(
+      (c) => c.postId === postId && c.token === token,
+    );
+    if (!entry) throw new Error("Solicite um código de verificação primeiro.");
+    if (entry.expiresAt <= Date.now()) {
+      db.approvalCodes = (db.approvalCodes ?? []).filter((c) => c !== entry);
+      this.write(db);
+      throw new Error("O código expirou. Solicite um novo.");
+    }
+    if (!input.code || !codesMatch(entry.code, input.code.trim())) {
+      throw new Error("Código incorreto.");
+    }
+
+    post.approval.decisions = [
+      ...post.approval.decisions,
+      {
+        id: uid("dec"),
+        round: post.approval.round,
+        result: input.result,
+        comment: input.comment?.trim() || undefined,
+        decidedByName: input.decidedByName.trim(),
+        verified: true,
+        at: nowISO(),
+      },
+    ];
+    post.updatedAt = nowISO();
+    // Single use: the code is spent once the decision lands.
+    db.approvalCodes = (db.approvalCodes ?? []).filter((c) => c !== entry);
+    this.write(db);
+  }
+
   // ── Public share view (isolated + sanitized) ──────────────────
   async getPublicView(token: string): Promise<PublicCalendarView | null> {
     const db = this.read();
@@ -279,6 +401,8 @@ export class LocalStorageService implements DataService {
         color: client.color,
         logoUrl: client.logoUrl,
         handle: client.handle,
+        // masked only — the real address never crosses into the public view
+        maskedEmail: maskEmail(client.email),
       },
       posts,
     };

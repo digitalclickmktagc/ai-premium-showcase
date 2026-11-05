@@ -41,6 +41,10 @@ function makeService(updatePost: DataService["updatePost"], db: Database): DataS
     regenerateShareToken: notUsed as unknown as DataService["regenerateShareToken"],
     createPost: notUsed as unknown as DataService["createPost"],
     updatePost,
+    requestApproval: notUsed as unknown as DataService["requestApproval"],
+    issueApprovalCode: notUsed as unknown as DataService["issueApprovalCode"],
+    submitApprovalDecision:
+      notUsed as unknown as DataService["submitApprovalDecision"],
     reschedulePost: notUsed as unknown as DataService["reschedulePost"],
     deletePost: notUsed as unknown as DataService["deletePost"],
     restorePost: notUsed as unknown as DataService["restorePost"],
