@@ -262,3 +262,32 @@ grant execute on function public.get_public_calendar(text) to anon, authenticate
 --  Enquanto nenhuma existir, o fluxo completo roda no ambiente de testes
 --  (adapter local, que mostra o código na tela).
 -- ============================================================================
+
+-- ============================================================================
+--  Migração 002 — Clientes: situação, segmento, fixar, índice de saúde
+--  (Spec 01. Anexada aqui para ser aplicada na mesma execução.)
+-- ============================================================================
+alter table public.clients add column if not exists status text not null default 'active'
+  check (status in ('active','paused','ended','archived'));
+alter table public.clients add column if not exists segment text;
+alter table public.clients add column if not exists pinned boolean not null default false;
+alter table public.clients add column if not exists served_since date;
+
+-- Registros antigos guardavam só o booleano: deriva a situação a partir dele.
+update public.clients set status = case when active then 'active' else 'paused' end
+ where status is null;
+
+-- Mantém o espelho `active` coerente com `status`, para telas antigas.
+create or replace function public.sync_client_active()
+returns trigger language plpgsql as $$
+begin
+  new.active := (new.status = 'active');
+  return new;
+end;
+$$;
+drop trigger if exists clients_sync_active on public.clients;
+create trigger clients_sync_active
+  before insert or update of status on public.clients
+  for each row execute function public.sync_client_active();
+
+create index if not exists clients_status_idx on public.clients(status);

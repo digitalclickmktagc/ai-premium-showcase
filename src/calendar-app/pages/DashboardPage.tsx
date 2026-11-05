@@ -12,25 +12,59 @@ import { Button } from "@/components/ui/button";
 import type { Client } from "../types";
 import { fromDayISO, initials } from "../utils";
 import { useApp } from "../store/AppProvider";
+import { CLIENT_STATUS_LABEL, isOperational, normalizeStatus } from "../health";
+import { HealthPill, PinButton, StatusChip } from "../components/ClientHealth";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import AdminLayout from "../components/AdminLayout";
 import ClientFormDialog from "../components/ClientFormDialog";
 import ShareLink from "../components/ShareLink";
 import EmptyState from "../components/EmptyState";
 
 export default function DashboardPage() {
-  const { clients, calendars, posts, getCalendarByClient, postsForCalendar } = useApp();
+  const { clients, calendars, posts, getCalendarByClient, postsForCalendar, updateClient } =
+    useApp();
   const navigate = useNavigate();
 
   const [newOpen, setNewOpen] = useState(false);
   const [editClient, setEditClient] = useState<Client | null>(null);
+  const [query, setQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("operational");
+  const [segmentFilter, setSegmentFilter] = useState<string>("all");
 
-  const sorted = useMemo(
-    () =>
-      [...clients].sort(
-        (a, b) => Number(b.active) - Number(a.active) || a.name.localeCompare(b.name),
-      ),
+  const segments = useMemo(
+    () => [...new Set(clients.map((c) => c.segment).filter(Boolean) as string[])].sort(),
     [clients],
   );
+
+  const sorted = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return clients
+      .filter((c) => {
+        const status = normalizeStatus(c);
+        if (statusFilter === "operational" && !isOperational(status)) return false;
+        if (!["operational", "all"].includes(statusFilter) && status !== statusFilter)
+          return false;
+        if (segmentFilter !== "all" && (c.segment ?? "") !== segmentFilter) return false;
+        if (q && !`${c.name} ${c.handle ?? ""} ${c.segment ?? ""}`.toLowerCase().includes(q))
+          return false;
+        return true;
+      })
+      .sort(
+        (a, b) =>
+          // pinned first, then operational, then by name
+          Number(Boolean(b.pinned)) - Number(Boolean(a.pinned)) ||
+          Number(isOperational(normalizeStatus(b))) -
+            Number(isOperational(normalizeStatus(a))) ||
+          a.name.localeCompare(b.name),
+      );
+  }, [clients, query, statusFilter, segmentFilter]);
 
   const stats = useMemo(() => {
     const now = new Date();
@@ -38,7 +72,7 @@ export default function DashboardPage() {
     const thisMonth = active.filter((p) => isSameMonth(fromDayISO(p.date), now));
     return {
       clients: clients.length,
-      activeClients: clients.filter((c) => c.active).length,
+      activeClients: clients.filter((c) => normalizeStatus(c) === "active").length,
       monthPosts: thisMonth.length,
       published: active.filter((p) => p.status === "published").length,
     };
@@ -66,6 +100,50 @@ export default function DashboardPage() {
         <StatCard label="Posts no mês" value={stats.monthPosts} />
         <StatCard label="Publicados" value={stats.published} />
       </div>
+
+      {/* Filters */}
+      {clients.length > 0 && (
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          <Input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Buscar cliente..."
+            className="h-9 w-full sm:w-56"
+          />
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="h-9 w-[150px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="operational">Ativos e pausados</SelectItem>
+              <SelectItem value="all">Todas as situações</SelectItem>
+              {(["active", "paused", "ended", "archived"] as const).map((s) => (
+                <SelectItem key={s} value={s}>
+                  {CLIENT_STATUS_LABEL[s]}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {segments.length > 0 && (
+            <Select value={segmentFilter} onValueChange={setSegmentFilter}>
+              <SelectTrigger className="h-9 w-[160px]">
+                <SelectValue placeholder="Segmento" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os segmentos</SelectItem>
+                {segments.map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {s}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+          <span className="text-xs text-muted-foreground">
+            {sorted.length} de {clients.length}
+          </span>
+        </div>
+      )}
 
       {/* Client grid */}
       {clients.length === 0 ? (
@@ -100,21 +178,21 @@ export default function DashboardPage() {
                     <Avatar client={client} />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <h3 className="truncate font-display text-base font-semibold">
+                        <h3 className="min-w-0 flex-1 truncate font-display text-base font-semibold">
                           {client.name}
                         </h3>
-                        {!client.active && (
-                          <span className="shrink-0 rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[9px] uppercase text-muted-foreground">
-                            inativo
-                          </span>
-                        )}
+                        <StatusChip client={client} />
                       </div>
-                      {client.handle && (
-                        <p className="truncate text-xs text-muted-foreground">
-                          {client.handle}
-                        </p>
-                      )}
+                      <p className="truncate text-xs text-muted-foreground">
+                        {[client.handle, client.segment].filter(Boolean).join(" · ") || "—"}
+                      </p>
                     </div>
+                    <PinButton
+                      pinned={Boolean(client.pinned)}
+                      onToggle={() =>
+                        updateClient(client.id, { pinned: !client.pinned }).catch(() => undefined)
+                      }
+                    />
                     <Button
                       variant="ghost"
                       size="icon"
@@ -126,7 +204,8 @@ export default function DashboardPage() {
                     </Button>
                   </div>
 
-                  <div className="mt-4 flex items-center gap-4 text-xs text-muted-foreground">
+                  <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted-foreground">
+                    <HealthPill posts={clientPosts} client={client} />
                     <span className="inline-flex items-center gap-1.5">
                       <Circle className="h-3 w-3" style={{ color: client.color }} />
                       {clientPosts.length} {clientPosts.length === 1 ? "post" : "posts"}

@@ -13,6 +13,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { useApp } from "../store/AppProvider";
 import { initials } from "../utils";
+import { CLIENT_STATUS_LABEL, isOperational, normalizeStatus } from "../health";
 import ClientFormDialog from "./ClientFormDialog";
 import { ThemeToggle } from "../theme";
 
@@ -32,7 +33,10 @@ function NavContent({
     () =>
       [...clients].sort(
         (a, b) =>
-          Number(b.active) - Number(a.active) || a.name.localeCompare(b.name),
+          Number(Boolean(b.pinned)) - Number(Boolean(a.pinned)) ||
+          Number(isOperational(normalizeStatus(b))) -
+            Number(isOperational(normalizeStatus(a))) ||
+          a.name.localeCompare(b.name),
       ),
     [clients],
   );
@@ -92,7 +96,7 @@ function NavContent({
                 active
                   ? "bg-foreground/[0.08] text-foreground"
                   : "text-muted-foreground hover:bg-foreground/[0.06] hover:text-foreground",
-                !client.active && "opacity-60",
+                !isOperational(normalizeStatus(client)) && "opacity-60",
               )}
             >
               <span
@@ -100,9 +104,9 @@ function NavContent({
                 style={{ backgroundColor: client.color }}
               />
               <span className="truncate">{client.name}</span>
-              {!client.active && (
+              {normalizeStatus(client) !== "active" && (
                 <span className="ml-auto shrink-0 rounded bg-foreground/[0.06] px-1.5 py-0.5 text-[9px] uppercase text-muted-foreground">
-                  inativo
+                  {CLIENT_STATUS_LABEL[normalizeStatus(client)]}
                 </span>
               )}
             </button>

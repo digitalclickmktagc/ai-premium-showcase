@@ -67,6 +67,10 @@ export interface ApprovalRequest {
   decisions: ApprovalDecision[];
 }
 
+/** Client lifecycle (Spec 01). `active` is kept as a derived mirror so older
+ * stored records and existing screens keep working. */
+export type ClientStatus = "active" | "paused" | "ended" | "archived";
+
 export interface Client {
   id: string;
   name: string;
@@ -78,7 +82,16 @@ export interface Client {
   handle?: string;
   /** Contact e-mail. Used to send the approval verification code. */
   email?: string;
+  /** Lifecycle state. Source of truth; `active` mirrors it for compatibility. */
+  status: ClientStatus;
+  /** True when status is "active". Derived — do not set it directly. */
   active: boolean;
+  /** Free-text segment (e.g. "Alimentação", "Saúde"). */
+  segment?: string;
+  /** Pinned clients sort to the top of the list. */
+  pinned?: boolean;
+  /** Client since (YYYY-MM-DD). */
+  servedSince?: string;
   createdAt: string;
 }
 
@@ -165,13 +178,26 @@ export interface CreateClientInput {
   handle?: string;
   /** Contact e-mail used for approval verification codes. */
   email?: string;
+  status?: ClientStatus;
+  segment?: string;
   active?: boolean;
   /** Optional override for the auto-created calendar name. */
   calendarName?: string;
 }
 
 export type UpdateClientInput = Partial<
-  Pick<Client, "name" | "color" | "logoUrl" | "handle" | "email" | "active">
+  Pick<
+    Client,
+    | "name"
+    | "color"
+    | "logoUrl"
+    | "handle"
+    | "email"
+    | "status"
+    | "segment"
+    | "pinned"
+    | "servedSince"
+  >
 >;
 
 export interface CreatePostInput {

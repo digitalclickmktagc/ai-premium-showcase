@@ -46,7 +46,11 @@ const toClient = (r: any): Client => ({
   logoUrl: r.logo_url ?? undefined,
   handle: r.handle ?? undefined,
   email: r.email ?? undefined,
-  active: r.active,
+  status: (r.status ?? (r.active === false ? "paused" : "active")) as Client["status"],
+  active: (r.status ?? (r.active === false ? "paused" : "active")) === "active",
+  segment: r.segment ?? undefined,
+  pinned: r.pinned ?? false,
+  servedSince: r.served_since ?? undefined,
   createdAt: r.created_at,
 });
 const toCalendar = (r: any): Calendar => ({
@@ -269,7 +273,9 @@ export class SupabaseService implements DataService {
         logo_url: input.logoUrl?.trim() || null,
         handle: input.handle?.trim() || null,
         email: input.email?.trim() || null,
-        active: input.active ?? true,
+        status: input.status ?? "active",
+        active: (input.status ?? "active") === "active",
+        segment: input.segment?.trim() || null,
       }),
     });
     const [calRow] = await this.rest<any[]>("calendars", {
@@ -291,7 +297,13 @@ export class SupabaseService implements DataService {
     if (patch.logoUrl !== undefined) row.logo_url = patch.logoUrl.trim() || null;
     if (patch.handle !== undefined) row.handle = patch.handle.trim() || null;
     if (patch.email !== undefined) row.email = patch.email.trim() || null;
-    if (patch.active !== undefined) row.active = patch.active;
+    if (patch.segment !== undefined) row.segment = patch.segment.trim() || null;
+    if (patch.pinned !== undefined) row.pinned = patch.pinned;
+    if (patch.servedSince !== undefined) row.served_since = patch.servedSince || null;
+    if (patch.status !== undefined) {
+      row.status = patch.status;
+      row.active = patch.status === "active";
+    }
     const [updated] = await this.rest<any[]>(`clients?id=eq.${id}`, {
       method: "PATCH",
       headers: { Prefer: "return=representation" },

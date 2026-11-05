@@ -24,7 +24,9 @@ export function buildSeed(): Database {
     color: "#f97316",
     handle: "@auroracafe",
     email: "contato@auroracafe.com.br",
+    status: "active" as const,
     active: true,
+    segment: "Alimentação",
     createdAt: iso,
   };
   const lumina = {
@@ -32,7 +34,9 @@ export function buildSeed(): Database {
     name: "Lumina Studio",
     color: "#8b5cf6",
     handle: "@luminastudio",
+    status: "active" as const,
     active: true,
+    segment: "Serviços criativos",
     createdAt: iso,
   };
   const vitta = {
@@ -40,7 +44,9 @@ export function buildSeed(): Database {
     name: "Vitta Fit",
     color: "#22c55e",
     handle: "@vittafit",
+    status: "paused" as const,
     active: false,
+    segment: "Saúde e bem-estar",
     createdAt: iso,
   };
 
@@ -158,6 +164,14 @@ export function buildSeed(): Database {
       contentType: "Feed",
       description: "Divulgação do pacote de ensaio gestante do mês.",
       internalNotes: "Aguardando valores finais do pacote.",
+    }),
+    // Deliberately late: gives the relationship index something to report.
+    mk(luminaCal.id, {
+      title: "Reels de bastidores (atrasado)",
+      date: day(1),
+      status: "todo",
+      contentType: "Reels",
+      description: "Era para ter saído no início do mês.",
     }),
     mk(luminaCal.id, {
       title: "Behind the scenes",

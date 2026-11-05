@@ -170,6 +170,35 @@ post's reschedule history, and a toast offers **Desfazer**.
   mark it "Reagendado". Change the status in the post dialog when you want that.
 - Deleted posts and the read-only client view are not draggable.
 
+## Client approval and relationship health (benchmark specs 03 and 01)
+
+**Approval (Spec 03).** A post can be sent to the client, which opens a
+numbered round. The client approves, requests changes or rejects; a comment is
+mandatory for the last two. The review state is *derived* from the decisions in
+force, never stored, so it cannot drift. Earlier rounds stay as history.
+
+Decisions taken through the public link always require a verification code: six
+digits, ten-minute expiry, single use, replaced when re-issued, hashed at rest.
+The client's address is only ever shown masked. Every public entry point
+resolves the post through the share token and refuses one belonging to another
+calendar.
+
+> **Not production-ready yet:** Postgres cannot send e-mail, so the code is only
+> delivered in the test environment (shown on screen). Production needs a
+> Supabase Edge Function plus a provider, or custom SMTP. See the note at the
+> end of `supabase/migrations/001_aprovacao_externa.sql`.
+
+**Clients (Spec 01).** Clients now have a lifecycle (ativo, pausado, encerrado,
+arquivado) with the transitions the spec allows, a free-text segment, and
+pinning. `active` remains as a derived mirror so older records keep working.
+
+The relationship index scores 0–100 as `max(0, 100 + Σ signal weights)` and
+always shows its breakdown, because a number nobody can explain is not
+actionable. Active signals: overdue posts (−5 each, max −30), reviews rejected
+in the last 30 days (−10 each, max −20), and no client interaction for 21 days
+(−15). The spec's "overdue receivable" signal is deliberately absent — there is
+no financial module, so it could never fire and listing it would mislead.
+
 ## Keeping the Supabase project awake (free plan)
 
 Supabase's **free plan pauses a project after ~7 days of inactivity**. While

@@ -11,9 +11,16 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import type { Client } from "../types";
+import type { Client, ClientStatus } from "../types";
+import { CLIENT_STATUS_LABEL, canTransition, normalizeStatus } from "../health";
 import { CLIENT_COLORS, randomClientColor } from "../utils";
 import { useApp } from "../store/AppProvider";
 
@@ -36,7 +43,8 @@ export default function ClientFormDialog({
   const [email, setEmail] = useState("");
   const [color, setColor] = useState(CLIENT_COLORS[0]);
   const [logoUrl, setLogoUrl] = useState("");
-  const [active, setActive] = useState(true);
+  const [status, setStatus] = useState<ClientStatus>("active");
+  const [segment, setSegment] = useState("");
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -46,7 +54,8 @@ export default function ClientFormDialog({
     setEmail(client?.email ?? "");
     setColor(client?.color ?? randomClientColor());
     setLogoUrl(client?.logoUrl ?? "");
-    setActive(client?.active ?? true);
+    setStatus(client ? normalizeStatus(client) : "active");
+    setSegment(client?.segment ?? "");
   }, [open, client]);
 
   const submit = async () => {
@@ -63,7 +72,8 @@ export default function ClientFormDialog({
           email,
           color,
           logoUrl,
-          active,
+          status,
+          segment,
         });
         toast.success("Cliente atualizado.");
         onOpenChange(false);
@@ -74,7 +84,8 @@ export default function ClientFormDialog({
           email,
           color,
           logoUrl,
-          active,
+          status,
+          segment,
         });
         toast.success("Cliente e calendário criados.");
         onOpenChange(false);
@@ -178,16 +189,34 @@ export default function ClientFormDialog({
             />
           </div>
 
-          <div className="flex items-center justify-between rounded-lg border border-border px-3 py-2">
-            <div>
-              <Label htmlFor="client-active" className="cursor-pointer">
-                Cliente ativo
-              </Label>
-              <p className="text-xs text-muted-foreground">
-                Clientes inativos ficam recolhidos no painel.
-              </p>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="client-segment">Segmento</Label>
+              <Input
+                id="client-segment"
+                value={segment}
+                onChange={(e) => setSegment(e.target.value)}
+                placeholder="Ex.: Alimentação"
+              />
             </div>
-            <Switch id="client-active" checked={active} onCheckedChange={setActive} />
+            <div className="space-y-1.5">
+              <Label htmlFor="client-status">Situação</Label>
+              <Select value={status} onValueChange={(v) => setStatus(v as ClientStatus)}>
+                <SelectTrigger id="client-status">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {(["active", "paused", "ended", "archived"] as ClientStatus[])
+                    // only offer transitions the lifecycle allows
+                    .filter((s) => !client || canTransition(normalizeStatus(client), s))
+                    .map((s) => (
+                      <SelectItem key={s} value={s}>
+                        {CLIENT_STATUS_LABEL[s]}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </div>
 

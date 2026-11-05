@@ -1,6 +1,7 @@
 import type {
   ApprovalResult,
   Calendar,
+  ClientStatus,
   Client,
   CreateClientInput,
   CreatePostInput,
@@ -13,6 +14,7 @@ import type {
   UpdatePostInput,
 } from "../types";
 import { randomClientColor, shareToken, uid } from "../utils";
+import { normalizeStatus } from "../health";
 import {
   APPROVAL_CODE_TTL_MS,
   codesMatch,
@@ -62,6 +64,11 @@ export class LocalStorageService implements DataService {
         parsed.clients ??= [];
         parsed.calendars ??= [];
         parsed.posts ??= [];
+        // Legacy records only had the boolean; derive the lifecycle from it.
+        parsed.clients = parsed.clients.map((c) => {
+          const status = normalizeStatus(c);
+          return { ...c, status, active: status === "active" };
+        });
         return parsed;
       }
     } catch {
@@ -130,7 +137,9 @@ export class LocalStorageService implements DataService {
       logoUrl: input.logoUrl?.trim() || undefined,
       handle: input.handle?.trim() || undefined,
       email: input.email?.trim() || undefined,
-      active: input.active ?? true,
+      status: input.status ?? "active",
+      active: (input.status ?? "active") === "active",
+      segment: input.segment?.trim() || undefined,
       createdAt: nowISO(),
     };
     const calendar: Calendar = {
@@ -155,7 +164,14 @@ export class LocalStorageService implements DataService {
     if (patch.logoUrl !== undefined) client.logoUrl = patch.logoUrl.trim() || undefined;
     if (patch.handle !== undefined) client.handle = patch.handle.trim() || undefined;
     if (patch.email !== undefined) client.email = patch.email.trim() || undefined;
-    if (patch.active !== undefined) client.active = patch.active;
+    if (patch.segment !== undefined) client.segment = patch.segment.trim() || undefined;
+    if (patch.pinned !== undefined) client.pinned = patch.pinned;
+    if (patch.servedSince !== undefined)
+      client.servedSince = patch.servedSince || undefined;
+    if (patch.status !== undefined) {
+      client.status = patch.status as ClientStatus;
+      client.active = patch.status === "active"; // keep the mirror honest
+    }
     this.write(db);
     return client;
   }
