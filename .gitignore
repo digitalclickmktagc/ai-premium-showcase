@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Pacote de publicação gerado por 'npm run package'
+calendario-editorial-producao.zip

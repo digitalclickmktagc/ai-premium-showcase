@@ -14,7 +14,8 @@
     "dev:test": "vite --mode test",
     "build:test": "vite build --mode test",
     "preview:test": "vite preview --mode test",
-    "build:preview": "vite build --mode preview"
+    "build:preview": "vite build --mode preview",
+    "package": "vite build && rm -f calendario-editorial-producao.zip && cd dist && zip -qr ../calendario-editorial-producao.zip . && cd .. && echo \"Pacote pronto: calendario-editorial-producao.zip\""
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
