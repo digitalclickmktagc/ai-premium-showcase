@@ -71,13 +71,17 @@ export interface DataService {
 
   /**
    * Public: issue a verification code for a decision taken through the share
-   * link. Returns the masked destination; `devCode` is only populated when no
-   * e-mail transport is configured (test environment).
+   * link. Returns the masked destination.
+   *
+   * `delivered` says whether the code actually left for the client's inbox.
+   * False means it exists but nobody received it — the UI must say so rather
+   * than leave the client waiting for an e-mail that is not coming.
+   * `devCode` is only populated by the local adapter (test environment).
    */
   issueApprovalCode(
     token: string,
     postId: string,
-  ): Promise<{ maskedEmail?: string; devCode?: string }>;
+  ): Promise<{ maskedEmail?: string; devCode?: string; delivered?: boolean }>;
 
   /**
    * Public: record the client's decision. Implementations must verify the

@@ -454,10 +454,45 @@ export class SupabaseService implements DataService {
     return toPost(row);
   }
 
+  /**
+   * Ask for a verification code and have it delivered.
+   *
+   * The Edge Function is the only path that can deliver: the database keeps
+   * the plaintext code away from anything the browser can call (migration
+   * 004). When the function is not deployed, or has no e-mail provider
+   * configured, we fall back to the anonymous RPC so the code at least
+   * exists — and report `delivered: false`, because a client staring at an
+   * inbox that will never receive anything is worse than being told.
+   */
   async issueApprovalCode(
     token: string,
     postId: string,
-  ): Promise<{ maskedEmail?: string; devCode?: string }> {
+  ): Promise<{ maskedEmail?: string; devCode?: string; delivered?: boolean }> {
+    const res = await this.http(`${this.base}/functions/v1/send-approval-code`, {
+      method: "POST",
+      headers: {
+        apikey: this.anonKey,
+        Authorization: `Bearer ${this.anonKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ token, postId }),
+    });
+
+    if (res.ok) {
+      const data = (await res.json().catch(() => ({}))) as {
+        masked_email?: string;
+      };
+      return { maskedEmail: data.masked_email ?? undefined, delivered: true };
+    }
+
+    // 404: function not deployed. 501: deployed, but no provider configured.
+    // Anything else is a real failure the client needs to hear about —
+    // an invalid link, a post from another calendar, the 60s cooldown.
+    if (res.status !== 404 && res.status !== 501) {
+      const body = await res.text().catch(() => "");
+      throw new Error(this.friendlyError(res.status, body));
+    }
+
     const data = await this.rest<{ masked_email?: string } | null>(
       "rpc/issue_approval_code",
       {
@@ -466,9 +501,7 @@ export class SupabaseService implements DataService {
         body: JSON.stringify({ p_token: token, p_post_id: postId }),
       },
     );
-    // The code is never returned over the wire in production: the database
-    // stores only its hash and an out-of-band channel delivers it.
-    return { maskedEmail: data?.masked_email ?? undefined };
+    return { maskedEmail: data?.masked_email ?? undefined, delivered: false };
   }
 
   async submitApprovalDecision(

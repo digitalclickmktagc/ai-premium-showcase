@@ -330,7 +330,7 @@ export class LocalStorageService implements DataService {
   async issueApprovalCode(
     token: string,
     postId: string,
-  ): Promise<{ maskedEmail?: string; devCode?: string }> {
+  ): Promise<{ maskedEmail?: string; devCode?: string; delivered?: boolean }> {
     const { db, post, client } = this.resolveByToken(token, postId);
     if (!post.approval || post.approval.round < 1)
       throw new Error("Este post ainda não foi enviado para aprovação.");
@@ -350,7 +350,7 @@ export class LocalStorageService implements DataService {
 
     // No e-mail transport in the local adapter: hand the code back so the
     // test environment can show it on screen.
-    return { maskedEmail: maskEmail(client?.email), devCode: code };
+    return { maskedEmail: maskEmail(client?.email), devCode: code, delivered: false };
   }
 
   async submitApprovalDecision(

@@ -183,10 +183,23 @@ The client's address is only ever shown masked. Every public entry point
 resolves the post through the share token and refuses one belonging to another
 calendar.
 
-> **Not production-ready yet:** Postgres cannot send e-mail, so the code is only
-> delivered in the test environment (shown on screen). Production needs a
-> Supabase Edge Function plus a provider, or custom SMTP. See the note at the
-> end of `supabase/migrations/001_aprovacao_externa.sql`.
+**Delivering the code.** Postgres cannot send e-mail, and the anonymous
+`issue_approval_code` discards the plaintext on purpose — so on its own it
+never closes the loop. Migration `004_entrega_codigo.sql` splits the function
+in two: the anonymous one still returns only the masked address, while
+`issue_approval_code_delivery` returns the code and is granted to
+`service_role` alone. The Edge Function `send-approval-code` is the only
+caller: it runs with a key the browser does not have, and mails the code
+through Resend. See `supabase/functions/README.md` to deploy it.
+
+Because the share link can now trigger mail to the client, the database
+enforces a 60-second minimum between requests — a limit no caller can route
+around.
+
+> **Still needs one manual step:** the Edge Function has to be deployed and
+> `RESEND_API_KEY` / `APPROVAL_FROM_EMAIL` set. Until then the app falls back
+> to generating the code without delivering it, and the client screen says so
+> plainly instead of leaving them waiting for an e-mail that is not coming.
 
 **Clients (Spec 01).** Clients now have a lifecycle (ativo, pausado, encerrado,
 arquivado) with the transitions the spec allows, a free-text segment, and
@@ -231,6 +244,24 @@ by the execution log: each run carries the decision's `eventKey`, and
 The log (`automation_run`) is insert-only for the admin and invisible to clients;
 deleting a rule keeps its history. Apply
 `supabase/migrations/003_automacoes.sql` before using this against Supabase.
+
+## Verifying the security model
+
+`supabase/verificacao-seguranca.sql` re-checks, against a live database, every
+isolation property this app claims: who may execute each function, that the
+plaintext code never reaches an anonymous caller, that one share token cannot
+touch another calendar's post, that RLS returns nothing from the tables, that
+internal notes stay out of the public view, and that the automation log cannot
+be rewritten. It runs inside a transaction that ends in `ROLLBACK`, so it is
+safe to run on production.
+
+It was last run against PostgreSQL 16 with all four migrations applied, and
+every check passed. One finding came out of that run and is fixed in migration
+004: `request_approval` and `peek_approval_code_expiry` had kept Postgres's
+default `EXECUTE` grant to `PUBLIC`. Neither was exploitable — they are not
+`SECURITY DEFINER`, so RLS already emptied them for an anonymous caller — but
+the grant is gone now, because it would become a real hole the day someone
+marks one of them `SECURITY DEFINER`.
 
 ## Keeping the Supabase project awake (free plan)
 

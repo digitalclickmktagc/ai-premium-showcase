@@ -69,6 +69,9 @@ export default function ClientDecisionPanel({
   const [code, setCode] = useState("");
   const [codeSent, setCodeSent] = useState(false);
   const [devCode, setDevCode] = useState<string | null>(null);
+  // The code exists but no e-mail left: say it plainly instead of leaving the
+  // client watching an inbox that will never ring.
+  const [undelivered, setUndelivered] = useState(false);
   const [busy, setBusy] = useState(false);
 
   const state = approvalState(post.approval);
@@ -83,11 +86,17 @@ export default function ClientDecisionPanel({
       const res = await getDataService().issueApprovalCode(token, post.id);
       setCodeSent(true);
       setDevCode(res.devCode ?? null);
-      toast.success(
-        res.maskedEmail
-          ? `Código enviado para ${res.maskedEmail}`
-          : "Código gerado.",
-      );
+      const delivered = res.delivered !== false;
+      setUndelivered(!delivered && !res.devCode);
+      if (delivered) {
+        toast.success(
+          res.maskedEmail
+            ? `Código enviado para ${res.maskedEmail}`
+            : "Código enviado.",
+        );
+      } else {
+        toast.info("Código gerado.");
+      }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Não foi possível gerar o código.");
     } finally {
@@ -230,6 +239,13 @@ export default function ClientDecisionPanel({
                 {devCode && (
                   <p className="rounded bg-amber-400 px-2 py-1 text-xs font-semibold text-amber-950">
                     Ambiente de testes — seu código é <strong>{devCode}</strong>
+                  </p>
+                )}
+                {undelivered && (
+                  <p className="rounded border border-amber-500/40 bg-amber-500/10 px-2 py-1.5 text-xs text-amber-700 dark:text-amber-300">
+                    O código foi gerado, mas o envio por e-mail ainda não está
+                    configurado nesta instalação. Peça o código à agência para
+                    concluir.
                   </p>
                 )}
                 <div className="space-y-1.5">

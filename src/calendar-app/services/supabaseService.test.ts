@@ -321,3 +321,73 @@ describe("SupabaseService — stage automations", () => {
     expect(calls).toHaveLength(0);
   });
 });
+
+describe("SupabaseService — delivering the verification code", () => {
+  it("asks the Edge Function first and reports the code as delivered", async () => {
+    const svc = new SupabaseService(URL, KEY);
+    mockFetch([{ body: { masked_email: "a***@cliente.com", delivered: true } }]);
+
+    const res = await svc.issueApprovalCode("tok", "p1");
+
+    expect(calls).toHaveLength(1);
+    expect(calls[0].url).toBe(`${URL}/functions/v1/send-approval-code`);
+    expect(calls[0].body).toEqual({ token: "tok", postId: "p1" });
+    expect(res).toEqual({ maskedEmail: "a***@cliente.com", delivered: true });
+  });
+
+  it("sends only the publishable key — never a user session — to the function", async () => {
+    const svc = await loggedInService();
+    mockFetch([{ body: { masked_email: "a***@cliente.com" } }]);
+    await svc.issueApprovalCode("tok", "p1");
+
+    expect(calls[0].headers.apikey).toBe(KEY);
+    expect(calls[0].headers.Authorization).toBe(`Bearer ${KEY}`);
+  });
+
+  it("falls back to the RPC when the function is not deployed, and says so", async () => {
+    const svc = new SupabaseService(URL, KEY);
+    mockFetch([
+      { status: 404, body: { message: "not found" } },
+      { body: { masked_email: "a***@cliente.com" } },
+    ]);
+
+    const res = await svc.issueApprovalCode("tok", "p1");
+
+    expect(calls.map((c) => c.url)).toEqual([
+      `${URL}/functions/v1/send-approval-code`,
+      `${URL}/rest/v1/rpc/issue_approval_code`,
+    ]);
+    expect(res).toEqual({ maskedEmail: "a***@cliente.com", delivered: false });
+  });
+
+  it("falls back the same way when the function has no e-mail provider (501)", async () => {
+    const svc = new SupabaseService(URL, KEY);
+    mockFetch([
+      { status: 501, body: { error: "Envio de e-mail ainda não configurado." } },
+      { body: { masked_email: "a***@cliente.com" } },
+    ]);
+
+    const res = await svc.issueApprovalCode("tok", "p1");
+    expect(res.delivered).toBe(false);
+    expect(calls).toHaveLength(2);
+  });
+
+  it("surfaces a real refusal instead of silently issuing a code", async () => {
+    const svc = new SupabaseService(URL, KEY);
+    // The database's own message: the share link does not match this post.
+    mockFetch([{ status: 400, body: { message: "Post não encontrado neste calendário." } }]);
+
+    await expect(svc.issueApprovalCode("tok", "p1")).rejects.toThrow(
+      /Post não encontrado neste calendário/,
+    );
+    expect(calls).toHaveLength(1); // no fallback: the refusal is the answer
+  });
+
+  it("surfaces the cooldown rather than retrying through the RPC", async () => {
+    const svc = new SupabaseService(URL, KEY);
+    mockFetch([{ status: 400, body: { message: "Aguarde 42 segundos para pedir um novo código." } }]);
+
+    await expect(svc.issueApprovalCode("tok", "p1")).rejects.toThrow(/Aguarde 42 segundos/);
+    expect(calls).toHaveLength(1);
+  });
+});
