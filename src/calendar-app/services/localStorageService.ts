@@ -247,6 +247,11 @@ export class LocalStorageService implements DataService {
       post.referenceLink = patch.referenceLink.trim() || undefined;
     if (patch.internalNotes !== undefined)
       post.internalNotes = patch.internalNotes.trim() || undefined;
+    // Workspace fields are replaced wholesale: the caller composed the list.
+    if (patch.checklist !== undefined) post.checklist = patch.checklist;
+    if (patch.comments !== undefined) post.comments = patch.comments;
+    if (patch.attachments !== undefined) post.attachments = patch.attachments;
+    if (patch.timeEntries !== undefined) post.timeEntries = patch.timeEntries;
     post.updatedAt = nowISO();
 
     this.write(db);
@@ -481,8 +486,19 @@ export class LocalStorageService implements DataService {
 
     const posts = db.posts
       .filter((p) => p.calendarId === calendar.id && p.status !== "deleted")
-      // Strip internal notes — never expose them to clients.
-      .map(({ internalNotes: _internal, ...rest }) => rest);
+      // Strip every internal field. Destructuring here is deliberate: a new
+      // internal field added to Post shows up in this list as a compile
+      // error on PublicPost, instead of quietly leaking.
+      .map(
+        ({
+          internalNotes: _internal,
+          checklist: _checklist,
+          comments: _comments,
+          attachments: _attachments,
+          timeEntries: _time,
+          ...rest
+        }) => rest,
+      );
 
     return {
       calendar: {

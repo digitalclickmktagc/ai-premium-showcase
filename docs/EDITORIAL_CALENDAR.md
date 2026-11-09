@@ -245,6 +245,32 @@ The log (`automation_run`) is insert-only for the admin and invisible to clients
 deleting a rule keeps its history. Apply
 `supabase/migrations/003_automacoes.sql` before using this against Supabase.
 
+## The card's production workspace (benchmark spec 02)
+
+Each card carries a checklist, internal comments, attachments and logged time.
+They save the moment you act, not when the modal's Save button is pressed: a
+ticked box and a written comment are facts, and losing them to a Cancel click
+would be the wrong kind of surprise.
+
+All four are **internal**, like `internalNotes`. `PublicPost` omits them, the
+local adapter strips them by destructuring (so a new internal field surfaces
+as a compile error rather than a leak), and `get_public_calendar` builds its
+payload field by field and never includes them. The security script checks all
+four by name.
+
+**Attachments are links, not uploaded bytes.** Storing the file itself needs a
+Supabase Storage bucket with its own policies; that is a separate step and is
+not built. Every attachment URL goes through the same allow-list the
+client-facing link uses, so a `javascript:` attachment cannot become a click.
+
+**Time is read the way a person writes it** — `90`, `1h30`, `1:30`, `45min`,
+`1,5h` — and refuses more than 24 hours on one card, which is always a typo.
+
+**One editor at a time.** Each list is saved whole, so two people editing the
+same card's checklist in the same second would have one overwrite the other.
+With a single admin account that cannot happen; it is worth revisiting if
+F00 ever brings real multi-user.
+
 ## Verifying the security model
 
 `supabase/verificacao-seguranca.sql` re-checks, against a live database, every

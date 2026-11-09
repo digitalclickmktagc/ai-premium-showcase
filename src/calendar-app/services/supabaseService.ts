@@ -77,6 +77,10 @@ const toPost = (r: any): Post => ({
   internalNotes: r.internal_notes ?? undefined,
   rescheduleHistory: r.reschedule_history ?? [],
   approval: r.approval ?? undefined,
+  checklist: r.checklist ?? undefined,
+  comments: r.comments ?? undefined,
+  attachments: r.attachments ?? undefined,
+  timeEntries: r.time_entries ?? undefined,
   createdAt: r.created_at,
   updatedAt: r.updated_at,
 });
@@ -385,6 +389,10 @@ export class SupabaseService implements DataService {
       row.reference_link = patch.referenceLink.trim() || null;
     if (patch.internalNotes !== undefined)
       row.internal_notes = patch.internalNotes.trim() || null;
+    if (patch.checklist !== undefined) row.checklist = patch.checklist;
+    if (patch.comments !== undefined) row.comments = patch.comments;
+    if (patch.attachments !== undefined) row.attachments = patch.attachments;
+    if (patch.timeEntries !== undefined) row.time_entries = patch.timeEntries;
     if (patch.date !== undefined) {
       row.date = patch.date;
       if (patch.date !== current.date) {

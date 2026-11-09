@@ -391,3 +391,41 @@ describe("SupabaseService — delivering the verification code", () => {
     expect(calls).toHaveLength(1);
   });
 });
+
+describe("SupabaseService — workspace do card", () => {
+  it("maps the four jsonb columns in and out, in snake_case", async () => {
+    const svc = await loggedInService();
+    mockFetch([
+      // fetchPost (the adapter reads the post before patching)
+      { body: [{ id: "p1", calendar_id: "cal1", title: "t", date: "2026-06-10", status: "todo", reschedule_history: [] }] },
+      {
+        body: [
+          {
+            id: "p1",
+            calendar_id: "cal1",
+            title: "t",
+            date: "2026-06-10",
+            status: "todo",
+            reschedule_history: [],
+            checklist: [{ id: "c1", text: "Gravar", done: false }],
+            comments: [{ id: "m1", author: "Ana", body: "oi", at: "t" }],
+            attachments: [{ id: "a1", name: "Brief", url: "https://x.com", at: "t" }],
+            time_entries: [{ id: "t1", minutes: 30, at: "t" }],
+          },
+        ],
+      },
+    ]);
+
+    const post = await svc.updatePost("p1", {
+      checklist: [{ id: "c1", text: "Gravar", done: false }],
+      timeEntries: [{ id: "t1", minutes: 30, at: "t" }],
+    });
+
+    const patch = calls[1].body as Record<string, unknown>;
+    expect(patch).toHaveProperty("checklist");
+    expect(patch).toHaveProperty("time_entries");
+    expect(patch).not.toHaveProperty("timeEntries");
+    expect(post.timeEntries).toEqual([{ id: "t1", minutes: 30, at: "t" }]);
+    expect(post.comments).toHaveLength(1);
+  });
+});

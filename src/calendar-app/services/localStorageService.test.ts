@@ -290,3 +290,64 @@ describe("LocalStorageService — stage automations", () => {
     expect(await svc.findAutomationRuns(["decision:d1"])).toHaveLength(1);
   });
 });
+
+describe("LocalStorageService — workspace do card (checklist, comentários, anexos, tempo)", () => {
+  let svc: LocalStorageService;
+  let calendarId: string;
+  let token: string;
+  let postId: string;
+
+  beforeEach(async () => {
+    svc = freshService();
+    const { calendar } = await svc.createClient({ name: "Cliente A", email: "c@a.com" });
+    calendarId = calendar.id;
+    token = calendar.shareToken;
+    postId = (await svc.createPost({ calendarId, title: "Post", date: "2026-06-10" })).id;
+  });
+
+  const workspace = {
+    checklist: [{ id: "c1", text: "Gravar", done: true }],
+    comments: [
+      { id: "m1", author: "Ana", body: "trocar a capa", at: "2026-06-10T10:00:00.000Z" },
+    ],
+    attachments: [
+      { id: "a1", name: "Briefing", url: "https://drive.google.com/x", at: "2026-06-10T10:00:00.000Z" },
+    ],
+    timeEntries: [{ id: "t1", minutes: 45, note: "edição", at: "2026-06-10T10:00:00.000Z" }],
+  };
+
+  it("stores and reads all four back", async () => {
+    const saved = await svc.updatePost(postId, workspace);
+    expect(saved.checklist).toEqual(workspace.checklist);
+    expect(saved.comments).toEqual(workspace.comments);
+    expect(saved.attachments).toEqual(workspace.attachments);
+    expect(saved.timeEntries).toEqual(workspace.timeEntries);
+
+    const db = await svc.getDatabase();
+    expect(db.posts.find((p) => p.id === postId)?.checklist).toHaveLength(1);
+  });
+
+  it("leaves the other three alone when only one is patched", async () => {
+    await svc.updatePost(postId, workspace);
+    const saved = await svc.updatePost(postId, { checklist: [] });
+    expect(saved.checklist).toEqual([]);
+    expect(saved.comments).toEqual(workspace.comments);
+    expect(saved.timeEntries).toEqual(workspace.timeEntries);
+  });
+
+  it("never lets any of it reach the client's view", async () => {
+    await svc.updatePost(postId, { ...workspace, internalNotes: "segredo" });
+    const view = await svc.getPublicView(token);
+    const post = view!.posts.find((p) => p.id === postId)!;
+
+    for (const field of ["checklist", "comments", "attachments", "timeEntries", "internalNotes"]) {
+      expect(post).not.toHaveProperty(field);
+    }
+    // and nothing of it survives anywhere in the serialized payload
+    const raw = JSON.stringify(view);
+    expect(raw).not.toContain("trocar a capa");
+    expect(raw).not.toContain("Briefing");
+    expect(raw).not.toContain("edição");
+    expect(raw).not.toContain("segredo");
+  });
+});

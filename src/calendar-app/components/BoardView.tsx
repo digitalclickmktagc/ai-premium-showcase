@@ -1,10 +1,11 @@
 import { useCallback, useMemo } from "react";
-import { Plus } from "lucide-react";
+import { CheckSquare, Clock, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Post, PostStatus } from "../types";
 import { SELECTABLE_STATUSES, statusConfig } from "../status";
 import { approvalConfig, approvalState, toneStyles } from "../approval";
 import { formatShortDay } from "../utils";
+import { checklistProgress, formatDuration, totalMinutes } from "../cards";
 import { useDragToReschedule } from "../hooks/useDragToReschedule";
 
 /**
@@ -92,6 +93,8 @@ export default function BoardView({
                 const aState = approvalState(post.approval);
                 const aCfg = approvalConfig(aState);
                 const dragging = drag?.item.id === post.id;
+                const checks = checklistProgress(post.checklist);
+                const logged = totalMinutes(post.timeEntries);
                 return (
                   <button
                     key={post.id}
@@ -125,6 +128,27 @@ export default function BoardView({
                       {post.contentType && (
                         <span className="rounded bg-foreground/[0.06] px-1 text-[9px] uppercase tracking-wide text-muted-foreground">
                           {post.contentType}
+                        </span>
+                      )}
+                      {checks.total > 0 && (
+                        <span
+                          className={cn(
+                            "inline-flex items-center gap-0.5 text-[10px]",
+                            checks.complete ? "text-emerald-500" : "text-muted-foreground",
+                          )}
+                          title={`Checklist: ${checks.done} de ${checks.total}`}
+                        >
+                          <CheckSquare className="h-3 w-3" />
+                          {checks.done}/{checks.total}
+                        </span>
+                      )}
+                      {logged > 0 && (
+                        <span
+                          className="inline-flex items-center gap-0.5 text-[10px] text-muted-foreground"
+                          title="Tempo lançado"
+                        >
+                          <Clock className="h-3 w-3" />
+                          {formatDuration(logged)}
                         </span>
                       )}
                       {aState !== "none" && (

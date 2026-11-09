@@ -15,10 +15,18 @@
 --    5  anônimo      → ERRO "permission denied" nas duas funções internas
 --    6  tabelas      → 0 linhas em tudo, para o anônimo
 --    7  outro calendário → ERRO "Post não encontrado neste calendário."
---    8  nota interna → vaza_nota = f
+--    8  visão pública → vaza_nota, vaza_checklist, vaza_comentario,
+--                       vaza_anexo e vaza_tempo todos = f
 --    9  histórico    → UPDATE 0 e DELETE 0; chave de evento repetida é recusada
 --
 --  Qualquer linha diferente disso é regressão de segurança.
+--
+--  NUM POSTGRES LOCAL (fora do Supabase), rode isto uma vez antes — são os
+--  papéis e permissões que o Supabase já cria sozinho, e sem eles a seção 6
+--  dá "permission denied" em vez de devolver zero linhas:
+--    create role anon;  create role authenticated;  create role service_role;
+--    grant usage on schema public to anon, authenticated, service_role;
+--    grant all on all tables in schema public to anon, authenticated, service_role;
 -- ============================================================================
 \pset pager off
 \set ON_ERROR_STOP off
@@ -46,9 +54,15 @@ insert into public.clients (id, name, color, email) values
 insert into public.calendars (id, client_id, name, share_token) values
   ('00000000-0000-4000-8000-00000000a001', '00000000-0000-4000-8000-00000000c001', 'ZZ Cal A', 'ZZ_TOKEN_A'),
   ('00000000-0000-4000-8000-00000000a002', '00000000-0000-4000-8000-00000000c002', 'ZZ Cal B', 'ZZ_TOKEN_B');
-insert into public.posts (id, calendar_id, title, date, status, internal_notes) values
-  ('00000000-0000-4000-8000-00000000b001', '00000000-0000-4000-8000-00000000a001', 'ZZ Post A', current_date, 'done', 'ZZ_NOTA_INTERNA'),
-  ('00000000-0000-4000-8000-00000000b002', '00000000-0000-4000-8000-00000000a002', 'ZZ Post B', current_date, 'done', null);
+insert into public.posts (id, calendar_id, title, date, status, internal_notes,
+                          checklist, comments, attachments, time_entries) values
+  ('00000000-0000-4000-8000-00000000b001', '00000000-0000-4000-8000-00000000a001', 'ZZ Post A', current_date, 'done', 'ZZ_NOTA_INTERNA',
+   '[{"id":"c1","text":"ZZ_CHECKLIST","done":false}]',
+   '[{"id":"m1","author":"Equipe","body":"ZZ_COMENTARIO","at":"2026-01-01T00:00:00Z"}]',
+   '[{"id":"a1","name":"ZZ_ANEXO","url":"https://exemplo.com","at":"2026-01-01T00:00:00Z"}]',
+   '[{"id":"t1","minutes":30,"note":"ZZ_TEMPO","at":"2026-01-01T00:00:00Z"}]'),
+  ('00000000-0000-4000-8000-00000000b002', '00000000-0000-4000-8000-00000000a002', 'ZZ Post B', current_date, 'done', null,
+   '[]','[]','[]','[]');
 select public.request_approval('00000000-0000-4000-8000-00000000b001', null);
 select public.request_approval('00000000-0000-4000-8000-00000000b002', null);
 
@@ -94,8 +108,13 @@ select public.issue_approval_code('ZZ_TOKEN_A','00000000-0000-4000-8000-00000000
 rollback to s7;
 
 \echo ''
-\echo '### 8. A visão pública não carrega nota interna'
-select public.get_public_calendar('ZZ_TOKEN_A')::text ilike '%ZZ_NOTA_INTERNA%' as vaza_nota;
+\echo '### 8. A visão pública não carrega nada interno'
+select public.get_public_calendar('ZZ_TOKEN_A')::text as pub \gset
+select :'pub' like '%ZZ_NOTA_INTERNA%' as vaza_nota,
+       :'pub' like '%ZZ_CHECKLIST%'    as vaza_checklist,
+       :'pub' like '%ZZ_COMENTARIO%'   as vaza_comentario,
+       :'pub' like '%ZZ_ANEXO%'        as vaza_anexo,
+       :'pub' like '%ZZ_TEMPO%'        as vaza_tempo;
 reset role;
 
 \echo ''

@@ -106,6 +106,37 @@ export interface Calendar {
   createdAt: string;
 }
 
+/** One line of a card's checklist. */
+export interface ChecklistItem {
+  id: string;
+  text: string;
+  done: boolean;
+}
+
+/** Internal note on a card, written by the agency. Never leaves the agency. */
+export interface PostComment {
+  id: string;
+  author: string;
+  body: string;
+  at: string;
+}
+
+/** A working file referenced by the card: a link, with a readable name. */
+export interface PostAttachment {
+  id: string;
+  name: string;
+  url: string;
+  at: string;
+}
+
+/** Time logged against the card, in minutes. */
+export interface TimeEntry {
+  id: string;
+  minutes: number;
+  note?: string;
+  at: string;
+}
+
 export interface Post {
   id: string;
   calendarId: string;
@@ -125,6 +156,14 @@ export interface Post {
   rescheduleHistory: RescheduleEntry[];
   /** External review. Absent means the post was never sent to the client. */
   approval?: ApprovalRequest;
+  /**
+   * Production workspace (benchmark spec 02). All four are INTERNAL: like
+   * `internalNotes`, none of them may ever reach the client's share view.
+   */
+  checklist?: ChecklistItem[];
+  comments?: PostComment[];
+  attachments?: PostAttachment[];
+  timeEntries?: TimeEntry[];
   createdAt: string;
   updatedAt: string;
 }
@@ -161,10 +200,14 @@ export interface Database {
 
 /**
  * Sanitized calendar payload for the public (client) share view.
- * Deleted posts are excluded and `internalNotes` is stripped from every post,
+ * Deleted posts are excluded and every internal field — notes, checklist,
+ * comments, attachments and logged time — is stripped from each post,
  * enforcing the isolation requirements from spec section 6.
  */
-export type PublicPost = Omit<Post, "internalNotes">;
+export type PublicPost = Omit<
+  Post,
+  "internalNotes" | "checklist" | "comments" | "attachments" | "timeEntries"
+>;
 
 export interface PublicCalendarView {
   calendar: Pick<Calendar, "id" | "name" | "shareToken">;
@@ -227,5 +270,9 @@ export type UpdatePostInput = Partial<
     | "contentType"
     | "referenceLink"
     | "internalNotes"
+    | "checklist"
+    | "comments"
+    | "attachments"
+    | "timeEntries"
   >
 >;
