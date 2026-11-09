@@ -15,6 +15,7 @@ import {
 import { Label } from "@/components/ui/label";
 import type { Post, PostStatus } from "../types";
 import { ALL_STATUSES, statusConfig } from "../status";
+import { resolveStages } from "../stages";
 import { formatShortDay, initials } from "../utils";
 import { useApp } from "../store/AppProvider";
 import AdminLayout from "../components/AdminLayout";
@@ -24,6 +25,7 @@ import MonthNavigator from "../components/MonthNavigator";
 import PostModal from "../components/PostModal";
 import ShareLink from "../components/ShareLink";
 import AutomationPanel from "../components/AutomationPanel";
+import StagesPanel from "../components/StagesPanel";
 import StatusLegend from "../components/StatusLegend";
 import EmptyState from "../components/EmptyState";
 
@@ -37,6 +39,7 @@ export default function CalendarPage() {
     regenerateShareToken,
     movePost,
     changeStatus,
+    stagesForCalendar,
   } = useApp();
 
   const calendar = getCalendar(calendarId);
@@ -70,6 +73,12 @@ export default function CalendarPage() {
     [editingPostId, allPosts],
   );
 
+  // The calendar's own columns, or the standard four when it has none.
+  const stages = useMemo(
+    () => resolveStages(calendarId, stagesForCalendar(calendarId)),
+    [calendarId, stagesForCalendar],
+  );
+
   const visiblePosts = useMemo(() => {
     if (!calendar) return [];
     return postsForCalendar(calendar.id, {
@@ -97,16 +106,18 @@ export default function CalendarPage() {
     setCreateDate(date);
     setModalOpen(true);
   };
-  /** Board drag & drop: change the post's stage. */
-  const handleChangeStatus = async (post: Post, status: PostStatus) => {
+  /** Board drag & drop: move the post to another column. */
+  const handleChangeStatus = async (post: Post, status: PostStatus, stageId?: string) => {
     const previous = post.status;
+    const previousStage = post.stageId;
+    const landed = stages.find((s) => s.id === stageId) ?? stages.find((s) => s.category === status);
     try {
-      await changeStatus(post.id, status);
-      toast.success(`"${post.title}" → ${statusConfig(status).label}`, {
+      await changeStatus(post.id, status, stageId);
+      toast.success(`"${post.title}" → ${landed?.name ?? statusConfig(status).label}`, {
         action: {
           label: "Desfazer",
           onClick: () => {
-            changeStatus(post.id, previous).catch(() =>
+            changeStatus(post.id, previous, previousStage).catch(() =>
               toast.error("Não foi possível desfazer."),
             );
           },
@@ -200,8 +211,9 @@ export default function CalendarPage() {
         />
       </div>
 
-      {/* Stage automations */}
-      <div className="mb-5">
+      {/* Board columns + stage automations */}
+      <div className="mb-5 grid gap-3 lg:grid-cols-2">
+        <StagesPanel calendarId={calendar.id} />
         <AutomationPanel calendarId={calendar.id} />
       </div>
 
@@ -293,6 +305,8 @@ export default function CalendarPage() {
       ) : (
         <BoardView
           posts={visiblePosts}
+          stages={stages}
+          calendarId={calendar.id}
           onPostClick={openEdit}
           onCreate={() => openCreate()}
           onChangeStatus={handleChangeStatus}
@@ -301,7 +315,7 @@ export default function CalendarPage() {
       )}
 
       <div className="mt-4">
-        <StatusLegend />
+        <StatusLegend customStages={stagesForCalendar(calendar.id).length > 0} />
       </div>
 
       <PostModal

@@ -1,5 +1,6 @@
 import type {
   ApprovalResult,
+  BoardStage,
   Calendar,
   ClientStatus,
   Client,
@@ -72,6 +73,7 @@ export class LocalStorageService implements DataService {
         parsed.clients ??= [];
         parsed.calendars ??= [];
         parsed.posts ??= [];
+        parsed.boardStages ??= [];
         parsed.automationRules ??= [];
         parsed.automationRuns ??= [];
         // Legacy records only had the boolean; derive the lifecycle from it.
@@ -252,6 +254,7 @@ export class LocalStorageService implements DataService {
     if (patch.comments !== undefined) post.comments = patch.comments;
     if (patch.attachments !== undefined) post.attachments = patch.attachments;
     if (patch.timeEntries !== undefined) post.timeEntries = patch.timeEntries;
+    if (patch.stageId !== undefined) post.stageId = patch.stageId || undefined;
     post.updatedAt = nowISO();
 
     this.write(db);
@@ -408,6 +411,54 @@ export class LocalStorageService implements DataService {
   }
 
   // ── Public share view (isolated + sanitized) ──────────────────
+  // ── Board columns ─────────────────────────────────────────────
+  async createBoardStage(input: Omit<BoardStage, "id">): Promise<BoardStage> {
+    const db = this.read();
+    if (!db.calendars.some((c) => c.id === input.calendarId)) {
+      throw new Error("Calendário não encontrado.");
+    }
+    const stage: BoardStage = { ...input, id: uid("stage"), name: input.name.trim() };
+    db.boardStages = [...(db.boardStages ?? []), stage];
+    this.write(db);
+    return stage;
+  }
+
+  async updateBoardStage(
+    id: string,
+    patch: Partial<Pick<BoardStage, "name" | "color" | "category" | "order">>,
+  ): Promise<BoardStage> {
+    const db = this.read();
+    const stages = db.boardStages ?? [];
+    const stage = stages.find((s) => s.id === id);
+    if (!stage) throw new Error("Coluna não encontrada.");
+    const next: BoardStage = {
+      ...stage,
+      ...patch,
+      name: (patch.name ?? stage.name).trim(),
+    };
+    db.boardStages = stages.map((s) => (s.id === id ? next : s));
+    this.write(db);
+    return next;
+  }
+
+  async deleteBoardStage(id: string): Promise<void> {
+    const db = this.read();
+    db.boardStages = (db.boardStages ?? []).filter((s) => s.id !== id);
+    // Cards that pointed at it keep their status and fall back to another
+    // column of the same category — see stageForPost.
+    db.posts = db.posts.map((p) => (p.stageId === id ? { ...p, stageId: undefined } : p));
+    this.write(db);
+  }
+
+  async reorderBoardStages(order: { id: string; order: number }[]): Promise<void> {
+    const db = this.read();
+    const byId = new Map(order.map((o) => [o.id, o.order]));
+    db.boardStages = (db.boardStages ?? []).map((s) =>
+      byId.has(s.id) ? { ...s, order: byId.get(s.id)! } : s,
+    );
+    this.write(db);
+  }
+
   // ── Stage automations ─────────────────────────────────────────
   async createAutomationRule(
     input: Omit<AutomationRule, "id" | "createdAt">,
@@ -496,6 +547,7 @@ export class LocalStorageService implements DataService {
           comments: _comments,
           attachments: _attachments,
           timeEntries: _time,
+          stageId: _stage,
           ...rest
         }) => rest,
       );

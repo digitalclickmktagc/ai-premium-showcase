@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import type {
+  BoardStage,
   Calendar,
   Client,
   CreateClientInput,
@@ -47,6 +48,7 @@ interface AppContextValue {
   clients: Client[];
   calendars: Calendar[];
   posts: Post[];
+  boardStages: BoardStage[];
   automationRules: AutomationRule[];
 
   // selectors
@@ -56,6 +58,8 @@ interface AppContextValue {
   getClientForCalendar: (calendarId: string) => Client | undefined;
   postsForCalendar: (calendarId: string, filter?: PostFilter) => Post[];
   rulesForCalendar: (calendarId: string) => AutomationRule[];
+  /** The calendar's own columns; empty means it uses the standard four. */
+  stagesForCalendar: (calendarId: string) => BoardStage[];
 
   // auth
   login: (email: string, password: string) => Promise<void>;
@@ -74,12 +78,24 @@ interface AppContextValue {
   reschedulePost: (id: string, newDate: string) => Promise<Post>;
   /** Optimistically move a post to another day (used by drag & drop). */
   movePost: (id: string, newDate: string) => Promise<void>;
-  /** Optimistically change a post's stage (used by the board view). */
-  changeStatus: (id: string, status: PostStatus) => Promise<void>;
+  /**
+   * Optimistically move a post on the board. `stageId` is the custom column
+   * it landed in, or undefined on a standard stage.
+   */
+  changeStatus: (id: string, status: PostStatus, stageId?: string) => Promise<void>;
   /** Send a post to the client, opening a new review round. */
   requestApproval: (id: string, teamMessage?: string) => Promise<Post>;
   deletePost: (id: string) => Promise<Post>;
   restorePost: (id: string, status?: PostStatus) => Promise<Post>;
+
+  // board columns
+  createStage: (input: Omit<BoardStage, "id">) => Promise<BoardStage>;
+  updateStage: (
+    id: string,
+    patch: Partial<Pick<BoardStage, "name" | "color" | "category" | "order">>,
+  ) => Promise<BoardStage>;
+  deleteStage: (id: string) => Promise<void>;
+  reorderStages: (order: { id: string; order: number }[]) => Promise<void>;
 
   // automation rules
   createRule: (input: Omit<AutomationRule, "id" | "createdAt">) => Promise<AutomationRule>;
@@ -104,6 +120,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [calendars, setCalendars] = useState<Calendar[]>([]);
   const [posts, setPosts] = useState<Post[]>([]);
   const [automationRules, setAutomationRules] = useState<AutomationRule[]>([]);
+  const [boardStages, setBoardStages] = useState<BoardStage[]>([]);
   // Mirrors `posts` synchronously so an optimistic update can roll back even
   // when the write rejects before React has applied the state updater.
   const postsRef = useRef<Post[]>(posts);
@@ -115,6 +132,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setCalendars(db.calendars);
     setPosts(db.posts);
     setAutomationRules(db.automationRules ?? []);
+    setBoardStages(db.boardStages ?? []);
   }, [service]);
 
   useEffect(() => {
@@ -183,6 +201,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     (calendarId: string) => automationRules.filter((r) => r.calendarId === calendarId),
     [automationRules],
   );
+  const stagesForCalendar = useCallback(
+    (calendarId: string) =>
+      boardStages
+        .filter((s) => s.calendarId === calendarId)
+        .sort((a, b) => a.order - b.order),
+    [boardStages],
+  );
 
   // ── auth ───────────────────────────────────────────────────
   const login = useCallback(
@@ -201,6 +226,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setCalendars([]);
     setPosts([]);
     setAutomationRules([]);
+    setBoardStages([]);
   }, [service]);
 
   // ── mutations (each refreshes local state) ─────────────────
@@ -363,13 +389,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
   );
 
   const changeStatus = useCallback(
-    async (id: string, status: PostStatus) => {
+    async (id: string, status: PostStatus, stageId?: string) => {
       const snapshot = postsRef.current;
       setPosts((current) =>
-        current.map((p) => (p.id === id ? { ...p, status } : p)),
+        current.map((p) => (p.id === id ? { ...p, status, stageId } : p)),
       );
       try {
-        await service.updatePost(id, { status });
+        await service.updatePost(id, { status, stageId: stageId ?? "" });
         await refresh();
       } catch (err) {
         setPosts(snapshot); // put the card back in its column
@@ -410,6 +436,41 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const res = await service.restorePost(id, status);
       await refresh();
       return res;
+    },
+    [service, refresh],
+  );
+
+  // ── Board columns (CRUD) ───────────────────────────────────
+  const createStage = useCallback(
+    async (input: Omit<BoardStage, "id">) => {
+      const stage = await service.createBoardStage(input);
+      await refresh();
+      return stage;
+    },
+    [service, refresh],
+  );
+  const updateStage = useCallback(
+    async (
+      id: string,
+      patch: Partial<Pick<BoardStage, "name" | "color" | "category" | "order">>,
+    ) => {
+      const stage = await service.updateBoardStage(id, patch);
+      await refresh();
+      return stage;
+    },
+    [service, refresh],
+  );
+  const deleteStage = useCallback(
+    async (id: string) => {
+      await service.deleteBoardStage(id);
+      await refresh();
+    },
+    [service, refresh],
+  );
+  const reorderStages = useCallback(
+    async (order: { id: string; order: number }[]) => {
+      await service.reorderBoardStages(order);
+      await refresh();
     },
     [service, refresh],
   );
@@ -491,6 +552,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     clients,
     calendars,
     posts,
+    boardStages,
     automationRules,
     getClient,
     getCalendar,
@@ -498,6 +560,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     getClientForCalendar,
     postsForCalendar,
     rulesForCalendar,
+    stagesForCalendar,
     login,
     logout,
     createClient,
@@ -511,6 +574,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     requestApproval,
     deletePost,
     restorePost,
+    createStage,
+    updateStage,
+    deleteStage,
+    reorderStages,
     createRule,
     updateRule,
     deleteRule,

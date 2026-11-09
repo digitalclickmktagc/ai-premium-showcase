@@ -107,7 +107,7 @@ describe("SupabaseService — authenticated reads", () => {
     mockFetch([{ body: [] }]);
     await svc.getDatabase();
 
-    expect(calls).toHaveLength(4);
+    expect(calls).toHaveLength(5);
     for (const c of calls) {
       expect(c.headers.apikey).toBe(KEY);
       expect(c.headers.Authorization).toBe("Bearer user-access-token");
@@ -116,6 +116,7 @@ describe("SupabaseService — authenticated reads", () => {
       `${URL}/rest/v1/clients?select=*`,
       `${URL}/rest/v1/calendars?select=*`,
       `${URL}/rest/v1/posts?select=*`,
+      `${URL}/rest/v1/board_stage?select=*&order=position.asc`,
       `${URL}/rest/v1/automation_rule?select=*&order=created_at.asc`,
     ]);
   });
@@ -124,7 +125,13 @@ describe("SupabaseService — authenticated reads", () => {
     const svc = new SupabaseService(URL, KEY);
     mockFetch([{ body: [] }]);
     const db = await svc.getDatabase();
-    expect(db).toEqual({ clients: [], calendars: [], posts: [], automationRules: [] });
+    expect(db).toEqual({
+      clients: [],
+      calendars: [],
+      posts: [],
+      boardStages: [],
+      automationRules: [],
+    });
     expect(calls).toHaveLength(0);
   });
 });

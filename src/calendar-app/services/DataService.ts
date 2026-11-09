@@ -1,6 +1,7 @@
 import type { AutomationRule, AutomationRun } from "../automation";
 import type {
   ApprovalResult,
+  BoardStage,
   Calendar,
   Client,
   CreateClientInput,
@@ -97,6 +98,21 @@ export interface DataService {
       code?: string;
     },
   ): Promise<void>;
+
+  // ── Board columns (admin only) ────────────────────────────────
+  /**
+   * Custom columns for one calendar's board. A calendar with none uses the
+   * four standard stages, so these are purely additive: nothing that reads
+   * `post.status` is affected by them.
+   */
+  createBoardStage(input: Omit<BoardStage, "id">): Promise<BoardStage>;
+  updateBoardStage(
+    id: string,
+    patch: Partial<Pick<BoardStage, "name" | "color" | "category" | "order">>,
+  ): Promise<BoardStage>;
+  deleteBoardStage(id: string): Promise<void>;
+  /** Persist a new order in one go, so the board never renders half-sorted. */
+  reorderBoardStages(order: { id: string; order: number }[]): Promise<void>;
 
   // ── Stage automations (admin only) ────────────────────────────
   /**

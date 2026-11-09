@@ -106,6 +106,34 @@ export interface Calendar {
   createdAt: string;
 }
 
+/**
+ * A column on a calendar's board (benchmark spec 02).
+ *
+ * Columns are per-calendar and optional: a calendar with none uses the four
+ * standard stages, exactly as before. Each custom column declares the status
+ * it stands for, and that status stays the invariant the rest of the system
+ * reads — the client view, the approval automations and the health index all
+ * keep working without knowing a thing about custom columns.
+ */
+export interface BoardStage {
+  id: string;
+  calendarId: string;
+  name: string;
+  /** Hex colour for the column dot and the card's left border. */
+  color: string;
+  /**
+   * The standard status this column stands for.
+   *
+   * A stored column is never "deleted" — the database rejects it and the
+   * editor does not offer it, because the bin is not a production stage. The
+   * type stays wide so the board can describe the bin as a column too, using
+   * the same shape as everything else it renders.
+   */
+  category: PostStatus;
+  /** Position on the board, ascending. */
+  order: number;
+}
+
 /** One line of a card's checklist. */
 export interface ChecklistItem {
   id: string;
@@ -164,6 +192,12 @@ export interface Post {
   comments?: PostComment[];
   attachments?: PostAttachment[];
   timeEntries?: TimeEntry[];
+  /**
+   * Custom column the card sits in, when the calendar defines its own.
+   * `status` is still kept in step with that column's category, so nothing
+   * that reads `status` has to know custom columns exist.
+   */
+  stageId?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -192,6 +226,8 @@ export interface Database {
   posts: Post[];
   /** Short-lived approval codes. Never exposed through the public view. */
   approvalCodes?: ApprovalCodeEntry[];
+  /** Custom board columns, scoped per calendar. Empty means "use the standard four". */
+  boardStages?: BoardStage[];
   /** Stage automations, scoped per calendar. Admin-only. */
   automationRules?: AutomationRule[];
   /** Insert-only execution log for those automations. Admin-only. */
@@ -206,7 +242,12 @@ export interface Database {
  */
 export type PublicPost = Omit<
   Post,
-  "internalNotes" | "checklist" | "comments" | "attachments" | "timeEntries"
+  | "internalNotes"
+  | "checklist"
+  | "comments"
+  | "attachments"
+  | "timeEntries"
+  | "stageId"
 >;
 
 export interface PublicCalendarView {
@@ -274,5 +315,6 @@ export type UpdatePostInput = Partial<
     | "comments"
     | "attachments"
     | "timeEntries"
+    | "stageId"
   >
 >;

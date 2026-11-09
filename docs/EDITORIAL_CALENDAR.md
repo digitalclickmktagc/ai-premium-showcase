@@ -245,6 +245,35 @@ The log (`automation_run`) is insert-only for the admin and invisible to clients
 deleting a rule keeps its history. Apply
 `supabase/migrations/003_automacoes.sql` before using this against Supabase.
 
+## Configurable board columns (benchmark spec 02)
+
+A calendar can replace the four standard stages with its own flow — Roteiro,
+Gravação, Edição, Aprovação — up to twelve columns, each with its own name,
+colour and position.
+
+**A column is not a new status.** It is a name and a position for one of the
+four statuses the system already understands, declared as the column's
+category. `post.status` stays the invariant: the client's share view, the
+approval automations and the relationship index keep reading it and never
+learn that custom columns exist. Dropping a card on "Gravação" writes
+`status: "done"` — so "ao entrar em Feito → enviar para aprovação" fires from
+a column the rule has never heard of.
+
+That is also what makes the feature safe to add: a calendar with no columns of
+its own renders exactly as before, so the blast radius is limited to calendars
+that opt in.
+
+A card keeps its column only while that column still exists and still stands
+for the card's status. Otherwise the status wins and the card lands in the
+first column of its own category — which is what keeps a deleted column, or a
+status changed from the edit form, from stranding cards nowhere. Deleting the
+last column of a status is refused for the same reason, and "voltar ao padrão"
+leaves every card where it is.
+
+Dragging auto-scrolls the board when the card is held near an edge: with up to
+twelve columns the target is often off-screen, and a column you cannot see is
+a column you cannot drop on.
+
 ## The card's production workspace (benchmark spec 02)
 
 Each card carries a checklist, internal comments, attachments and logged time.

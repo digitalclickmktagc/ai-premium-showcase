@@ -12,6 +12,7 @@
  */
 import type {
   ApprovalResult,
+  BoardStage,
   Calendar,
   Client,
   CreateClientInput,
@@ -81,8 +82,17 @@ const toPost = (r: any): Post => ({
   comments: r.comments ?? undefined,
   attachments: r.attachments ?? undefined,
   timeEntries: r.time_entries ?? undefined,
+  stageId: r.stage_id ?? undefined,
   createdAt: r.created_at,
   updatedAt: r.updated_at,
+});
+const toStage = (r: any): BoardStage => ({
+  id: r.id,
+  calendarId: r.calendar_id,
+  name: r.name,
+  color: r.color,
+  category: r.category,
+  order: r.position,
 });
 const toRule = (r: any): AutomationRule => ({
   id: r.id,
@@ -273,11 +283,18 @@ export class SupabaseService implements DataService {
   // ── Reads ─────────────────────────────────────────────────────
   async getDatabase(): Promise<Database> {
     if (!this.session)
-      return { clients: [], calendars: [], posts: [], automationRules: [] };
-    const [clients, calendars, posts, rules] = await Promise.all([
+      return {
+        clients: [],
+        calendars: [],
+        posts: [],
+        boardStages: [],
+        automationRules: [],
+      };
+    const [clients, calendars, posts, stages, rules] = await Promise.all([
       this.rest<any[]>("clients?select=*"),
       this.rest<any[]>("calendars?select=*"),
       this.rest<any[]>("posts?select=*"),
+      this.rest<any[]>("board_stage?select=*&order=position.asc"),
       // Rules are small and bounded, so they travel with the first load. The
       // execution log does not: it only grows, and is fetched on demand.
       this.rest<any[]>("automation_rule?select=*&order=created_at.asc"),
@@ -286,6 +303,7 @@ export class SupabaseService implements DataService {
       clients: clients.map(toClient),
       calendars: calendars.map(toCalendar),
       posts: posts.map(toPost),
+      boardStages: stages.map(toStage),
       automationRules: rules.map(toRule),
     };
   }
@@ -393,6 +411,7 @@ export class SupabaseService implements DataService {
     if (patch.comments !== undefined) row.comments = patch.comments;
     if (patch.attachments !== undefined) row.attachments = patch.attachments;
     if (patch.timeEntries !== undefined) row.time_entries = patch.timeEntries;
+    if (patch.stageId !== undefined) row.stage_id = patch.stageId || null;
     if (patch.date !== undefined) {
       row.date = patch.date;
       if (patch.date !== current.date) {
@@ -539,6 +558,69 @@ export class SupabaseService implements DataService {
   }
 
   // ── Public share view (anon RPC, isolated + sanitized) ────────
+  // ── Board columns ─────────────────────────────────────────────
+  // Table `board_stage`, admin-only (RLS in 006_colunas_do_quadro.sql).
+  // `order` is a reserved word in SQL, so the column is called `position`.
+  async createBoardStage(input: Omit<BoardStage, "id">): Promise<BoardStage> {
+    const [row] = await this.rest<any[]>("board_stage", {
+      method: "POST",
+      headers: { Prefer: "return=representation" },
+      body: JSON.stringify({
+        calendar_id: input.calendarId,
+        name: input.name.trim(),
+        color: input.color,
+        category: input.category,
+        position: input.order,
+      }),
+    });
+    return toStage(row);
+  }
+
+  async updateBoardStage(
+    id: string,
+    patch: Partial<Pick<BoardStage, "name" | "color" | "category" | "order">>,
+  ): Promise<BoardStage> {
+    const row: any = {};
+    if (patch.name !== undefined) row.name = patch.name.trim();
+    if (patch.color !== undefined) row.color = patch.color;
+    if (patch.category !== undefined) row.category = patch.category;
+    if (patch.order !== undefined) row.position = patch.order;
+
+    const [updated] = await this.rest<any[]>(
+      `board_stage?id=eq.${encodeURIComponent(id)}`,
+      {
+        method: "PATCH",
+        headers: { Prefer: "return=representation" },
+        body: JSON.stringify(row),
+      },
+    );
+    if (!updated) throw new Error("Coluna não encontrada.");
+    return toStage(updated);
+  }
+
+  async deleteBoardStage(id: string): Promise<void> {
+    // posts.stage_id is ON DELETE SET NULL, so the cards fall back to another
+    // column of the same category on their own.
+    await this.rest<void>(`board_stage?id=eq.${encodeURIComponent(id)}`, {
+      method: "DELETE",
+    });
+  }
+
+  async reorderBoardStages(order: { id: string; order: number }[]): Promise<void> {
+    // No bulk update in PostgREST without an RPC; the list is at most a dozen
+    // rows, and sending them together keeps the board from rendering
+    // half-sorted.
+    await Promise.all(
+      order.map((o) =>
+        this.rest<void>(`board_stage?id=eq.${encodeURIComponent(o.id)}`, {
+          method: "PATCH",
+          headers: { Prefer: "return=minimal" },
+          body: JSON.stringify({ position: o.order }),
+        }),
+      ),
+    );
+  }
+
   // ── Stage automations ─────────────────────────────────────────
   // Tables `automation_rule` / `automation_run`, readable and writable only by
   // an authenticated admin (RLS in supabase/migrations/003_automacoes.sql).

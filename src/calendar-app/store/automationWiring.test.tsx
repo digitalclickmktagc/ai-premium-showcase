@@ -81,6 +81,10 @@ function fakeBackend(db: Database) {
     createAutomationRule: notUsed as unknown as DataService["createAutomationRule"],
     updateAutomationRule: notUsed as unknown as DataService["updateAutomationRule"],
     deleteAutomationRule: notUsed as unknown as DataService["deleteAutomationRule"],
+    createBoardStage: notUsed as unknown as DataService["createBoardStage"],
+    updateBoardStage: notUsed as unknown as DataService["updateBoardStage"],
+    deleteBoardStage: notUsed as unknown as DataService["deleteBoardStage"],
+    reorderBoardStages: async () => undefined,
     logAutomationRun: async (run) => {
       runs.push(run);
     },
