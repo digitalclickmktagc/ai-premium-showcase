@@ -1,7 +1,12 @@
 import type {
   Appointment,
   ApprovalResult,
+  ContactBlock,
   Contract,
+  ContractingProcess,
+  CrmTask,
+  Deal,
+  Interaction,
   FinanceAccount,
   FinanceCategory,
   FinanceEntry,
@@ -72,6 +77,7 @@ import {
   validateSeries,
   validateTransfer,
 } from "../finance";
+import { validateDeal, validateInteraction } from "../crm";
 import { buildSeed } from "./seed";
 import type { DataService } from "./DataService";
 
@@ -119,6 +125,11 @@ export class LocalStorageService implements DataService {
         parsed.calendars ??= [];
         parsed.posts ??= [];
         parsed.boardStages ??= [];
+        parsed.deals ??= [];
+        parsed.interactions ??= [];
+        parsed.crmTasks ??= [];
+        parsed.blocks ??= [];
+        parsed.processes ??= [];
         parsed.accounts ??= [];
         parsed.categories ??= [];
         parsed.entries ??= [];
@@ -467,6 +478,91 @@ export class LocalStorageService implements DataService {
   }
 
   // ── Public share view (isolated + sanitized) ──────────────────
+  // ── CRM e orquestrador ────────────────────────────────────────
+  async saveDeal(deal: Deal): Promise<Deal> {
+    const invalid = validateDeal(deal);
+    if (invalid) throw new Error(invalid);
+    const db = this.read();
+    const list = db.deals ?? [];
+    const next = { ...deal, updatedAt: nowISO() };
+    db.deals = list.some((d) => d.id === deal.id)
+      ? list.map((d) => (d.id === deal.id ? next : d))
+      : [...list, next];
+    this.write(db);
+    return next;
+  }
+
+  async deleteDeal(id: string): Promise<void> {
+    const db = this.read();
+    db.deals = (db.deals ?? []).filter((d) => d.id !== id);
+    // Interactions are the record of what was said to a person. They go with
+    // the deal, because keeping them without it would be keeping personal
+    // data with no reason to hold it.
+    db.interactions = (db.interactions ?? []).filter((i) => i.dealId !== id);
+    db.crmTasks = (db.crmTasks ?? []).filter((t) => t.dealId !== id);
+    this.write(db);
+  }
+
+  async addInteraction(interaction: Interaction): Promise<Interaction> {
+    const invalid = validateInteraction(interaction);
+    if (invalid) throw new Error(invalid);
+    const db = this.read();
+    db.interactions = [...(db.interactions ?? []), interaction];
+    // The deal's "last contact" follows from the interaction, never the
+    // other way round.
+    db.deals = (db.deals ?? []).map((d) =>
+      d.id === interaction.dealId
+        ? { ...d, lastContactOn: interaction.at.slice(0, 10), updatedAt: nowISO() }
+        : d,
+    );
+    this.write(db);
+    return interaction;
+  }
+
+  async saveCrmTask(task: CrmTask): Promise<CrmTask> {
+    if (!task.title.trim()) throw new Error("Dê um título à tarefa.");
+    const db = this.read();
+    const list = db.crmTasks ?? [];
+    db.crmTasks = list.some((t) => t.id === task.id)
+      ? list.map((t) => (t.id === task.id ? task : t))
+      : [...list, task];
+    this.write(db);
+    return task;
+  }
+
+  async deleteCrmTask(id: string): Promise<void> {
+    const db = this.read();
+    db.crmTasks = (db.crmTasks ?? []).filter((t) => t.id !== id);
+    this.write(db);
+  }
+
+  async saveBlock(block: ContactBlock): Promise<ContactBlock> {
+    if (!block.value.trim()) throw new Error("Informe o contato a bloquear.");
+    const db = this.read();
+    const list = db.blocks ?? [];
+    db.blocks = list.some((b) => b.id === block.id)
+      ? list.map((b) => (b.id === block.id ? block : b))
+      : [...list, block];
+    this.write(db);
+    return block;
+  }
+
+  async deleteBlock(id: string): Promise<void> {
+    const db = this.read();
+    db.blocks = (db.blocks ?? []).filter((b) => b.id !== id);
+    this.write(db);
+  }
+
+  async saveProcess(process: ContractingProcess): Promise<ContractingProcess> {
+    const db = this.read();
+    const list = db.processes ?? [];
+    db.processes = list.some((p) => p.id === process.id)
+      ? list.map((p) => (p.id === process.id ? process : p))
+      : [...list, process];
+    this.write(db);
+    return process;
+  }
+
   // ── Financeiro ────────────────────────────────────────────────
   async saveAccount(account: FinanceAccount): Promise<FinanceAccount> {
     if (!account.name.trim()) throw new Error("Dê um nome à conta.");

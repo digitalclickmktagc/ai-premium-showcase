@@ -11,7 +11,12 @@ import {
 import type {
   Appointment,
   Availability,
+  ContactBlock,
   Contract,
+  ContractingProcess,
+  CrmTask,
+  Deal,
+  Interaction,
   FinanceAccount,
   FinanceCategory,
   FinanceEntry,
@@ -34,6 +39,17 @@ import type {
   UpdatePostInput,
 } from "../types";
 import { getDataService } from "../services";
+import {
+  advanceProcess,
+  isActionable,
+  newProcess,
+  proposalsAwaitingProcess,
+  type SagaContext,
+} from "../orchestrator";
+import { BILLING_LABEL, isRecurring, proposalTotals } from "../proposals";
+import { DEFAULT_RENEW_NOTICE_DAYS, hashText, isEffective } from "../contracts";
+import { formatMoney } from "../money";
+import { shareToken, todayISO, uid } from "../utils";
 import {
   newChain,
   pendingReviewEvents,
@@ -63,6 +79,11 @@ interface AppContextValue {
   posts: Post[];
   boardStages: BoardStage[];
   automationRules: AutomationRule[];
+  deals: Deal[];
+  interactions: Interaction[];
+  crmTasks: CrmTask[];
+  blocks: ContactBlock[];
+  processes: ContractingProcess[];
   accounts: FinanceAccount[];
   categories: FinanceCategory[];
   entries: FinanceEntry[];
@@ -113,6 +134,17 @@ interface AppContextValue {
   requestApproval: (id: string, teamMessage?: string) => Promise<Post>;
   deletePost: (id: string) => Promise<Post>;
   restorePost: (id: string, status?: PostStatus) => Promise<Post>;
+
+  // crm
+  saveDeal: (d: Deal) => Promise<Deal>;
+  deleteDeal: (id: string) => Promise<void>;
+  addInteraction: (i: Interaction) => Promise<Interaction>;
+  saveCrmTask: (t: CrmTask) => Promise<CrmTask>;
+  deleteCrmTask: (id: string) => Promise<void>;
+  saveBlock: (b: ContactBlock) => Promise<ContactBlock>;
+  deleteBlock: (id: string) => Promise<void>;
+  /** Push a stuck sale-to-operation process one more time. */
+  retryProcess: (id: string) => Promise<void>;
 
   // financeiro
   saveAccount: (a: FinanceAccount) => Promise<FinanceAccount>;
@@ -188,6 +220,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [posts, setPosts] = useState<Post[]>([]);
   const [automationRules, setAutomationRules] = useState<AutomationRule[]>([]);
   const [boardStages, setBoardStages] = useState<BoardStage[]>([]);
+  const [deals, setDeals] = useState<Deal[]>([]);
+  const [interactions, setInteractions] = useState<Interaction[]>([]);
+  const [crmTasks, setCrmTasks] = useState<CrmTask[]>([]);
+  const [blocks, setBlocks] = useState<ContactBlock[]>([]);
+  const [processes, setProcesses] = useState<ContractingProcess[]>([]);
   const [accounts, setAccounts] = useState<FinanceAccount[]>([]);
   const [categories, setCategories] = useState<FinanceCategory[]>([]);
   const [entries, setEntries] = useState<FinanceEntry[]>([]);
@@ -206,6 +243,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const postsRef = useRef<Post[]>(posts);
   postsRef.current = posts;
 
+  // Mirrors for the saga, which runs outside render and must not read stale
+  // state captured by a closure.
+  const clientsRef = useRef<Client[]>([]);
+  const calendarsRef = useRef<Calendar[]>([]);
+  const contractsRef = useRef<Contract[]>([]);
+  const proposalsRef = useRef<Proposal[]>([]);
+  const processesRef = useRef<ContractingProcess[]>([]);
+  const dealsRef = useRef<Deal[]>([]);
+
   const refresh = useCallback(async () => {
     const db = await service.getDatabase();
     setClients(db.clients);
@@ -213,6 +259,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setPosts(db.posts);
     setAutomationRules(db.automationRules ?? []);
     setBoardStages(db.boardStages ?? []);
+    setDeals(db.deals ?? []);
+    setInteractions(db.interactions ?? []);
+    setCrmTasks(db.crmTasks ?? []);
+    setBlocks(db.blocks ?? []);
+    setProcesses(db.processes ?? []);
     setAccounts(db.accounts ?? []);
     setCategories(db.categories ?? []);
     setEntries(db.entries ?? []);
@@ -320,6 +371,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setPosts([]);
     setAutomationRules([]);
     setBoardStages([]);
+    setDeals([]);
+    setInteractions([]);
+    setCrmTasks([]);
+    setBlocks([]);
+    setProcesses([]);
     setAccounts([]);
     setCategories([]);
     setEntries([]);
@@ -543,6 +599,243 @@ export function AppProvider({ children }: { children: ReactNode }) {
     },
     [service, refresh],
   );
+
+  // ── CRM ────────────────────────────────────────────────────
+  const saveDeal = useCallback(
+    async (d: Deal) => {
+      const res = await service.saveDeal(d);
+      await refresh();
+      return res;
+    },
+    [service, refresh],
+  );
+  const deleteDeal = useCallback(
+    async (id: string) => {
+      await service.deleteDeal(id);
+      await refresh();
+    },
+    [service, refresh],
+  );
+  const addInteraction = useCallback(
+    async (i: Interaction) => {
+      const res = await service.addInteraction(i);
+      await refresh();
+      return res;
+    },
+    [service, refresh],
+  );
+  const saveCrmTask = useCallback(
+    async (t: CrmTask) => {
+      const res = await service.saveCrmTask(t);
+      await refresh();
+      return res;
+    },
+    [service, refresh],
+  );
+  const deleteCrmTask = useCallback(
+    async (id: string) => {
+      await service.deleteCrmTask(id);
+      await refresh();
+    },
+    [service, refresh],
+  );
+  const saveBlock = useCallback(
+    async (b: ContactBlock) => {
+      const res = await service.saveBlock(b);
+      await refresh();
+      return res;
+    },
+    [service, refresh],
+  );
+  const deleteBlock = useCallback(
+    async (id: string) => {
+      await service.deleteBlock(id);
+      await refresh();
+    },
+    [service, refresh],
+  );
+
+  // ── Orquestrador venda → operação (spec 10) ────────────────
+  /**
+   * The client accepts in their own browser, where nothing may touch the
+   * agency's data. So the saga starts here, the next time the agency's app
+   * has the proposal in front of it — the same catch-up shape the post
+   * automations use. Each step records what it created, so running this
+   * again never produces a second client, contract or billing series.
+   */
+  const buildSagaContext = useCallback((): SagaContext => {
+    const db = {
+      clients: clientsRef.current,
+      calendars: calendarsRef.current,
+      contracts: contractsRef.current,
+    };
+    return {
+      resolveClient: async (proposal) => {
+        if (proposal.clientId) return proposal.clientId;
+        const name = (proposal.leadName ?? proposal.title).trim();
+        const existing = db.clients.find(
+          (c) => c.name.trim().toLowerCase() === name.toLowerCase(),
+        );
+        // Same name is only a hint, never a merge — but with nothing else to
+        // go on it is the best available, and the spec allows the suggestion.
+        if (existing) return existing.id;
+        const { client } = await service.createClient({ name });
+        return client.id;
+      },
+      generateContract: async (proposal, clientId) => {
+        const client = db.clients.find((c) => c.id === clientId);
+        const totals = proposalTotals(proposal.items);
+        const text = [
+          `CONTRATO DE PRESTAÇÃO DE SERVIÇOS`,
+          ``,
+          `CONTRATANTE: ${client?.name ?? proposal.leadName ?? ""}`,
+          `CONTRATADA: ${session?.name ?? "Agência"}`,
+          ``,
+          `Serviços contratados, conforme a proposta ${proposal.number ?? proposal.title}:`,
+          ...proposal.items.map((i) => `- ${i.description} (${BILLING_LABEL[i.billing]})`),
+          ``,
+          `Valor recorrente: ${formatMoney(totals.recurringMonthly)} por mês.`,
+          `Valor único: ${formatMoney(totals.oneOff)}.`,
+        ].join("\n");
+
+        const contract: Contract = {
+          id: uid("ctr"),
+          clientId,
+          proposalId: proposal.id,
+          title: `Contrato — ${proposal.title}`,
+          status: "aguardando_partes",
+          finalText: text,
+          textHash: await hashText(text),
+          startsOn: todayISO(),
+          autoRenew: true,
+          renewNoticeDays: DEFAULT_RENEW_NOTICE_DAYS,
+          parties: [
+            {
+              id: uid("party"),
+              role: "contratante",
+              name: client?.name ?? proposal.leadName ?? "Contratante",
+              order: 0,
+              required: true,
+              token: shareToken(),
+            },
+            {
+              id: uid("party"),
+              role: "contratada",
+              name: session?.name ?? "Agência",
+              order: 1,
+              required: true,
+              token: shareToken(),
+            },
+          ],
+          signatures: [],
+          createdAt: new Date().toISOString(),
+        };
+        await service.saveContract(contract);
+        return contract.id;
+      },
+      isContractEffective: (contractId) => {
+        const contract = contractsRef.current.find((c) => c.id === contractId);
+        return Boolean(contract && isEffective(contract));
+      },
+      activateServices: async (proposal) => proposal.items.map((i) => i.id),
+      createBilling: async (proposal, clientId) => {
+        const ids: string[] = [];
+        for (const item of proposal.items) {
+          const total = Math.round(item.quantity * item.unitPrice);
+          const recurring = isRecurring(item.billing);
+          const months =
+            item.billing === "trimestral"
+              ? 3
+              : item.billing === "semestral"
+                ? 6
+                : item.billing === "anual"
+                  ? 12
+                  : 1;
+          const id = uid("ser");
+          await service.saveSeries({
+            id,
+            kind: recurring ? "recorrente" : "parcelada",
+            everyMonths: recurring ? months : 1,
+            dayOfMonth: 5,
+            count: recurring
+              ? undefined
+              : Math.max(2, proposal.payment?.installments ?? 2),
+            totalAmount: total,
+            startDate: todayISO(),
+            nature: "receita",
+            description: `${item.description} — ${proposal.title}`,
+            clientId,
+            createdAt: new Date().toISOString(),
+          });
+          ids.push(id);
+        }
+        return ids;
+      },
+      ensureBoard: async (clientId) => {
+        const calendar = calendarsRef.current.find((c) => c.clientId === clientId);
+        return calendar?.id ?? "";
+      },
+      markDealWon: async (dealId) => {
+        const deal = dealsRef.current.find((d) => d.id === dealId);
+        if (!deal) return;
+        await service.saveDeal({ ...deal, status: "ganho" });
+      },
+    };
+  }, [service, session]);
+
+  const runningSaga = useRef(false);
+  const runPendingProcesses = useCallback(async () => {
+    if (runningSaga.current) return;
+    runningSaga.current = true;
+    try {
+      const ctx = buildSagaContext();
+      const starting = proposalsAwaitingProcess(proposalsRef.current, processesRef.current);
+      const toRun: ContractingProcess[] = [
+        ...starting.map((p) => {
+          const deal = dealsRef.current.find((d) => d.proposalId === p.id);
+          return newProcess(p, deal?.id);
+        }),
+        ...processesRef.current.filter(isActionable),
+      ];
+      if (toRun.length === 0) return;
+
+      let changed = false;
+      for (const process of toRun) {
+        const proposal = proposalsRef.current.find((p) => p.id === process.proposalId);
+        if (!proposal) continue;
+        const next = await advanceProcess(process, proposal, ctx);
+        // Only write when something actually moved. A waiting process is
+        // re-checked on every load, and saving an identical row would reload
+        // the app, which would check again, forever.
+        if (next === process) continue;
+        await service.saveProcess(next);
+        changed = true;
+      }
+      if (changed) await refresh();
+    } catch (err) {
+      console.error("Falha no processo de contratação", err);
+    } finally {
+      runningSaga.current = false;
+    }
+  }, [buildSagaContext, service, refresh]);
+
+  const retryProcess = useCallback(
+    async (id: string) => {
+      const process = processesRef.current.find((p) => p.id === id);
+      const proposal = process && proposalsRef.current.find((p) => p.id === process.proposalId);
+      if (!process || !proposal) throw new Error("Processo não encontrado.");
+      const next = await advanceProcess(process, proposal, buildSagaContext());
+      await service.saveProcess(next);
+      await refresh();
+    },
+    [buildSagaContext, service, refresh],
+  );
+
+  // Start or resume whenever the data the saga reads has changed.
+  useEffect(() => {
+    if (!session || loading) return;
+    void runPendingProcesses();
+  }, [session, loading, proposals, processes, contracts, runPendingProcesses]);
 
   // ── Financeiro ─────────────────────────────────────────────
   // Thin pass-throughs: every rule lives in finance.ts (pure, tested) or in
@@ -875,6 +1168,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     };
   }, [session, loading, posts, automationRules, service, fireAutomations]);
 
+  clientsRef.current = clients;
+  calendarsRef.current = calendars;
+  contractsRef.current = contracts;
+  proposalsRef.current = proposals;
+  processesRef.current = processes;
+  dealsRef.current = deals;
+
   const value: AppContextValue = {
     serviceName: service.name,
     loading,
@@ -884,6 +1184,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     posts,
     boardStages,
     automationRules,
+    deals,
+    interactions,
+    crmTasks,
+    blocks,
+    processes,
     accounts,
     categories,
     entries,
@@ -917,6 +1222,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
     requestApproval,
     deletePost,
     restorePost,
+    saveDeal,
+    deleteDeal,
+    addInteraction,
+    saveCrmTask,
+    deleteCrmTask,
+    saveBlock,
+    deleteBlock,
+    retryProcess,
     saveAccount,
     deleteAccount,
     saveCategory,

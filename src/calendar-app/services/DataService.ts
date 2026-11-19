@@ -2,7 +2,12 @@ import type { AutomationRule, AutomationRun } from "../automation";
 import type {
   Appointment,
   ApprovalResult,
+  ContactBlock,
   Contract,
+  ContractingProcess,
+  CrmTask,
+  Deal,
+  Interaction,
   FinanceAccount,
   FinanceCategory,
   FinanceEntry,
@@ -151,6 +156,18 @@ export interface DataService {
    * reading the whole log keeps this cheap however long the log grows.
    */
   findAutomationRuns(eventKeys: string[]): Promise<AutomationRun[]>;
+
+  // ── CRM e orquestrador (specs 09 e 10) ────────────────────────
+  saveDeal(deal: Deal): Promise<Deal>;
+  deleteDeal(id: string): Promise<void>;
+  /** Insert-only: correcting an interaction means writing another one. */
+  addInteraction(interaction: Interaction): Promise<Interaction>;
+  saveCrmTask(task: CrmTask): Promise<CrmTask>;
+  deleteCrmTask(id: string): Promise<void>;
+  saveBlock(block: ContactBlock): Promise<ContactBlock>;
+  deleteBlock(id: string): Promise<void>;
+  /** The sale-to-operation saga's persisted state. */
+  saveProcess(process: ContractingProcess): Promise<ContractingProcess>;
 
   // ── Financeiro (spec 08) ──────────────────────────────────────
   saveAccount(account: FinanceAccount): Promise<FinanceAccount>;

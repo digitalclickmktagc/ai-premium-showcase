@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import {
   AlertTriangle,
   Copy,
+  Workflow,
   Eye,
   FileSignature,
   FileText,
@@ -38,6 +39,7 @@ import {
   pendingParties,
 } from "../contracts";
 import { formatShortDay, shareUrl, todayISO } from "../utils";
+import { STEP_LABEL, failedStep, progressOf } from "../orchestrator";
 import type { Proposal, Service } from "../types";
 
 /**
@@ -53,9 +55,11 @@ export default function CommercialPage() {
     proposals,
     contracts,
     clients,
+    processes,
     deleteService,
     sendProposal,
     deleteProposal,
+    retryProcess,
   } = useApp();
 
   const [tab, setTab] = useState("propostas");
@@ -188,6 +192,7 @@ export default function CommercialPage() {
             <ul className="space-y-2">
               {visibleProposals.map((p) => {
                 const totals = proposalTotals(p.items);
+                const process = processes.find((x) => x.proposalId === p.id);
                 const expired = isExpired(p);
                 const status = expired ? "vencida" : p.status;
                 return (
@@ -300,6 +305,46 @@ export default function CommercialPage() {
                         </Button>
                       )}
                     </div>
+                    {process && (
+                      <div className="w-full border-t border-border pt-2">
+                        <p className="flex flex-wrap items-center gap-1.5 text-[11px] text-muted-foreground">
+                          <Workflow className="h-3 w-3" />
+                          Contratação: {progressOf(process).done}/{progressOf(process).total} passos
+                          {process.status === "aguardando_assinatura" && (
+                            <span className="text-amber-600 dark:text-amber-400">
+                              · aguardando assinaturas (nada financeiro foi criado ainda)
+                            </span>
+                          )}
+                          {process.status === "concluido" && (
+                            <span className="text-emerald-600 dark:text-emerald-400">
+                              · concluída
+                            </span>
+                          )}
+                          {process.status === "falhou" && (
+                            <span className="text-destructive">
+                              · parou em “{STEP_LABEL[failedStep(process)!.key]}”:{" "}
+                              {failedStep(process)?.detail}
+                            </span>
+                          )}
+                          {process.status === "falhou" && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-6 px-2 text-[10px]"
+                              onClick={() =>
+                                void retryProcess(process.id).catch((err) =>
+                                  toast.error(
+                                    err instanceof Error ? err.message : "Não foi possível.",
+                                  ),
+                                )
+                              }
+                            >
+                              Tentar de novo
+                            </Button>
+                          )}
+                        </p>
+                      </div>
+                    )}
                   </li>
                 );
               })}

@@ -107,7 +107,7 @@ describe("SupabaseService — authenticated reads", () => {
     mockFetch([{ body: [] }]);
     await svc.getDatabase();
 
-    expect(calls).toHaveLength(17);
+    expect(calls).toHaveLength(22);
     for (const c of calls) {
       expect(c.headers.apikey).toBe(KEY);
       expect(c.headers.Authorization).toBe("Bearer user-access-token");
@@ -130,6 +130,11 @@ describe("SupabaseService — authenticated reads", () => {
       `${URL}/rest/v1/finance_entry?select=*&order=due_date.desc`,
       `${URL}/rest/v1/finance_series?select=*`,
       `${URL}/rest/v1/finance_transfer?select=*&order=date.desc`,
+      `${URL}/rest/v1/crm_deal?select=*&order=updated_at.desc`,
+      `${URL}/rest/v1/crm_interaction?select=*&order=at.desc`,
+      `${URL}/rest/v1/crm_task?select=*&order=due_on.asc`,
+      `${URL}/rest/v1/crm_block?select=*`,
+      `${URL}/rest/v1/contracting_process?select=*`,
     ]);
   });
 
@@ -154,6 +159,11 @@ describe("SupabaseService — authenticated reads", () => {
       entries: [],
       series: [],
       transfers: [],
+      deals: [],
+      interactions: [],
+      crmTasks: [],
+      blocks: [],
+      processes: [],
     });
     expect(calls).toHaveLength(0);
   });

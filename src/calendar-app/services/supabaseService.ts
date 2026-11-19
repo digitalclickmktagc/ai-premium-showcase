@@ -13,7 +13,12 @@
 import type {
   Appointment,
   ApprovalResult,
+  ContactBlock,
   Contract,
+  ContractingProcess,
+  CrmTask,
+  Deal,
+  Interaction,
   FinanceAccount,
   FinanceCategory,
   FinanceEntry,
@@ -42,6 +47,7 @@ import { shareToken } from "../utils";
 import { validateDecision } from "../approval";
 import { validateAppointment, validateBooking } from "../agenda";
 import { validateProposal, validateService } from "../proposals";
+import { validateDeal, validateInteraction } from "../crm";
 import {
   buildReversal,
   dueForMaterialisation,
@@ -116,6 +122,89 @@ const toStage = (r: any): BoardStage => ({
   color: r.color,
   category: r.category,
   order: r.position,
+});
+const toDeal = (r: any): Deal => ({
+  id: r.id,
+  phase: r.phase,
+  stageId: r.stage_id,
+  name: r.name,
+  company: r.company ?? undefined,
+  document: r.document ?? undefined,
+  segment: r.segment ?? undefined,
+  city: r.city ?? undefined,
+  origin: r.origin ?? undefined,
+  tags: r.tags ?? undefined,
+  recurringValue: r.recurring_cents ?? 0,
+  oneOffValue: r.one_off_cents ?? 0,
+  probability: r.probability ?? undefined,
+  score: r.score ?? undefined,
+  nextStepOn: r.next_step_on ?? undefined,
+  lastContactOn: r.last_contact_on ?? undefined,
+  clientId: r.client_id ?? undefined,
+  proposalId: r.proposal_id ?? undefined,
+  status: r.status,
+  lossReason: r.loss_reason ?? undefined,
+  contacts: r.contacts ?? [],
+  createdAt: r.created_at,
+  updatedAt: r.updated_at,
+});
+const dealRow = (d: Deal) => ({
+  id: d.id,
+  phase: d.phase,
+  stage_id: d.stageId,
+  name: d.name.trim(),
+  company: d.company ?? null,
+  document: d.document ?? null,
+  segment: d.segment ?? null,
+  city: d.city ?? null,
+  origin: d.origin ?? null,
+  tags: d.tags ?? [],
+  recurring_cents: d.recurringValue,
+  one_off_cents: d.oneOffValue,
+  probability: d.probability ?? null,
+  score: d.score ?? null,
+  next_step_on: d.nextStepOn ?? null,
+  last_contact_on: d.lastContactOn ?? null,
+  client_id: d.clientId ?? null,
+  proposal_id: d.proposalId ?? null,
+  status: d.status,
+  loss_reason: d.lossReason ?? null,
+  contacts: d.contacts,
+});
+const toInteraction = (r: any): Interaction => ({
+  id: r.id,
+  dealId: r.deal_id,
+  kind: r.kind,
+  at: r.at,
+  author: r.author ?? undefined,
+  content: r.content,
+  answered: r.answered ?? undefined,
+});
+const toCrmTask = (r: any): CrmTask => ({
+  id: r.id,
+  dealId: r.deal_id,
+  title: r.title,
+  dueOn: r.due_on,
+  note: r.note ?? undefined,
+  doneAt: r.done_at ?? undefined,
+  result: r.result ?? undefined,
+});
+const toBlock = (r: any): ContactBlock => ({
+  id: r.id,
+  kind: r.kind,
+  value: r.value,
+  reason: r.reason ?? undefined,
+  at: r.at,
+});
+const toProcess = (r: any): ContractingProcess => ({
+  id: r.id,
+  proposalId: r.proposal_id,
+  dealId: r.deal_id ?? undefined,
+  clientId: r.client_id ?? undefined,
+  status: r.status,
+  steps: r.steps ?? [],
+  startedAt: r.started_at,
+  finishedAt: r.finished_at ?? undefined,
 });
 const toAccount = (r: any): FinanceAccount => ({
   id: r.id,
@@ -590,6 +679,11 @@ export class SupabaseService implements DataService {
         entries: [],
         series: [],
         transfers: [],
+        deals: [],
+        interactions: [],
+        crmTasks: [],
+        blocks: [],
+        processes: [],
       };
     const [
       clients,
@@ -609,6 +703,11 @@ export class SupabaseService implements DataService {
       entries,
       finSeries,
       transfers,
+      deals,
+      interactions,
+      crmTasks,
+      blocks,
+      processes,
     ] = await Promise.all([
         this.rest<any[]>("clients?select=*"),
         this.rest<any[]>("calendars?select=*"),
@@ -629,6 +728,11 @@ export class SupabaseService implements DataService {
         this.rest<any[]>("finance_entry?select=*&order=due_date.desc"),
         this.rest<any[]>("finance_series?select=*"),
         this.rest<any[]>("finance_transfer?select=*&order=date.desc"),
+        this.rest<any[]>("crm_deal?select=*&order=updated_at.desc"),
+        this.rest<any[]>("crm_interaction?select=*&order=at.desc"),
+        this.rest<any[]>("crm_task?select=*&order=due_on.asc"),
+        this.rest<any[]>("crm_block?select=*"),
+        this.rest<any[]>("contracting_process?select=*"),
       ]);
     return {
       clients: clients.map(toClient),
@@ -647,6 +751,11 @@ export class SupabaseService implements DataService {
       entries: entries.map(toEntry),
       series: finSeries.map(toSeries),
       transfers: transfers.map(toTransfer),
+      deals: deals.map(toDeal),
+      interactions: interactions.map(toInteraction),
+      crmTasks: crmTasks.map(toCrmTask),
+      blocks: blocks.map(toBlock),
+      processes: processes.map(toProcess),
       availability: cfg[0]
         ? {
             weekdays: cfg[0].weekdays ?? {},
@@ -916,6 +1025,97 @@ export class SupabaseService implements DataService {
   }
 
   // ── Public share view (anon RPC, isolated + sanitized) ────────
+  // ── CRM e orquestrador ────────────────────────────────────────
+  async saveDeal(deal: Deal): Promise<Deal> {
+    const invalid = validateDeal(deal);
+    if (invalid) throw new Error(invalid);
+    const [row] = await this.rest<any[]>("crm_deal", {
+      method: "POST",
+      headers: { Prefer: "return=representation,resolution=merge-duplicates" },
+      body: JSON.stringify({ ...dealRow(deal), updated_at: new Date().toISOString() }),
+    });
+    return toDeal(row);
+  }
+  async deleteDeal(id: string): Promise<void> {
+    await this.rest<void>(`crm_deal?id=eq.${encodeURIComponent(id)}`, { method: "DELETE" });
+  }
+  async addInteraction(interaction: Interaction): Promise<Interaction> {
+    const invalid = validateInteraction(interaction);
+    if (invalid) throw new Error(invalid);
+    const [row] = await this.rest<any[]>("crm_interaction", {
+      method: "POST",
+      headers: { Prefer: "return=representation" },
+      body: JSON.stringify({
+        id: interaction.id,
+        deal_id: interaction.dealId,
+        kind: interaction.kind,
+        at: interaction.at,
+        author: interaction.author ?? null,
+        content: interaction.content,
+        answered: interaction.answered ?? null,
+      }),
+    });
+    await this.rest<void>(`crm_deal?id=eq.${encodeURIComponent(interaction.dealId)}`, {
+      method: "PATCH",
+      headers: { Prefer: "return=minimal" },
+      body: JSON.stringify({ last_contact_on: interaction.at.slice(0, 10) }),
+    });
+    return toInteraction(row);
+  }
+  async saveCrmTask(task: CrmTask): Promise<CrmTask> {
+    const [row] = await this.rest<any[]>("crm_task", {
+      method: "POST",
+      headers: { Prefer: "return=representation,resolution=merge-duplicates" },
+      body: JSON.stringify({
+        id: task.id,
+        deal_id: task.dealId,
+        title: task.title.trim(),
+        due_on: task.dueOn,
+        note: task.note ?? null,
+        done_at: task.doneAt ?? null,
+        result: task.result ?? null,
+      }),
+    });
+    return toCrmTask(row);
+  }
+  async deleteCrmTask(id: string): Promise<void> {
+    await this.rest<void>(`crm_task?id=eq.${encodeURIComponent(id)}`, { method: "DELETE" });
+  }
+  async saveBlock(block: ContactBlock): Promise<ContactBlock> {
+    const [row] = await this.rest<any[]>("crm_block", {
+      method: "POST",
+      headers: { Prefer: "return=representation,resolution=merge-duplicates" },
+      body: JSON.stringify({
+        id: block.id,
+        kind: block.kind,
+        value: block.value.trim().toLowerCase(),
+        reason: block.reason ?? null,
+        at: block.at,
+      }),
+    });
+    return toBlock(row);
+  }
+  async deleteBlock(id: string): Promise<void> {
+    await this.rest<void>(`crm_block?id=eq.${encodeURIComponent(id)}`, { method: "DELETE" });
+  }
+  async saveProcess(process: ContractingProcess): Promise<ContractingProcess> {
+    const [row] = await this.rest<any[]>("contracting_process", {
+      method: "POST",
+      headers: { Prefer: "return=representation,resolution=merge-duplicates" },
+      body: JSON.stringify({
+        id: process.id,
+        proposal_id: process.proposalId,
+        deal_id: process.dealId ?? null,
+        client_id: process.clientId ?? null,
+        status: process.status,
+        steps: process.steps,
+        started_at: process.startedAt,
+        finished_at: process.finishedAt ?? null,
+      }),
+    });
+    return toProcess(row);
+  }
+
   // ── Financeiro ────────────────────────────────────────────────
   // Upserts throughout. The rules that must not be negotiable — a settled
   // amount never changing, a settled entry never being deleted — are database

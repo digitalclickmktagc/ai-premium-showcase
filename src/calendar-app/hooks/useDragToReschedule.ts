@@ -37,6 +37,12 @@ export function useDragToReschedule<T>({
   /** dataset key marking a drop zone: "day" on the calendar, "stage" on the board. */
   targetAttr?: string;
 }) {
+  /**
+   * The horizontally scrolling container, when the drop targets live in one.
+   * A board can be wider than the screen, and a column you cannot see is a
+   * column you cannot drop on — so holding a card near the edge scrolls it.
+   */
+  const scrollerRef = useRef<HTMLDivElement | null>(null);
   const [press, setPress] = useState<{
     item: T;
     x: number;
@@ -128,6 +134,25 @@ export function useDragToReschedule<T>({
     return cleanup;
   }, [press, targetAttr]);
 
+  // Scroll the container while a card is held near its edge. The effect
+  // re-runs on every pointer move, which also keeps it scrolling while the
+  // card is held still.
+  useEffect(() => {
+    const el = scrollerRef.current;
+    if (!drag || !el) return;
+    const EDGE_PX = 90;
+    const STEP_PX = 16;
+    let raf = 0;
+    const tick = () => {
+      const box = el.getBoundingClientRect();
+      if (drag.x < box.left + EDGE_PX) el.scrollLeft -= STEP_PX;
+      else if (drag.x > box.right - EDGE_PX) el.scrollLeft += STEP_PX;
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [drag]);
+
   /**
    * Returns true when the click that just fired was the tail of a drag, so the
    * caller can swallow it instead of opening the post.
@@ -138,5 +163,5 @@ export function useDragToReschedule<T>({
     return true;
   }, []);
 
-  return { drag, overTarget, startDrag, consumeDragClick };
+  return { drag, overTarget, startDrag, consumeDragClick, scrollerRef };
 }

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useMemo } from "react";
 import { CheckSquare, Clock, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { BoardStage, Post, PostStatus } from "../types";
@@ -63,36 +63,15 @@ export default function BoardView({
     [onChangeStatus, stages],
   );
 
-  const { drag, overTarget, startDrag, consumeDragClick } = useDragToReschedule<Post>({
-    enabled: true,
-    onDrop: handleDrop,
-    targetAttr: "stage",
-  });
+  // The hook owns the edge auto-scroll; the board only says which element
+  // scrolls.
+  const { drag, overTarget, startDrag, consumeDragClick, scrollerRef } =
+    useDragToReschedule<Post>({
+      enabled: true,
+      onDrop: handleDrop,
+      targetAttr: "stage",
+    });
 
-  /**
-   * Scroll the board while a card is held near its edge.
-   *
-   * With custom columns a board can be wider than the screen, and a column
-   * you cannot see is a column you cannot drop on. The effect re-runs on each
-   * pointer move, which also means it keeps scrolling while the card is held
-   * still at the edge.
-   */
-  const scrollerRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const el = scrollerRef.current;
-    if (!drag || !el) return;
-    const EDGE_PX = 90;
-    const STEP_PX = 16;
-    let raf = 0;
-    const tick = () => {
-      const box = el.getBoundingClientRect();
-      if (drag.x < box.left + EDGE_PX) el.scrollLeft -= STEP_PX;
-      else if (drag.x > box.right - EDGE_PX) el.scrollLeft += STEP_PX;
-      raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [drag]);
 
   const byStage = useMemo(() => groupByStage(posts, stages), [posts, stages]);
 

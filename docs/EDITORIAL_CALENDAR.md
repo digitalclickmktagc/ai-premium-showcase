@@ -396,6 +396,44 @@ Balances count only settled entries: a bill that exists is not money that
 left. The statement rebuilt from the movements agrees with the computed
 balance, which is the spec's reconstruction test and is covered in the tests.
 
+## CRM and the sale-to-operation orchestrator (specs 09 and 10)
+
+`/app/crm`. One entity walks both funnels: a prospect and an opportunity are
+the same business at different temperatures, and two registers of one company
+is how an agency calls someone twice with two different stories.
+
+The qualification score is computed from what the record itself shows — a
+score that needs a meeting to work out is not a score, it is a meeting — and
+the temperature bands follow it. The no-reply cadence (2/4/7 days, give up
+after three) is **advice**, not an action: marking a deal lost is the agency's
+call, and the screen offers it rather than doing it quietly.
+
+**An interaction is never edited.** Correcting one means writing another, in
+the app and by a database trigger. Every contact records where it came from,
+when it was collected and under which lawful basis, and a blocked domain
+blocks every address under it — someone who asked not to be contacted did not
+mean "try my colleague instead".
+
+### The orchestrator
+
+Accepting a proposal starts a saga: resolve the client, generate the contract,
+wait for signatures, activate the services, create the billing, prepare the
+calendar, conclude. Each step records the ids it created, so running it again
+never produces a second client, contract or series — and running it again is
+exactly how a retry after a failure works.
+
+**Nothing financial exists before the contract is in force.** An accepted
+proposal is a promise; a signed contract is an obligation, and only the second
+one bills. The process sits in `aguardando_assinatura` until the last required
+party signs, with nothing written to finance.
+
+The client accepts in their own browser, where nothing may touch the agency's
+data, so the saga runs the next time the agency's app loads — the same
+catch-up shape the post automations use. Two things that testing turned up and
+the code now handles: a waiting process must stay on the list to re-check (the
+signature it waits for happens somewhere else entirely), and it must return
+*itself* unchanged while waiting, or a save-and-reload would spin forever.
+
 ## Verifying the security model
 
 `supabase/verificacao-seguranca.sql` re-checks, against a live database, every

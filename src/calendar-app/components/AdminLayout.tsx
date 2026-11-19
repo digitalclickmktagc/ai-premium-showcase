@@ -4,6 +4,7 @@ import {
   CalendarDays,
   CalendarRange,
   Handshake,
+  Target,
   Wallet,
   LayoutGrid,
   LogOut,
@@ -28,7 +29,7 @@ function NavContent({
 }: {
   activeClientId?: string;
   /** Which top-level area is open, for pages that are not a client. */
-  section?: "agenda" | "comercial" | "financeiro";
+  section?: "agenda" | "comercial" | "financeiro" | "crm";
   onNavigate?: () => void;
   onNewClient: () => void;
 }) {
@@ -77,6 +78,18 @@ function NavContent({
         >
           <LayoutGrid className="h-4 w-4" />
           Todos os clientes
+        </button>
+        <button
+          onClick={() => go("/app/crm")}
+          className={cn(
+            "mt-0.5 flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+            section === "crm"
+              ? "bg-primary/15 text-foreground"
+              : "text-muted-foreground hover:bg-foreground/[0.06] hover:text-foreground",
+          )}
+        >
+          <Target className="h-4 w-4" />
+          CRM
         </button>
         <button
           onClick={() => go("/app/comercial")}
@@ -204,7 +217,7 @@ export default function AdminLayout({
 }: {
   children: ReactNode;
   activeClientId?: string;
-  section?: "agenda" | "comercial" | "financeiro";
+  section?: "agenda" | "comercial" | "financeiro" | "crm";
   title?: string;
 }) {
   const [sheetOpen, setSheetOpen] = useState(false);

@@ -202,6 +202,133 @@ export interface Post {
   updatedAt: string;
 }
 
+// ── CRM (benchmark spec 09) ──────────────────────────────────
+
+export type DealPhase = "prospeccao" | "oportunidade";
+export type DealStatus = "aberto" | "ganho" | "perdido";
+export type StageKind = "aberta" | "ganho" | "perda";
+
+export interface CrmStage {
+  id: string;
+  phase: DealPhase;
+  name: string;
+  order: number;
+  kind: StageKind;
+  /** 0–100; the odds the agency gives a deal sitting here. */
+  defaultProbability: number;
+  /** The stage cannot be entered without a proposal attached. */
+  requiresProposal?: boolean;
+}
+
+export interface CrmContact {
+  id: string;
+  name: string;
+  role?: string;
+  phone?: string;
+  email?: string;
+  primary: boolean;
+  /** Where the contact came from, and under which lawful basis (LGPD). */
+  source?: string;
+  collectedAt?: string;
+  lawfulBasis?: string;
+}
+
+export type InteractionKind = "ligacao" | "mensagem" | "email" | "reuniao" | "nota";
+
+/** Insert-only: a correction is a new interaction, never an edit. */
+export interface Interaction {
+  id: string;
+  dealId: string;
+  kind: InteractionKind;
+  at: string;
+  author?: string;
+  content: string;
+  /** Whether the other side answered. Drives the no-reply cadence. */
+  answered?: boolean;
+}
+
+export interface CrmTask {
+  id: string;
+  dealId: string;
+  title: string;
+  dueOn: string;
+  note?: string;
+  doneAt?: string;
+  result?: string;
+}
+
+export interface Deal {
+  id: string;
+  phase: DealPhase;
+  stageId: string;
+  name: string;
+  company?: string;
+  document?: string;
+  segment?: string;
+  city?: string;
+  origin?: string;
+  tags?: string[];
+  /** Integer cents. */
+  recurringValue: number;
+  oneOffValue: number;
+  /** Overrides the stage's default when set. */
+  probability?: number;
+  /** 0–100, from the qualification criteria. */
+  score?: number;
+  nextStepOn?: string;
+  lastContactOn?: string;
+  clientId?: string;
+  proposalId?: string;
+  status: DealStatus;
+  lossReason?: string;
+  contacts: CrmContact[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** A contact that must never be approached again (LGPD, and manners). */
+export interface ContactBlock {
+  id: string;
+  kind: "email" | "dominio" | "telefone";
+  value: string;
+  reason?: string;
+  at: string;
+}
+
+// ── Orquestrador venda → operação (benchmark spec 10) ────────
+
+export type SagaStepKey =
+  | "resolver_cliente"
+  | "gerar_contrato"
+  | "aguardar_assinaturas"
+  | "ativar_servicos"
+  | "criar_financeiro"
+  | "criar_quadro"
+  | "concluir";
+
+export type SagaStepStatus = "pendente" | "feito" | "falhou" | "pulado";
+
+export interface SagaStep {
+  key: SagaStepKey;
+  status: SagaStepStatus;
+  attempts: number;
+  /** Ids created by this step, so a retry can recognise its own work. */
+  result?: Record<string, string>;
+  detail?: string;
+  at?: string;
+}
+
+export interface ContractingProcess {
+  id: string;
+  proposalId: string;
+  dealId?: string;
+  clientId?: string;
+  status: "em_andamento" | "aguardando_assinatura" | "concluido" | "falhou" | "cancelado";
+  steps: SagaStep[];
+  startedAt: string;
+  finishedAt?: string;
+}
+
 // ── Financeiro (benchmark spec 08) ───────────────────────────
 
 export type EntryNature = "receita" | "despesa";
@@ -550,6 +677,15 @@ export interface Database {
   approvalCodes?: ApprovalCodeEntry[];
   /** Custom board columns, scoped per calendar. Empty means "use the standard four". */
   boardStages?: BoardStage[];
+  /**
+   * CRM e orquestrador (specs 09 e 10). As etapas do funil são o conjunto
+   * padrão calculado em crm.ts — editá-las não está construído.
+   */
+  deals?: Deal[];
+  interactions?: Interaction[];
+  crmTasks?: CrmTask[];
+  blocks?: ContactBlock[];
+  processes?: ContractingProcess[];
   /** Financeiro (spec 08). */
   accounts?: FinanceAccount[];
   categories?: FinanceCategory[];
