@@ -14,6 +14,11 @@ import type {
   Appointment,
   ApprovalResult,
   Contract,
+  FinanceAccount,
+  FinanceCategory,
+  FinanceEntry,
+  FinanceSeries,
+  Transfer,
   Proposal,
   ProposalStatus,
   Service,
@@ -37,6 +42,13 @@ import { shareToken } from "../utils";
 import { validateDecision } from "../approval";
 import { validateAppointment, validateBooking } from "../agenda";
 import { validateProposal, validateService } from "../proposals";
+import {
+  buildReversal,
+  dueForMaterialisation,
+  validateEntry,
+  validateSeries,
+  validateTransfer,
+} from "../finance";
 import { validateSignature } from "../contracts";
 import {
   validateRule,
@@ -104,6 +116,126 @@ const toStage = (r: any): BoardStage => ({
   color: r.color,
   category: r.category,
   order: r.position,
+});
+const toAccount = (r: any): FinanceAccount => ({
+  id: r.id,
+  name: r.name,
+  kind: r.kind,
+  initialBalance: r.initial_balance_cents,
+  initialBalanceDate: r.initial_balance_date,
+  color: r.color ?? undefined,
+  active: r.active !== false,
+  createdAt: r.created_at,
+});
+const accountRow = (a: FinanceAccount) => ({
+  id: a.id,
+  name: a.name.trim(),
+  kind: a.kind,
+  initial_balance_cents: a.initialBalance,
+  initial_balance_date: a.initialBalanceDate,
+  color: a.color ?? null,
+  active: a.active,
+});
+const toCategory = (r: any): FinanceCategory => ({
+  id: r.id,
+  name: r.name,
+  nature: r.nature,
+  expenseKind: r.expense_kind ?? undefined,
+  monthlyTarget: r.monthly_target_cents ?? undefined,
+  color: r.color ?? undefined,
+  active: r.active !== false,
+});
+const categoryRow = (c: FinanceCategory) => ({
+  id: c.id,
+  name: c.name.trim(),
+  nature: c.nature,
+  expense_kind: c.expenseKind ?? null,
+  monthly_target_cents: c.monthlyTarget ?? null,
+  color: c.color ?? null,
+  active: c.active,
+});
+const toEntry = (r: any): FinanceEntry => ({
+  id: r.id,
+  nature: r.nature,
+  description: r.description,
+  amount: r.amount_cents,
+  dueDate: r.due_date,
+  competence: r.competence,
+  status: r.status,
+  settledAt: r.settled_at ?? undefined,
+  accountId: r.account_id ?? undefined,
+  categoryId: r.category_id ?? undefined,
+  clientId: r.client_id ?? undefined,
+  method: r.method ?? undefined,
+  document: r.document ?? undefined,
+  note: r.note ?? undefined,
+  seriesId: r.series_id ?? undefined,
+  seriesPosition: r.series_position ?? undefined,
+  origin: r.origin,
+  reversalOf: r.reversal_of ?? undefined,
+  createdAt: r.created_at,
+});
+const entryRow = (e: FinanceEntry) => ({
+  id: e.id,
+  nature: e.nature,
+  description: e.description.trim(),
+  amount_cents: e.amount,
+  due_date: e.dueDate,
+  competence: e.competence,
+  status: e.status,
+  settled_at: e.settledAt ?? null,
+  account_id: e.accountId ?? null,
+  category_id: e.categoryId ?? null,
+  client_id: e.clientId ?? null,
+  method: e.method ?? null,
+  document: e.document ?? null,
+  note: e.note ?? null,
+  series_id: e.seriesId ?? null,
+  series_position: e.seriesPosition ?? null,
+  origin: e.origin,
+  reversal_of: e.reversalOf ?? null,
+});
+const toSeries = (r: any): FinanceSeries => ({
+  id: r.id,
+  kind: r.kind,
+  everyMonths: r.every_months,
+  dayOfMonth: r.day_of_month,
+  count: r.count ?? undefined,
+  totalAmount: r.total_cents,
+  startDate: r.start_date,
+  endDate: r.end_date ?? undefined,
+  skipped: r.skipped ?? undefined,
+  nature: r.nature,
+  description: r.description,
+  categoryId: r.category_id ?? undefined,
+  accountId: r.account_id ?? undefined,
+  clientId: r.client_id ?? undefined,
+  createdAt: r.created_at,
+});
+const seriesRow = (s: FinanceSeries) => ({
+  id: s.id,
+  kind: s.kind,
+  every_months: s.everyMonths,
+  day_of_month: s.dayOfMonth,
+  count: s.count ?? null,
+  total_cents: s.totalAmount,
+  start_date: s.startDate,
+  end_date: s.endDate ?? null,
+  skipped: s.skipped ?? [],
+  nature: s.nature,
+  description: s.description.trim(),
+  category_id: s.categoryId ?? null,
+  account_id: s.accountId ?? null,
+  client_id: s.clientId ?? null,
+});
+const toTransfer = (r: any): Transfer => ({
+  id: r.id,
+  fromAccountId: r.from_account_id,
+  toAccountId: r.to_account_id,
+  amount: r.amount_cents,
+  date: r.date,
+  note: r.note ?? undefined,
+  createdAt: r.created_at,
 });
 const toService = (r: any): Service => ({
   id: r.id,
@@ -453,6 +585,11 @@ export class SupabaseService implements DataService {
         services: [],
         proposals: [],
         contracts: [],
+        accounts: [],
+        categories: [],
+        entries: [],
+        series: [],
+        transfers: [],
       };
     const [
       clients,
@@ -467,6 +604,11 @@ export class SupabaseService implements DataService {
       services,
       proposals,
       contracts,
+      accounts,
+      categories,
+      entries,
+      finSeries,
+      transfers,
     ] = await Promise.all([
         this.rest<any[]>("clients?select=*"),
         this.rest<any[]>("calendars?select=*"),
@@ -482,6 +624,11 @@ export class SupabaseService implements DataService {
         this.rest<any[]>("service?select=*&order=position.asc"),
         this.rest<any[]>("proposal?select=*&order=created_at.desc"),
         this.rest<any[]>("contract?select=*&order=created_at.desc"),
+        this.rest<any[]>("finance_account?select=*&order=name.asc"),
+        this.rest<any[]>("finance_category?select=*&order=name.asc"),
+        this.rest<any[]>("finance_entry?select=*&order=due_date.desc"),
+        this.rest<any[]>("finance_series?select=*"),
+        this.rest<any[]>("finance_transfer?select=*&order=date.desc"),
       ]);
     return {
       clients: clients.map(toClient),
@@ -495,6 +642,11 @@ export class SupabaseService implements DataService {
       services: services.map(toService),
       proposals: proposals.map(toProposal),
       contracts: contracts.map(toContract),
+      accounts: accounts.map(toAccount),
+      categories: categories.map(toCategory),
+      entries: entries.map(toEntry),
+      series: finSeries.map(toSeries),
+      transfers: transfers.map(toTransfer),
       availability: cfg[0]
         ? {
             weekdays: cfg[0].weekdays ?? {},
@@ -764,6 +916,147 @@ export class SupabaseService implements DataService {
   }
 
   // ── Public share view (anon RPC, isolated + sanitized) ────────
+  // ── Financeiro ────────────────────────────────────────────────
+  // Upserts throughout. The rules that must not be negotiable — a settled
+  // amount never changing, a settled entry never being deleted — are database
+  // triggers (migration 009), not checks up here.
+  async saveAccount(account: FinanceAccount): Promise<FinanceAccount> {
+    const [row] = await this.rest<any[]>("finance_account", {
+      method: "POST",
+      headers: { Prefer: "return=representation,resolution=merge-duplicates" },
+      body: JSON.stringify(accountRow(account)),
+    });
+    return toAccount(row);
+  }
+  async deleteAccount(id: string): Promise<void> {
+    await this.rest<void>(`finance_account?id=eq.${encodeURIComponent(id)}`, {
+      method: "DELETE",
+    });
+  }
+  async saveCategory(category: FinanceCategory): Promise<FinanceCategory> {
+    const [row] = await this.rest<any[]>("finance_category", {
+      method: "POST",
+      headers: { Prefer: "return=representation,resolution=merge-duplicates" },
+      body: JSON.stringify(categoryRow(category)),
+    });
+    return toCategory(row);
+  }
+  async deleteCategory(id: string): Promise<void> {
+    await this.rest<void>(`finance_category?id=eq.${encodeURIComponent(id)}`, {
+      method: "DELETE",
+    });
+  }
+
+  async saveEntry(entry: FinanceEntry): Promise<FinanceEntry> {
+    const invalid = validateEntry(entry);
+    if (invalid) throw new Error(invalid);
+    const [row] = await this.rest<any[]>("finance_entry", {
+      method: "POST",
+      headers: { Prefer: "return=representation,resolution=merge-duplicates" },
+      body: JSON.stringify(entryRow(entry)),
+    });
+    return toEntry(row);
+  }
+  async deleteEntry(id: string): Promise<void> {
+    await this.rest<void>(`finance_entry?id=eq.${encodeURIComponent(id)}`, {
+      method: "DELETE",
+    });
+  }
+  async settleEntry(id: string, accountId: string, date: string): Promise<FinanceEntry> {
+    const [row] = await this.rest<any[]>(`finance_entry?id=eq.${encodeURIComponent(id)}`, {
+      method: "PATCH",
+      headers: { Prefer: "return=representation" },
+      body: JSON.stringify({ status: "liquidado", settled_at: date, account_id: accountId }),
+    });
+    if (!row) throw new Error("Lançamento não encontrado.");
+    return toEntry(row);
+  }
+  async unsettleEntry(id: string): Promise<FinanceEntry> {
+    const [row] = await this.rest<any[]>(`finance_entry?id=eq.${encodeURIComponent(id)}`, {
+      method: "PATCH",
+      headers: { Prefer: "return=representation" },
+      body: JSON.stringify({ status: "pendente", settled_at: null }),
+    });
+    if (!row) throw new Error("Lançamento não encontrado.");
+    return toEntry(row);
+  }
+  async reverseEntry(id: string): Promise<FinanceEntry> {
+    const [current] = await this.rest<any[]>(
+      `finance_entry?id=eq.${encodeURIComponent(id)}&select=*`,
+    );
+    if (!current) throw new Error("Lançamento não encontrado.");
+    const entry = toEntry(current);
+    if (entry.status !== "liquidado")
+      throw new Error("Só um lançamento liquidado é estornado.");
+    const reversal = buildReversal(entry, crypto.randomUUID());
+    const [row] = await this.rest<any[]>("finance_entry", {
+      method: "POST",
+      headers: { Prefer: "return=representation" },
+      body: JSON.stringify(entryRow(reversal)),
+    });
+    return toEntry(row);
+  }
+
+  async saveSeries(series: FinanceSeries): Promise<FinanceSeries> {
+    const invalid = validateSeries(series);
+    if (invalid) throw new Error(invalid);
+    const [row] = await this.rest<any[]>("finance_series", {
+      method: "POST",
+      headers: { Prefer: "return=representation,resolution=merge-duplicates" },
+      body: JSON.stringify(seriesRow(series)),
+    });
+    return toSeries(row);
+  }
+  async deleteSeries(id: string): Promise<void> {
+    // Open rows go with the series; settled ones stay, because they happened.
+    await this.rest<void>(
+      `finance_entry?series_id=eq.${encodeURIComponent(id)}&status=neq.liquidado`,
+      { method: "DELETE" },
+    );
+    await this.rest<void>(`finance_series?id=eq.${encodeURIComponent(id)}`, {
+      method: "DELETE",
+    });
+  }
+  async materialiseSeries(): Promise<number> {
+    const [series, entries] = await Promise.all([
+      this.rest<any[]>("finance_series?select=*"),
+      this.rest<any[]>("finance_entry?select=*&series_id=not.is.null"),
+    ]);
+    const due = dueForMaterialisation(series.map(toSeries), entries.map(toEntry));
+    if (due.length === 0) return 0;
+    await this.rest<void>("finance_entry", {
+      method: "POST",
+      headers: { Prefer: "return=minimal" },
+      body: JSON.stringify(
+        due.map((e) => entryRow({ ...e, id: crypto.randomUUID() })),
+      ),
+    });
+    return due.length;
+  }
+
+  async saveTransfer(transfer: Transfer): Promise<Transfer> {
+    const invalid = validateTransfer(transfer);
+    if (invalid) throw new Error(invalid);
+    const [row] = await this.rest<any[]>("finance_transfer", {
+      method: "POST",
+      headers: { Prefer: "return=representation,resolution=merge-duplicates" },
+      body: JSON.stringify({
+        id: transfer.id,
+        from_account_id: transfer.fromAccountId,
+        to_account_id: transfer.toAccountId,
+        amount_cents: transfer.amount,
+        date: transfer.date,
+        note: transfer.note ?? null,
+      }),
+    });
+    return toTransfer(row);
+  }
+  async deleteTransfer(id: string): Promise<void> {
+    await this.rest<void>(`finance_transfer?id=eq.${encodeURIComponent(id)}`, {
+      method: "DELETE",
+    });
+  }
+
   // ── Catálogo, propostas e contratos ───────────────────────────
   async createService(input: Omit<Service, "id" | "createdAt">): Promise<Service> {
     const invalid = validateService(input);

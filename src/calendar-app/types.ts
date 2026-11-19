@@ -202,6 +202,98 @@ export interface Post {
   updatedAt: string;
 }
 
+// ── Financeiro (benchmark spec 08) ───────────────────────────
+
+export type EntryNature = "receita" | "despesa";
+export type EntryStatus = "previsto" | "pendente" | "liquidado" | "cancelado";
+export type AccountKind = "banco" | "caixa" | "carteira";
+export type ExpenseKind = "fixa" | "variavel" | "imposto" | "pessoal";
+
+export interface FinanceAccount {
+  id: string;
+  name: string;
+  kind: AccountKind;
+  /** Integer cents. */
+  initialBalance: number;
+  initialBalanceDate: string;
+  color?: string;
+  active: boolean;
+  createdAt: string;
+}
+
+export interface FinanceCategory {
+  id: string;
+  name: string;
+  nature: EntryNature;
+  expenseKind?: ExpenseKind;
+  /** Integer cents; 0 means no target. */
+  monthlyTarget?: number;
+  color?: string;
+  active: boolean;
+}
+
+export type SeriesKind = "parcelada" | "recorrente";
+
+export interface FinanceSeries {
+  id: string;
+  kind: SeriesKind;
+  /** Months between charges: 1 monthly, 3 quarterly, 12 yearly. */
+  everyMonths: number;
+  /** Day of month the charge falls on (1–28, clamped). */
+  dayOfMonth: number;
+  /** Instalments, for a `parcelada` series. */
+  count?: number;
+  /** Integer cents: the whole for `parcelada`, one charge for `recorrente`. */
+  totalAmount: number;
+  startDate: string;
+  /** Null for an open-ended recurring series. */
+  endDate?: string;
+  /** Months the agency chose to skip, as YYYY-MM. */
+  skipped?: string[];
+  nature: EntryNature;
+  description: string;
+  categoryId?: string;
+  accountId?: string;
+  clientId?: string;
+  createdAt: string;
+}
+
+export interface FinanceEntry {
+  id: string;
+  nature: EntryNature;
+  description: string;
+  /** Integer cents, always positive; `nature` carries the sign. */
+  amount: number;
+  dueDate: string;
+  /** Accounting month, YYYY-MM. */
+  competence: string;
+  status: EntryStatus;
+  settledAt?: string;
+  accountId?: string;
+  categoryId?: string;
+  clientId?: string;
+  method?: string;
+  document?: string;
+  note?: string;
+  seriesId?: string;
+  /** 1-based position in a `parcelada` series. */
+  seriesPosition?: number;
+  origin: "manual" | "serie" | "contrato";
+  /** Set on the mirror entry that reverses a settled one. */
+  reversalOf?: string;
+  createdAt: string;
+}
+
+export interface Transfer {
+  id: string;
+  fromAccountId: string;
+  toAccountId: string;
+  amount: number;
+  date: string;
+  note?: string;
+  createdAt: string;
+}
+
 // ── Catálogo e propostas (benchmark spec 06) ─────────────────
 
 /** How a service is charged. Recurring kinds normalise to a monthly figure. */
@@ -458,6 +550,12 @@ export interface Database {
   approvalCodes?: ApprovalCodeEntry[];
   /** Custom board columns, scoped per calendar. Empty means "use the standard four". */
   boardStages?: BoardStage[];
+  /** Financeiro (spec 08). */
+  accounts?: FinanceAccount[];
+  categories?: FinanceCategory[];
+  entries?: FinanceEntry[];
+  series?: FinanceSeries[];
+  transfers?: Transfer[];
   /** Catálogo, propostas e contratos (specs 06 e 07). */
   services?: Service[];
   proposals?: Proposal[];

@@ -367,6 +367,35 @@ and document, timestamp, browser) and mandatory witnesses. Legal review of
 that choice is still outstanding — the code models the decision; it does not
 pronounce on whether it suffices in court.
 
+## Finance (benchmark spec 08)
+
+`/app/financeiro`. Two decisions shape the whole module.
+
+**Cents, always.** Every amount is an integer, as the spec requires. A cent
+lost to floating point does not announce itself — it shows up months later as
+a reconciliation that will not close.
+
+**A recurring series does not materialise the future.** Charges are projected
+by query and become real rows only when they come inside the 35-day window or
+when someone acts on that month. Twelve months of projection write nothing to
+the database — the spec's own acceptance test. The month's list mixes real
+rows with projections and marks which is which, because a forecast you cannot
+tell from a fact is how a cash position quietly becomes fiction. Paying a
+projection creates and settles the row in one gesture.
+
+**What is settled is history.** A settled entry never changes value or nature
+and is never deleted; correcting one means reversing it with a mirror entry,
+and the original stays. Undoing a settlement is allowed and simply puts the
+balance back. All three rules are database triggers as well as app checks.
+
+Transfers are their own table rather than two entries, because they move value
+between accounts and must stay out of the result — by competence and by cash
+alike.
+
+Balances count only settled entries: a bill that exists is not money that
+left. The statement rebuilt from the movements agrees with the computed
+balance, which is the spec's reconstruction test and is covered in the tests.
+
 ## Verifying the security model
 
 `supabase/verificacao-seguranca.sql` re-checks, against a live database, every

@@ -3,6 +3,11 @@ import type {
   Appointment,
   ApprovalResult,
   Contract,
+  FinanceAccount,
+  FinanceCategory,
+  FinanceEntry,
+  FinanceSeries,
+  Transfer,
   Proposal,
   ProposalStatus,
   Service,
@@ -146,6 +151,31 @@ export interface DataService {
    * reading the whole log keeps this cheap however long the log grows.
    */
   findAutomationRuns(eventKeys: string[]): Promise<AutomationRun[]>;
+
+  // ── Financeiro (spec 08) ──────────────────────────────────────
+  saveAccount(account: FinanceAccount): Promise<FinanceAccount>;
+  /** Refused when the account has ever moved: deactivate it instead. */
+  deleteAccount(id: string): Promise<void>;
+  saveCategory(category: FinanceCategory): Promise<FinanceCategory>;
+  deleteCategory(id: string): Promise<void>;
+
+  saveEntry(entry: FinanceEntry): Promise<FinanceEntry>;
+  deleteEntry(id: string): Promise<void>;
+  /** Settle: the money moved, on this date, into this account. */
+  settleEntry(id: string, accountId: string, date: string): Promise<FinanceEntry>;
+  /** Undo a settlement. The amount never changes; the balance goes back. */
+  unsettleEntry(id: string): Promise<FinanceEntry>;
+  /** Reverse a settled entry with a mirror entry. The original stays. */
+  reverseEntry(id: string): Promise<FinanceEntry>;
+
+  saveSeries(series: FinanceSeries): Promise<FinanceSeries>;
+  /** Close a recurring series: projections after the date stop existing. */
+  deleteSeries(id: string): Promise<void>;
+  /** Turn projections inside the window into real rows. */
+  materialiseSeries(): Promise<number>;
+
+  saveTransfer(transfer: Transfer): Promise<Transfer>;
+  deleteTransfer(id: string): Promise<void>;
 
   // ── Catálogo, propostas e contratos (specs 06 e 07) ───────────
   createService(input: Omit<Service, "id" | "createdAt">): Promise<Service>;

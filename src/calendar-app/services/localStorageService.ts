@@ -2,6 +2,11 @@ import type {
   Appointment,
   ApprovalResult,
   Contract,
+  FinanceAccount,
+  FinanceCategory,
+  FinanceEntry,
+  FinanceSeries,
+  Transfer,
   Proposal,
   ProposalStatus,
   Service,
@@ -57,6 +62,16 @@ import {
   hasSigned,
   validateSignature,
 } from "../contracts";
+import {
+  accountHasMovement,
+  buildReversal,
+  canEditAmount,
+  canTransition as canTransitionEntry,
+  dueForMaterialisation,
+  validateEntry,
+  validateSeries,
+  validateTransfer,
+} from "../finance";
 import { buildSeed } from "./seed";
 import type { DataService } from "./DataService";
 
@@ -104,6 +119,11 @@ export class LocalStorageService implements DataService {
         parsed.calendars ??= [];
         parsed.posts ??= [];
         parsed.boardStages ??= [];
+        parsed.accounts ??= [];
+        parsed.categories ??= [];
+        parsed.entries ??= [];
+        parsed.series ??= [];
+        parsed.transfers ??= [];
         parsed.services ??= [];
         parsed.proposals ??= [];
         parsed.contracts ??= [];
@@ -447,6 +467,173 @@ export class LocalStorageService implements DataService {
   }
 
   // ── Public share view (isolated + sanitized) ──────────────────
+  // ── Financeiro ────────────────────────────────────────────────
+  async saveAccount(account: FinanceAccount): Promise<FinanceAccount> {
+    if (!account.name.trim()) throw new Error("Dê um nome à conta.");
+    const db = this.read();
+    const list = db.accounts ?? [];
+    db.accounts = list.some((a) => a.id === account.id)
+      ? list.map((a) => (a.id === account.id ? account : a))
+      : [...list, account];
+    this.write(db);
+    return account;
+  }
+
+  async deleteAccount(id: string): Promise<void> {
+    const db = this.read();
+    // An account that has moved is history. It is deactivated, never removed.
+    if (accountHasMovement(id, db.entries ?? [], db.transfers ?? [])) {
+      throw new Error("Esta conta tem movimento. Desative-a em vez de excluir.");
+    }
+    db.accounts = (db.accounts ?? []).filter((a) => a.id !== id);
+    this.write(db);
+  }
+
+  async saveCategory(category: FinanceCategory): Promise<FinanceCategory> {
+    if (!category.name.trim()) throw new Error("Dê um nome à categoria.");
+    const db = this.read();
+    const list = db.categories ?? [];
+    db.categories = list.some((c) => c.id === category.id)
+      ? list.map((c) => (c.id === category.id ? category : c))
+      : [...list, category];
+    this.write(db);
+    return category;
+  }
+
+  async deleteCategory(id: string): Promise<void> {
+    const db = this.read();
+    if ((db.entries ?? []).some((e) => e.categoryId === id)) {
+      throw new Error("Há lançamentos nesta categoria. Desative-a em vez de excluir.");
+    }
+    db.categories = (db.categories ?? []).filter((c) => c.id !== id);
+    this.write(db);
+  }
+
+  async saveEntry(entry: FinanceEntry): Promise<FinanceEntry> {
+    const invalid = validateEntry(entry);
+    if (invalid) throw new Error(invalid);
+    const db = this.read();
+    const list = db.entries ?? [];
+    const current = list.find((e) => e.id === entry.id);
+    // A settled entry's value is never edited: correcting it means reversing.
+    if (current && !canEditAmount(current) && current.amount !== entry.amount) {
+      throw new Error("Um lançamento liquidado não muda de valor. Estorne-o.");
+    }
+    db.entries = current
+      ? list.map((e) => (e.id === entry.id ? entry : e))
+      : [...list, entry];
+    this.write(db);
+    return entry;
+  }
+
+  async deleteEntry(id: string): Promise<void> {
+    const db = this.read();
+    const current = (db.entries ?? []).find((e) => e.id === id);
+    if (!current) return;
+    if (current.status === "liquidado")
+      throw new Error("Um lançamento liquidado não é removido. Estorne-o.");
+    db.entries = (db.entries ?? []).filter((e) => e.id !== id);
+    this.write(db);
+  }
+
+  async settleEntry(id: string, accountId: string, date: string): Promise<FinanceEntry> {
+    const db = this.read();
+    const list = db.entries ?? [];
+    const current = list.find((e) => e.id === id);
+    if (!current) throw new Error("Lançamento não encontrado.");
+    if (!canTransitionEntry(current.status, "liquidado"))
+      throw new Error("Este lançamento não pode ser liquidado agora.");
+    if (!accountId) throw new Error("Escolha a conta.");
+
+    const next: FinanceEntry = {
+      ...current,
+      status: "liquidado",
+      settledAt: date,
+      accountId,
+    };
+    db.entries = list.map((e) => (e.id === id ? next : e));
+    this.write(db);
+    return next;
+  }
+
+  async unsettleEntry(id: string): Promise<FinanceEntry> {
+    const db = this.read();
+    const list = db.entries ?? [];
+    const current = list.find((e) => e.id === id);
+    if (!current) throw new Error("Lançamento não encontrado.");
+    if (current.status !== "liquidado") throw new Error("Este lançamento não está liquidado.");
+    const next: FinanceEntry = { ...current, status: "pendente", settledAt: undefined };
+    db.entries = list.map((e) => (e.id === id ? next : e));
+    this.write(db);
+    return next;
+  }
+
+  async reverseEntry(id: string): Promise<FinanceEntry> {
+    const db = this.read();
+    const list = db.entries ?? [];
+    const current = list.find((e) => e.id === id);
+    if (!current) throw new Error("Lançamento não encontrado.");
+    if (current.status !== "liquidado")
+      throw new Error("Só um lançamento liquidado é estornado.");
+    const reversal = buildReversal(current, uid("fin"));
+    db.entries = [...list, reversal];
+    this.write(db);
+    return reversal;
+  }
+
+  async saveSeries(series: FinanceSeries): Promise<FinanceSeries> {
+    const invalid = validateSeries(series);
+    if (invalid) throw new Error(invalid);
+    const db = this.read();
+    const list = db.series ?? [];
+    db.series = list.some((s) => s.id === series.id)
+      ? list.map((s) => (s.id === series.id ? series : s))
+      : [...list, series];
+    this.write(db);
+    return series;
+  }
+
+  async deleteSeries(id: string): Promise<void> {
+    const db = this.read();
+    db.series = (db.series ?? []).filter((s) => s.id !== id);
+    // Rows already materialised but still open go with it; settled ones stay,
+    // because they happened.
+    db.entries = (db.entries ?? []).filter(
+      (e) => e.seriesId !== id || e.status === "liquidado",
+    );
+    this.write(db);
+  }
+
+  async materialiseSeries(): Promise<number> {
+    const db = this.read();
+    const due = dueForMaterialisation(db.series ?? [], db.entries ?? []);
+    if (due.length === 0) return 0;
+    db.entries = [
+      ...(db.entries ?? []),
+      ...due.map((e) => ({ ...e, id: uid("fin"), createdAt: nowISO() })),
+    ];
+    this.write(db);
+    return due.length;
+  }
+
+  async saveTransfer(transfer: Transfer): Promise<Transfer> {
+    const invalid = validateTransfer(transfer);
+    if (invalid) throw new Error(invalid);
+    const db = this.read();
+    const list = db.transfers ?? [];
+    db.transfers = list.some((t) => t.id === transfer.id)
+      ? list.map((t) => (t.id === transfer.id ? transfer : t))
+      : [...list, transfer];
+    this.write(db);
+    return transfer;
+  }
+
+  async deleteTransfer(id: string): Promise<void> {
+    const db = this.read();
+    db.transfers = (db.transfers ?? []).filter((t) => t.id !== id);
+    this.write(db);
+  }
+
   // ── Catálogo ──────────────────────────────────────────────────
   async createService(input: Omit<Service, "id" | "createdAt">): Promise<Service> {
     const invalid = validateService(input);

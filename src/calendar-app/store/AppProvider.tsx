@@ -12,6 +12,11 @@ import type {
   Appointment,
   Availability,
   Contract,
+  FinanceAccount,
+  FinanceCategory,
+  FinanceEntry,
+  FinanceSeries,
+  Transfer,
   Proposal,
   Service,
   BoardStage,
@@ -58,6 +63,11 @@ interface AppContextValue {
   posts: Post[];
   boardStages: BoardStage[];
   automationRules: AutomationRule[];
+  accounts: FinanceAccount[];
+  categories: FinanceCategory[];
+  entries: FinanceEntry[];
+  series: FinanceSeries[];
+  transfers: Transfer[];
   services: Service[];
   proposals: Proposal[];
   contracts: Contract[];
@@ -103,6 +113,22 @@ interface AppContextValue {
   requestApproval: (id: string, teamMessage?: string) => Promise<Post>;
   deletePost: (id: string) => Promise<Post>;
   restorePost: (id: string, status?: PostStatus) => Promise<Post>;
+
+  // financeiro
+  saveAccount: (a: FinanceAccount) => Promise<FinanceAccount>;
+  deleteAccount: (id: string) => Promise<void>;
+  saveCategory: (c: FinanceCategory) => Promise<FinanceCategory>;
+  deleteCategory: (id: string) => Promise<void>;
+  saveEntry: (e: FinanceEntry) => Promise<FinanceEntry>;
+  deleteEntry: (id: string) => Promise<void>;
+  settleEntry: (id: string, accountId: string, date: string) => Promise<FinanceEntry>;
+  unsettleEntry: (id: string) => Promise<FinanceEntry>;
+  reverseEntry: (id: string) => Promise<FinanceEntry>;
+  saveSeries: (s: FinanceSeries) => Promise<FinanceSeries>;
+  deleteSeries: (id: string) => Promise<void>;
+  materialiseSeries: () => Promise<number>;
+  saveTransfer: (t: Transfer) => Promise<Transfer>;
+  deleteTransfer: (id: string) => Promise<void>;
 
   // comercial
   createService: (input: Omit<Service, "id" | "createdAt">) => Promise<Service>;
@@ -162,6 +188,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [posts, setPosts] = useState<Post[]>([]);
   const [automationRules, setAutomationRules] = useState<AutomationRule[]>([]);
   const [boardStages, setBoardStages] = useState<BoardStage[]>([]);
+  const [accounts, setAccounts] = useState<FinanceAccount[]>([]);
+  const [categories, setCategories] = useState<FinanceCategory[]>([]);
+  const [entries, setEntries] = useState<FinanceEntry[]>([]);
+  const [series, setSeries] = useState<FinanceSeries[]>([]);
+  const [transfers, setTransfers] = useState<Transfer[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const [proposals, setProposals] = useState<Proposal[]>([]);
   const [contracts, setContracts] = useState<Contract[]>([]);
@@ -182,6 +213,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setPosts(db.posts);
     setAutomationRules(db.automationRules ?? []);
     setBoardStages(db.boardStages ?? []);
+    setAccounts(db.accounts ?? []);
+    setCategories(db.categories ?? []);
+    setEntries(db.entries ?? []);
+    setSeries(db.series ?? []);
+    setTransfers(db.transfers ?? []);
     setServices(db.services ?? []);
     setProposals(db.proposals ?? []);
     setContracts(db.contracts ?? []);
@@ -284,6 +320,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setPosts([]);
     setAutomationRules([]);
     setBoardStages([]);
+    setAccounts([]);
+    setCategories([]);
+    setEntries([]);
+    setSeries([]);
+    setTransfers([]);
     setServices([]);
     setProposals([]);
     setContracts([]);
@@ -499,6 +540,114 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const res = await service.restorePost(id, status);
       await refresh();
       return res;
+    },
+    [service, refresh],
+  );
+
+  // ── Financeiro ─────────────────────────────────────────────
+  // Thin pass-throughs: every rule lives in finance.ts (pure, tested) or in
+  // the database. Nothing is decided here beyond reloading afterwards.
+  const saveAccount = useCallback(
+    async (a: FinanceAccount) => {
+      const res = await service.saveAccount(a);
+      await refresh();
+      return res;
+    },
+    [service, refresh],
+  );
+  const deleteAccount = useCallback(
+    async (id: string) => {
+      await service.deleteAccount(id);
+      await refresh();
+    },
+    [service, refresh],
+  );
+  const saveCategory = useCallback(
+    async (c: FinanceCategory) => {
+      const res = await service.saveCategory(c);
+      await refresh();
+      return res;
+    },
+    [service, refresh],
+  );
+  const deleteCategory = useCallback(
+    async (id: string) => {
+      await service.deleteCategory(id);
+      await refresh();
+    },
+    [service, refresh],
+  );
+  const saveEntry = useCallback(
+    async (e: FinanceEntry) => {
+      const res = await service.saveEntry(e);
+      await refresh();
+      return res;
+    },
+    [service, refresh],
+  );
+  const deleteEntry = useCallback(
+    async (id: string) => {
+      await service.deleteEntry(id);
+      await refresh();
+    },
+    [service, refresh],
+  );
+  const settleEntry = useCallback(
+    async (id: string, accountId: string, date: string) => {
+      const res = await service.settleEntry(id, accountId, date);
+      await refresh();
+      return res;
+    },
+    [service, refresh],
+  );
+  const unsettleEntry = useCallback(
+    async (id: string) => {
+      const res = await service.unsettleEntry(id);
+      await refresh();
+      return res;
+    },
+    [service, refresh],
+  );
+  const reverseEntry = useCallback(
+    async (id: string) => {
+      const res = await service.reverseEntry(id);
+      await refresh();
+      return res;
+    },
+    [service, refresh],
+  );
+  const saveSeries = useCallback(
+    async (s: FinanceSeries) => {
+      const res = await service.saveSeries(s);
+      await refresh();
+      return res;
+    },
+    [service, refresh],
+  );
+  const deleteSeries = useCallback(
+    async (id: string) => {
+      await service.deleteSeries(id);
+      await refresh();
+    },
+    [service, refresh],
+  );
+  const materialiseSeries = useCallback(async () => {
+    const count = await service.materialiseSeries();
+    if (count > 0) await refresh();
+    return count;
+  }, [service, refresh]);
+  const saveTransfer = useCallback(
+    async (t: Transfer) => {
+      const res = await service.saveTransfer(t);
+      await refresh();
+      return res;
+    },
+    [service, refresh],
+  );
+  const deleteTransfer = useCallback(
+    async (id: string) => {
+      await service.deleteTransfer(id);
+      await refresh();
     },
     [service, refresh],
   );
@@ -735,6 +884,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     posts,
     boardStages,
     automationRules,
+    accounts,
+    categories,
+    entries,
+    series,
+    transfers,
     services,
     proposals,
     contracts,
@@ -763,6 +917,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
     requestApproval,
     deletePost,
     restorePost,
+    saveAccount,
+    deleteAccount,
+    saveCategory,
+    deleteCategory,
+    saveEntry,
+    deleteEntry,
+    settleEntry,
+    unsettleEntry,
+    reverseEntry,
+    saveSeries,
+    deleteSeries,
+    materialiseSeries,
+    saveTransfer,
+    deleteTransfer,
     createService,
     updateService,
     deleteService,
