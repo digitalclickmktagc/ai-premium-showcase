@@ -2,6 +2,10 @@ import type { AutomationRule, AutomationRun } from "../automation";
 import type {
   Appointment,
   ApprovalResult,
+  Contract,
+  Proposal,
+  ProposalStatus,
+  Service,
   Availability,
   BoardStage,
   BookingPage,
@@ -142,6 +146,42 @@ export interface DataService {
    * reading the whole log keeps this cheap however long the log grows.
    */
   findAutomationRuns(eventKeys: string[]): Promise<AutomationRun[]>;
+
+  // ── Catálogo, propostas e contratos (specs 06 e 07) ───────────
+  createService(input: Omit<Service, "id" | "createdAt">): Promise<Service>;
+  updateService(id: string, patch: Partial<Service>): Promise<Service>;
+  deleteService(id: string): Promise<void>;
+
+  /** Create or replace a proposal. An accepted one is refused. */
+  saveProposal(proposal: Proposal): Promise<Proposal>;
+  /** Assign the next number (if it has none) and put it in front of the client. */
+  sendProposal(id: string): Promise<Proposal>;
+  /** Only a draft or an archived proposal can be removed. */
+  deleteProposal(id: string): Promise<void>;
+
+  saveContract(contract: Contract): Promise<Contract>;
+  deleteContract(id: string): Promise<void>;
+
+  // ── Public proposal and contract pages (no session) ───────────
+  /** Reading it counts as the client opening it (spec 06: `visualizacao`). */
+  getPublicProposal(linkId: string): Promise<Proposal | null>;
+  decideProposal(
+    linkId: string,
+    input: {
+      result: Extract<ProposalStatus, "aceita" | "recusada" | "ajuste_pedido">;
+      deciderName: string;
+      deciderDocument?: string;
+      reason?: string;
+    },
+  ): Promise<void>;
+  /** One party's view of a contract, resolved by that party's own token. */
+  getPublicContract(
+    partyToken: string,
+  ): Promise<{ contract: Contract; partyId: string } | null>;
+  signContract(
+    partyToken: string,
+    input: { typedName: string; typedDocument: string },
+  ): Promise<void>;
 
   // ── Agenda (spec 04) ──────────────────────────────────────────
   createAppointment(input: Omit<Appointment, "id" | "createdAt">): Promise<Appointment>;

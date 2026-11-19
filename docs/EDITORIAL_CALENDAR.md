@@ -335,6 +335,38 @@ External calendar sync (`conexao_calendario` in the spec) is deliberately
 absent: the owner decided against it (D7), and the table alone would promise a
 sync that never happens.
 
+## Catalogue, proposals and contracts (benchmark specs 06 and 07)
+
+`/app/comercial` holds three tabs, because for a small agency these are three
+views of one conversation with one client.
+
+**Money is integer cents everywhere** (`money.ts`), as spec 08 requires. No
+figure in a proposal, a contract or the finance module is ever a float, and
+instalments always add back up to the total — the remainder goes on the last
+one.
+
+**Recurring and one-off stay apart** all the way to the client's screen. An
+annual item of R$ 1.200 shows as R$ 100 a month, per the spec's own example;
+blending the two into a single number is how a deal ends up disputed.
+
+**A number is handed out on the first send**, never on a draft: a number given
+to something abandoned leaves a hole to explain. **An accepted proposal is
+immutable** — in the editor, in the adapter, and by a database trigger, so it
+cannot be talked around. Accepting a lapsed proposal is refused at the link,
+because the price on screen may no longer be the price.
+
+**Contracts** freeze their text and its SHA-256 at generation. Every signature
+records the hash of what it signed, and a contract whose signatures disagree
+with its text can never take effect. After the first signature the text is
+frozen three times over (UI, adapter, database trigger) and a signed contract
+is never deleted — only cancelled. Each party gets its own signing link, so a
+signatory never sees anyone else's.
+
+The owner chose a **simple** electronic signature with evidence (typed name
+and document, timestamp, browser) and mandatory witnesses. Legal review of
+that choice is still outstanding — the code models the decision; it does not
+pronounce on whether it suffices in court.
+
 ## Verifying the security model
 
 `supabase/verificacao-seguranca.sql` re-checks, against a live database, every

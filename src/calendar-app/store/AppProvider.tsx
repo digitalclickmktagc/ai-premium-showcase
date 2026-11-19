@@ -11,6 +11,9 @@ import {
 import type {
   Appointment,
   Availability,
+  Contract,
+  Proposal,
+  Service,
   BoardStage,
   Booking,
   BookingPage,
@@ -55,6 +58,9 @@ interface AppContextValue {
   posts: Post[];
   boardStages: BoardStage[];
   automationRules: AutomationRule[];
+  services: Service[];
+  proposals: Proposal[];
+  contracts: Contract[];
   appointments: Appointment[];
   bookings: Booking[];
   markedDates: MarkedDate[];
@@ -97,6 +103,16 @@ interface AppContextValue {
   requestApproval: (id: string, teamMessage?: string) => Promise<Post>;
   deletePost: (id: string) => Promise<Post>;
   restorePost: (id: string, status?: PostStatus) => Promise<Post>;
+
+  // comercial
+  createService: (input: Omit<Service, "id" | "createdAt">) => Promise<Service>;
+  updateService: (id: string, patch: Partial<Service>) => Promise<Service>;
+  deleteService: (id: string) => Promise<void>;
+  saveProposal: (proposal: Proposal) => Promise<Proposal>;
+  sendProposal: (id: string) => Promise<Proposal>;
+  deleteProposal: (id: string) => Promise<void>;
+  saveContract: (contract: Contract) => Promise<Contract>;
+  deleteContract: (id: string) => Promise<void>;
 
   // agenda
   createAppointment: (input: Omit<Appointment, "id" | "createdAt">) => Promise<Appointment>;
@@ -146,6 +162,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [posts, setPosts] = useState<Post[]>([]);
   const [automationRules, setAutomationRules] = useState<AutomationRule[]>([]);
   const [boardStages, setBoardStages] = useState<BoardStage[]>([]);
+  const [services, setServices] = useState<Service[]>([]);
+  const [proposals, setProposals] = useState<Proposal[]>([]);
+  const [contracts, setContracts] = useState<Contract[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [markedDates, setMarkedDates] = useState<MarkedDate[]>([]);
@@ -163,6 +182,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setPosts(db.posts);
     setAutomationRules(db.automationRules ?? []);
     setBoardStages(db.boardStages ?? []);
+    setServices(db.services ?? []);
+    setProposals(db.proposals ?? []);
+    setContracts(db.contracts ?? []);
     setAppointments(db.appointments ?? []);
     setBookings(db.bookings ?? []);
     setMarkedDates(db.markedDates ?? []);
@@ -262,6 +284,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setPosts([]);
     setAutomationRules([]);
     setBoardStages([]);
+    setServices([]);
+    setProposals([]);
+    setContracts([]);
     setAppointments([]);
     setBookings([]);
     setMarkedDates([]);
@@ -478,6 +503,69 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [service, refresh],
   );
 
+  // ── Comercial (catálogo, propostas, contratos) ─────────────
+  const createService = useCallback(
+    async (input: Omit<Service, "id" | "createdAt">) => {
+      const res = await service.createService(input);
+      await refresh();
+      return res;
+    },
+    [service, refresh],
+  );
+  const updateService = useCallback(
+    async (id: string, patch: Partial<Service>) => {
+      const res = await service.updateService(id, patch);
+      await refresh();
+      return res;
+    },
+    [service, refresh],
+  );
+  const deleteService = useCallback(
+    async (id: string) => {
+      await service.deleteService(id);
+      await refresh();
+    },
+    [service, refresh],
+  );
+  const saveProposal = useCallback(
+    async (proposal: Proposal) => {
+      const res = await service.saveProposal(proposal);
+      await refresh();
+      return res;
+    },
+    [service, refresh],
+  );
+  const sendProposal = useCallback(
+    async (id: string) => {
+      const res = await service.sendProposal(id);
+      await refresh();
+      return res;
+    },
+    [service, refresh],
+  );
+  const deleteProposal = useCallback(
+    async (id: string) => {
+      await service.deleteProposal(id);
+      await refresh();
+    },
+    [service, refresh],
+  );
+  const saveContract = useCallback(
+    async (contract: Contract) => {
+      const res = await service.saveContract(contract);
+      await refresh();
+      return res;
+    },
+    [service, refresh],
+  );
+  const deleteContract = useCallback(
+    async (id: string) => {
+      await service.deleteContract(id);
+      await refresh();
+    },
+    [service, refresh],
+  );
+
   // ── Agenda ─────────────────────────────────────────────────
   const createAppointment = useCallback(
     async (input: Omit<Appointment, "id" | "createdAt">) => {
@@ -647,6 +735,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     posts,
     boardStages,
     automationRules,
+    services,
+    proposals,
+    contracts,
     appointments,
     bookings,
     markedDates,
@@ -672,6 +763,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
     requestApproval,
     deletePost,
     restorePost,
+    createService,
+    updateService,
+    deleteService,
+    saveProposal,
+    sendProposal,
+    deleteProposal,
+    saveContract,
+    deleteContract,
     createAppointment,
     updateAppointment,
     cancelAppointment,

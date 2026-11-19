@@ -1,6 +1,10 @@
 import type {
   Appointment,
   ApprovalResult,
+  Contract,
+  Proposal,
+  ProposalStatus,
+  Service,
   Availability,
   BoardStage,
   BookingPage,
@@ -39,6 +43,20 @@ import {
   validateAppointment,
   validateBooking,
 } from "../agenda";
+import {
+  canTransition,
+  isEditable,
+  validateService,
+  isExpired,
+  nextProposalNumber,
+  validateProposal,
+} from "../proposals";
+import {
+  canEditText,
+  deriveStatus,
+  hasSigned,
+  validateSignature,
+} from "../contracts";
 import { buildSeed } from "./seed";
 import type { DataService } from "./DataService";
 
@@ -86,6 +104,9 @@ export class LocalStorageService implements DataService {
         parsed.calendars ??= [];
         parsed.posts ??= [];
         parsed.boardStages ??= [];
+        parsed.services ??= [];
+        parsed.proposals ??= [];
+        parsed.contracts ??= [];
         parsed.appointments ??= [];
         parsed.bookings ??= [];
         parsed.markedDates ??= [];
@@ -426,6 +447,234 @@ export class LocalStorageService implements DataService {
   }
 
   // ── Public share view (isolated + sanitized) ──────────────────
+  // ── Catálogo ──────────────────────────────────────────────────
+  async createService(input: Omit<Service, "id" | "createdAt">): Promise<Service> {
+    const invalid = validateService(input);
+    if (invalid) throw new Error(invalid);
+    const db = this.read();
+    const service: Service = {
+      ...input,
+      name: input.name.trim(),
+      id: uid("svc"),
+      createdAt: nowISO(),
+    };
+    db.services = [...(db.services ?? []), service];
+    this.write(db);
+    return service;
+  }
+
+  async updateService(id: string, patch: Partial<Service>): Promise<Service> {
+    const db = this.read();
+    const list = db.services ?? [];
+    const current = list.find((s) => s.id === id);
+    if (!current) throw new Error("Serviço não encontrado.");
+    const next: Service = { ...current, ...patch };
+    const invalid = validateService(next);
+    if (invalid) throw new Error(invalid);
+    db.services = list.map((s) => (s.id === id ? next : s));
+    this.write(db);
+    return next;
+  }
+
+  async deleteService(id: string): Promise<void> {
+    const db = this.read();
+    db.services = (db.services ?? []).filter((s) => s.id !== id);
+    // Proposals keep their items: they are the record of what was offered.
+    this.write(db);
+  }
+
+  // ── Propostas ─────────────────────────────────────────────────
+  async saveProposal(proposal: Proposal): Promise<Proposal> {
+    const db = this.read();
+    const list = db.proposals ?? [];
+    const current = list.find((p) => p.id === proposal.id);
+    // An accepted proposal is what was agreed. It never changes again.
+    if (current && !isEditable(current))
+      throw new Error("Uma proposta aceita não pode ser alterada.");
+
+    const invalid = validateProposal(proposal);
+    if (invalid) throw new Error(invalid);
+
+    const next: Proposal = { ...proposal, updatedAt: nowISO() };
+    db.proposals = current
+      ? list.map((p) => (p.id === proposal.id ? next : p))
+      : [...list, next];
+    this.write(db);
+    return next;
+  }
+
+  async sendProposal(id: string): Promise<Proposal> {
+    const db = this.read();
+    const list = db.proposals ?? [];
+    const current = list.find((p) => p.id === id);
+    if (!current) throw new Error("Proposta não encontrada.");
+    if (!canTransition(current.status, "enviada"))
+      throw new Error("Esta proposta não pode ser enviada agora.");
+
+    const next: Proposal = {
+      ...current,
+      // The number is handed out on the first send, never on a draft: a
+      // number given to something abandoned leaves a hole to explain.
+      number: current.number ?? nextProposalNumber(list),
+      status: "enviada",
+      sentAt: nowISO(),
+      version: current.status === "ajuste_pedido" ? current.version + 1 : current.version,
+      updatedAt: nowISO(),
+    };
+    db.proposals = list.map((p) => (p.id === id ? next : p));
+    this.write(db);
+    return next;
+  }
+
+  async deleteProposal(id: string): Promise<void> {
+    const db = this.read();
+    const current = (db.proposals ?? []).find((p) => p.id === id);
+    if (!current) return;
+    if (current.status !== "rascunho" && current.status !== "arquivada")
+      throw new Error("Só rascunhos e propostas arquivadas podem ser excluídos.");
+    db.proposals = (db.proposals ?? []).filter((p) => p.id !== id);
+    this.write(db);
+  }
+
+  // ── Contratos ─────────────────────────────────────────────────
+  async saveContract(contract: Contract): Promise<Contract> {
+    const db = this.read();
+    const list = db.contracts ?? [];
+    const current = list.find((c) => c.id === contract.id);
+    if (current && !canEditText(current) && current.finalText !== contract.finalText) {
+      throw new Error(
+        "O texto não pode mudar depois da primeira assinatura. Cancele e gere outro contrato.",
+      );
+    }
+    db.contracts = current
+      ? list.map((c) => (c.id === contract.id ? contract : c))
+      : [...list, contract];
+    this.write(db);
+    return contract;
+  }
+
+  async deleteContract(id: string): Promise<void> {
+    const db = this.read();
+    const current = (db.contracts ?? []).find((c) => c.id === id);
+    if (!current) return;
+    if (current.signatures.length > 0)
+      throw new Error("Um contrato com assinatura nunca é removido. Cancele-o.");
+    db.contracts = (db.contracts ?? []).filter((c) => c.id !== id);
+    this.write(db);
+  }
+
+  // ── Páginas públicas de proposta e contrato ───────────────────
+  async getPublicProposal(linkId: string): Promise<Proposal | null> {
+    const db = this.read();
+    const proposal = (db.proposals ?? []).find((p) => p.linkId === linkId);
+    // A draft has no public life, and an archived one is gone.
+    if (!proposal || proposal.status === "rascunho" || proposal.status === "arquivada")
+      return null;
+
+    // Opening it is a fact worth keeping (spec 06: `visualizacao_proposta`).
+    const view = {
+      id: uid("view"),
+      at: nowISO(),
+      agent: typeof navigator === "undefined" ? undefined : navigator.userAgent,
+    };
+    const updated = { ...proposal, views: [...proposal.views, view] };
+    db.proposals = (db.proposals ?? []).map((p) => (p.id === proposal.id ? updated : p));
+    this.write(db);
+    return updated;
+  }
+
+  async decideProposal(
+    linkId: string,
+    input: {
+      result: Extract<ProposalStatus, "aceita" | "recusada" | "ajuste_pedido">;
+      deciderName: string;
+      deciderDocument?: string;
+      reason?: string;
+    },
+  ): Promise<void> {
+    const db = this.read();
+    const list = db.proposals ?? [];
+    const proposal = list.find((p) => p.linkId === linkId);
+    if (!proposal) throw new Error("Proposta não encontrada.");
+    if (!input.deciderName.trim()) throw new Error("Informe seu nome.");
+    if (input.result !== "aceita" && !input.reason?.trim())
+      throw new Error("Conte o motivo para a agência saber como ajustar.");
+
+    // Accepting something that has lapsed is refused at the link, as the
+    // spec requires: the price on screen may no longer be the price.
+    if (isExpired(proposal)) throw new Error("Esta proposta venceu. Peça uma nova à agência.");
+    if (!canTransition(proposal.status, input.result))
+      throw new Error("Esta proposta não aceita mais decisões.");
+
+    db.proposals = list.map((p) =>
+      p.id === proposal.id
+        ? {
+            ...p,
+            status: input.result,
+            decidedAt: nowISO(),
+            deciderName: input.deciderName.trim(),
+            deciderDocument: input.deciderDocument?.trim() || undefined,
+            refusalReason: input.reason?.trim() || undefined,
+            updatedAt: nowISO(),
+          }
+        : p,
+    );
+    this.write(db);
+  }
+
+  async getPublicContract(partyToken: string) {
+    const db = this.read();
+    for (const contract of db.contracts ?? []) {
+      const party = contract.parties.find((p) => p.token === partyToken);
+      // A draft has no parties to show and a cancelled one is not signable.
+      if (!party || contract.status === "rascunho" || contract.status === "cancelado")
+        continue;
+      return { contract, partyId: party.id };
+    }
+    return null;
+  }
+
+  async signContract(
+    partyToken: string,
+    input: { typedName: string; typedDocument: string },
+  ): Promise<void> {
+    const invalid = validateSignature(input);
+    if (invalid) throw new Error(invalid);
+
+    const db = this.read();
+    const list = db.contracts ?? [];
+    const contract = list.find((c) => c.parties.some((p) => p.token === partyToken));
+    if (!contract) throw new Error("Contrato não encontrado.");
+    const party = contract.parties.find((p) => p.token === partyToken)!;
+    if (contract.status === "cancelado") throw new Error("Este contrato foi cancelado.");
+    if (hasSigned(contract, party.id)) throw new Error("Esta parte já assinou.");
+
+    const signature = {
+      id: uid("sig"),
+      partyId: party.id,
+      typedName: input.typedName.trim(),
+      typedDocument: input.typedDocument.replace(/\D/g, ""),
+      at: nowISO(),
+      agent: typeof navigator === "undefined" ? undefined : navigator.userAgent,
+      // The hash of the text as it stands right now. If the text were ever
+      // changed afterwards, this is what would expose it.
+      signedTextHash: contract.textHash,
+    };
+    const signed: Contract = { ...contract, signatures: [...contract.signatures, signature] };
+    const status = deriveStatus(signed);
+    db.contracts = list.map((c) =>
+      c.id === contract.id
+        ? {
+            ...signed,
+            status,
+            effectiveAt:
+              status === "vigente" && !signed.effectiveAt ? nowISO() : signed.effectiveAt,
+          }
+        : c,
+    );
+    this.write(db);
+  }
+
   // ── Agenda ────────────────────────────────────────────────────
   async createAppointment(
     input: Omit<Appointment, "id" | "createdAt">,

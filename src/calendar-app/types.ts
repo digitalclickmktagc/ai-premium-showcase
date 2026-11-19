@@ -202,6 +202,161 @@ export interface Post {
   updatedAt: string;
 }
 
+// ── Catálogo e propostas (benchmark spec 06) ─────────────────
+
+/** How a service is charged. Recurring kinds normalise to a monthly figure. */
+export type Billing =
+  | "mensal"
+  | "trimestral"
+  | "semestral"
+  | "anual"
+  | "unica"
+  | "por_hora";
+
+export interface Service {
+  id: string;
+  name: string;
+  category?: string;
+  description?: string;
+  /** What the client gets, one line each. */
+  included?: string[];
+  internalNote?: string;
+  /** Integer cents. Never a float. */
+  price: number;
+  billing: Billing;
+  executionDays?: number;
+  active: boolean;
+  /** Shown on the public price table. */
+  publicInTable: boolean;
+  order: number;
+  color?: string;
+  createdAt: string;
+}
+
+export type ProposalStatus =
+  | "rascunho"
+  | "enviada"
+  | "ajuste_pedido"
+  | "aceita"
+  | "recusada"
+  | "vencida"
+  | "arquivada";
+
+export interface ProposalItem {
+  id: string;
+  serviceId?: string;
+  description: string;
+  quantity: number;
+  /** Integer cents. */
+  unitPrice: number;
+  billing: Billing;
+  scope?: string;
+}
+
+export type PaymentMethod = "pix" | "boleto" | "cartao" | "transferencia";
+
+export interface PaymentTerms {
+  modality: "a_vista" | "parcelado";
+  /** Integer cents paid up front. */
+  entryAmount: number;
+  installments: number;
+  firstDueDate?: string;
+  methods: PaymentMethod[];
+}
+
+/** Insert-only record of the client opening the proposal. */
+export interface ProposalView {
+  id: string;
+  at: string;
+  agent?: string;
+}
+
+export interface Proposal {
+  id: string;
+  /** AAAA-NNN, assigned when it is first sent. */
+  number?: string;
+  title: string;
+  clientId?: string;
+  /** Name to address when there is no client record yet. */
+  leadName?: string;
+  cover?: string;
+  validUntil: string;
+  minMonths?: number;
+  conditions?: string;
+  notes?: string;
+  status: ProposalStatus;
+  /** Token for the public page. */
+  linkId: string;
+  items: ProposalItem[];
+  payment?: PaymentTerms;
+  views: ProposalView[];
+  sentAt?: string;
+  decidedAt?: string;
+  deciderName?: string;
+  deciderDocument?: string;
+  refusalReason?: string;
+  /** Bumped on every re-send after a change request. */
+  version: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// ── Contratos e assinatura (benchmark spec 07) ───────────────
+
+export type ContractStatus =
+  | "rascunho"
+  | "gerado"
+  | "aguardando_partes"
+  | "parcialmente_assinado"
+  | "vigente"
+  | "encerrado"
+  | "cancelado";
+
+export type PartyRole = "contratante" | "contratada" | "testemunha";
+
+export interface ContractParty {
+  id: string;
+  role: PartyRole;
+  name: string;
+  document?: string;
+  email?: string;
+  order: number;
+  required: boolean;
+  /** Token for this party's signing link. */
+  token: string;
+}
+
+export interface Signature {
+  id: string;
+  partyId: string;
+  typedName: string;
+  typedDocument: string;
+  at: string;
+  agent?: string;
+  /** Must equal the contract's textHash, or the contract cannot take effect. */
+  signedTextHash: string;
+}
+
+export interface Contract {
+  id: string;
+  clientId?: string;
+  proposalId?: string;
+  title: string;
+  status: ContractStatus;
+  /** Frozen at generation. Immutable once anyone has signed. */
+  finalText: string;
+  /** SHA-256 of finalText. */
+  textHash: string;
+  startsOn?: string;
+  endsOn?: string;
+  autoRenew: boolean;
+  renewNoticeDays: number;
+  parties: ContractParty[];
+  signatures: Signature[];
+  createdAt: string;
+  effectiveAt?: string;
+}
+
 // ── Agenda (benchmark spec 04) ───────────────────────────────
 
 /** A meeting the agency keeps. The agenda's own entity. */
@@ -303,6 +458,10 @@ export interface Database {
   approvalCodes?: ApprovalCodeEntry[];
   /** Custom board columns, scoped per calendar. Empty means "use the standard four". */
   boardStages?: BoardStage[];
+  /** Catálogo, propostas e contratos (specs 06 e 07). */
+  services?: Service[];
+  proposals?: Proposal[];
+  contracts?: Contract[];
   /** Agenda (spec 04). */
   appointments?: Appointment[];
   bookings?: Booking[];

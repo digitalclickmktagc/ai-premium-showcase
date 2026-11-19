@@ -13,6 +13,10 @@
 import type {
   Appointment,
   ApprovalResult,
+  Contract,
+  Proposal,
+  ProposalStatus,
+  Service,
   Availability,
   BoardStage,
   BookingPage,
@@ -32,6 +36,8 @@ import type {
 import { shareToken } from "../utils";
 import { validateDecision } from "../approval";
 import { validateAppointment, validateBooking } from "../agenda";
+import { validateProposal, validateService } from "../proposals";
+import { validateSignature } from "../contracts";
 import {
   validateRule,
   type AutomationRule,
@@ -98,6 +104,119 @@ const toStage = (r: any): BoardStage => ({
   color: r.color,
   category: r.category,
   order: r.position,
+});
+const toService = (r: any): Service => ({
+  id: r.id,
+  name: r.name,
+  category: r.category ?? undefined,
+  description: r.description ?? undefined,
+  included: r.included ?? undefined,
+  internalNote: r.internal_note ?? undefined,
+  price: r.price_cents,
+  billing: r.billing,
+  executionDays: r.execution_days ?? undefined,
+  active: r.active !== false,
+  publicInTable: r.public_in_table === true,
+  order: r.position ?? 0,
+  color: r.color ?? undefined,
+  createdAt: r.created_at,
+});
+const serviceRow = (s: Partial<Service>) => {
+  const row: any = {};
+  if (s.name !== undefined) row.name = s.name.trim();
+  if (s.category !== undefined) row.category = s.category || null;
+  if (s.description !== undefined) row.description = s.description || null;
+  if (s.included !== undefined) row.included = s.included ?? [];
+  if (s.internalNote !== undefined) row.internal_note = s.internalNote || null;
+  if (s.price !== undefined) row.price_cents = s.price;
+  if (s.billing !== undefined) row.billing = s.billing;
+  if (s.executionDays !== undefined) row.execution_days = s.executionDays ?? null;
+  if (s.active !== undefined) row.active = s.active;
+  if (s.publicInTable !== undefined) row.public_in_table = s.publicInTable;
+  if (s.order !== undefined) row.position = s.order;
+  if (s.color !== undefined) row.color = s.color || null;
+  return row;
+};
+const toProposal = (r: any): Proposal => ({
+  id: r.id,
+  number: r.number ?? undefined,
+  title: r.title,
+  clientId: r.client_id ?? undefined,
+  leadName: r.lead_name ?? undefined,
+  cover: r.cover ?? undefined,
+  validUntil: r.valid_until,
+  minMonths: r.min_months ?? undefined,
+  conditions: r.conditions ?? undefined,
+  notes: r.notes ?? undefined,
+  status: r.status,
+  linkId: r.link_id,
+  items: r.items ?? [],
+  payment: r.payment ?? undefined,
+  views: r.views ?? [],
+  sentAt: r.sent_at ?? undefined,
+  decidedAt: r.decided_at ?? undefined,
+  deciderName: r.decider_name ?? undefined,
+  deciderDocument: r.decider_document ?? undefined,
+  refusalReason: r.refusal_reason ?? undefined,
+  version: r.version ?? 1,
+  createdAt: r.created_at,
+  updatedAt: r.updated_at,
+});
+const proposalRow = (p: Proposal) => ({
+  id: p.id,
+  number: p.number ?? null,
+  title: p.title.trim(),
+  client_id: p.clientId ?? null,
+  lead_name: p.leadName ?? null,
+  cover: p.cover ?? null,
+  valid_until: p.validUntil,
+  min_months: p.minMonths ?? null,
+  conditions: p.conditions ?? null,
+  notes: p.notes ?? null,
+  status: p.status,
+  link_id: p.linkId,
+  items: p.items,
+  payment: p.payment ?? null,
+  views: p.views,
+  sent_at: p.sentAt ?? null,
+  decided_at: p.decidedAt ?? null,
+  decider_name: p.deciderName ?? null,
+  decider_document: p.deciderDocument ?? null,
+  refusal_reason: p.refusalReason ?? null,
+  version: p.version,
+});
+const toContract = (r: any): Contract => ({
+  id: r.id,
+  clientId: r.client_id ?? undefined,
+  proposalId: r.proposal_id ?? undefined,
+  title: r.title,
+  status: r.status,
+  finalText: r.final_text,
+  textHash: r.text_hash,
+  startsOn: r.starts_on ?? undefined,
+  endsOn: r.ends_on ?? undefined,
+  autoRenew: r.auto_renew === true,
+  renewNoticeDays: r.renew_notice_days ?? 30,
+  parties: r.parties ?? [],
+  signatures: r.signatures ?? [],
+  createdAt: r.created_at,
+  effectiveAt: r.effective_at ?? undefined,
+});
+const contractRow = (c: Contract) => ({
+  id: c.id,
+  client_id: c.clientId ?? null,
+  proposal_id: c.proposalId ?? null,
+  title: c.title,
+  status: c.status,
+  final_text: c.finalText,
+  text_hash: c.textHash,
+  starts_on: c.startsOn ?? null,
+  ends_on: c.endsOn ?? null,
+  auto_renew: c.autoRenew,
+  renew_notice_days: c.renewNoticeDays,
+  parties: c.parties,
+  signatures: c.signatures,
+  effective_at: c.effectiveAt ?? null,
 });
 const toAppointment = (r: any): Appointment => ({
   id: r.id,
@@ -331,9 +450,24 @@ export class SupabaseService implements DataService {
         appointments: [],
         bookings: [],
         markedDates: [],
+        services: [],
+        proposals: [],
+        contracts: [],
       };
-    const [clients, calendars, posts, stages, rules, appointments, bookings, marked, cfg] =
-      await Promise.all([
+    const [
+      clients,
+      calendars,
+      posts,
+      stages,
+      rules,
+      appointments,
+      bookings,
+      marked,
+      cfg,
+      services,
+      proposals,
+      contracts,
+    ] = await Promise.all([
         this.rest<any[]>("clients?select=*"),
         this.rest<any[]>("calendars?select=*"),
         this.rest<any[]>("posts?select=*"),
@@ -345,6 +479,9 @@ export class SupabaseService implements DataService {
         this.rest<any[]>("booking?select=*&order=starts_at.asc"),
         this.rest<any[]>("marked_date?select=*&order=date.asc"),
         this.rest<any[]>("booking_config?select=*&limit=1"),
+        this.rest<any[]>("service?select=*&order=position.asc"),
+        this.rest<any[]>("proposal?select=*&order=created_at.desc"),
+        this.rest<any[]>("contract?select=*&order=created_at.desc"),
       ]);
     return {
       clients: clients.map(toClient),
@@ -355,6 +492,9 @@ export class SupabaseService implements DataService {
       appointments: appointments.map(toAppointment),
       bookings: bookings.map(toBooking),
       markedDates: marked.map(toMarkedDate),
+      services: services.map(toService),
+      proposals: proposals.map(toProposal),
+      contracts: contracts.map(toContract),
       availability: cfg[0]
         ? {
             weekdays: cfg[0].weekdays ?? {},
@@ -624,6 +764,133 @@ export class SupabaseService implements DataService {
   }
 
   // ── Public share view (anon RPC, isolated + sanitized) ────────
+  // ── Catálogo, propostas e contratos ───────────────────────────
+  async createService(input: Omit<Service, "id" | "createdAt">): Promise<Service> {
+    const invalid = validateService(input);
+    if (invalid) throw new Error(invalid);
+    const [row] = await this.rest<any[]>("service", {
+      method: "POST",
+      headers: { Prefer: "return=representation" },
+      body: JSON.stringify(serviceRow(input)),
+    });
+    return toService(row);
+  }
+
+  async updateService(id: string, patch: Partial<Service>): Promise<Service> {
+    const [row] = await this.rest<any[]>(`service?id=eq.${encodeURIComponent(id)}`, {
+      method: "PATCH",
+      headers: { Prefer: "return=representation" },
+      body: JSON.stringify(serviceRow(patch)),
+    });
+    if (!row) throw new Error("Serviço não encontrado.");
+    return toService(row);
+  }
+
+  async deleteService(id: string): Promise<void> {
+    await this.rest<void>(`service?id=eq.${encodeURIComponent(id)}`, { method: "DELETE" });
+  }
+
+  async saveProposal(proposal: Proposal): Promise<Proposal> {
+    const invalid = validateProposal(proposal);
+    if (invalid) throw new Error(invalid);
+    // The database refuses a write to an accepted proposal (migration 008),
+    // so this cannot be talked around from the client.
+    const [row] = await this.rest<any[]>("proposal", {
+      method: "POST",
+      headers: { Prefer: "return=representation,resolution=merge-duplicates" },
+      body: JSON.stringify(proposalRow(proposal)),
+    });
+    return toProposal(row);
+  }
+
+  async sendProposal(id: string): Promise<Proposal> {
+    const data = await this.rest<any>("rpc/send_proposal", {
+      method: "POST",
+      body: JSON.stringify({ p_id: id }),
+    });
+    return toProposal(data);
+  }
+
+  async deleteProposal(id: string): Promise<void> {
+    await this.rest<void>(
+      `proposal?id=eq.${encodeURIComponent(id)}&status=in.(rascunho,arquivada)`,
+      { method: "DELETE" },
+    );
+  }
+
+  async saveContract(contract: Contract): Promise<Contract> {
+    const [row] = await this.rest<any[]>("contract", {
+      method: "POST",
+      headers: { Prefer: "return=representation,resolution=merge-duplicates" },
+      body: JSON.stringify(contractRow(contract)),
+    });
+    return toContract(row);
+  }
+
+  async deleteContract(id: string): Promise<void> {
+    await this.rest<void>(`contract?id=eq.${encodeURIComponent(id)}`, { method: "DELETE" });
+  }
+
+  // ── Public proposal and contract (no session) ─────────────────
+  async getPublicProposal(linkId: string): Promise<Proposal | null> {
+    const data = await this.rest<any>("rpc/public_proposal", {
+      method: "POST",
+      useUser: false,
+      body: JSON.stringify({ p_link: linkId, p_agent: navigator.userAgent }),
+    });
+    return data ? toProposal(data) : null;
+  }
+
+  async decideProposal(
+    linkId: string,
+    input: {
+      result: Extract<ProposalStatus, "aceita" | "recusada" | "ajuste_pedido">;
+      deciderName: string;
+      deciderDocument?: string;
+      reason?: string;
+    },
+  ): Promise<void> {
+    await this.rest<void>("rpc/public_decide_proposal", {
+      method: "POST",
+      useUser: false,
+      body: JSON.stringify({
+        p_link: linkId,
+        p_result: input.result,
+        p_name: input.deciderName,
+        p_document: input.deciderDocument ?? null,
+        p_reason: input.reason ?? null,
+      }),
+    });
+  }
+
+  async getPublicContract(partyToken: string) {
+    const data = await this.rest<any>("rpc/public_contract", {
+      method: "POST",
+      useUser: false,
+      body: JSON.stringify({ p_token: partyToken }),
+    });
+    if (!data) return null;
+    return { contract: toContract(data.contract), partyId: data.partyId };
+  }
+
+  async signContract(
+    partyToken: string,
+    input: { typedName: string; typedDocument: string },
+  ): Promise<void> {
+    const invalid = validateSignature(input);
+    if (invalid) throw new Error(invalid);
+    await this.rest<void>("rpc/public_sign_contract", {
+      method: "POST",
+      useUser: false,
+      body: JSON.stringify({
+        p_token: partyToken,
+        p_name: input.typedName.trim(),
+        p_document: input.typedDocument.replace(/\D/g, ""),
+        p_agent: navigator.userAgent,
+      }),
+    });
+  }
+
   // ── Agenda ────────────────────────────────────────────────────
   async createAppointment(
     input: Omit<Appointment, "id" | "createdAt">,

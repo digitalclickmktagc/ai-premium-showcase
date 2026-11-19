@@ -12,6 +12,9 @@ import LoginPage from "./calendar-app/pages/LoginPage";
 import DashboardPage from "./calendar-app/pages/DashboardPage";
 import AgendaPage from "./calendar-app/pages/AgendaPage";
 import PublicBookingPage from "./calendar-app/pages/PublicBookingPage";
+import CommercialPage from "./calendar-app/pages/CommercialPage";
+import PublicProposalPage from "./calendar-app/pages/PublicProposalPage";
+import PublicContractPage from "./calendar-app/pages/PublicContractPage";
 import CalendarPage from "./calendar-app/pages/CalendarPage";
 import ClientViewPage from "./calendar-app/pages/ClientViewPage";
 import ClientHubPage from "./calendar-app/pages/ClientHubPage";
@@ -35,6 +38,14 @@ const AdminApp = () => (
           element={
             <RequireAuth>
               <DashboardPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="comercial"
+          element={
+            <RequireAuth>
+              <CommercialPage />
             </RequireAuth>
           }
         />
@@ -70,6 +81,23 @@ const App = () => (
           <Route path="/" element={<Index />} />
           {/* Editorial calendar — admin area */}
           <Route path="/app/*" element={<AdminApp />} />
+          {/* Proposal and contract, each reachable only by its own token */}
+          <Route
+            path="/p/:linkId"
+            element={
+              <ThemeProvider>
+                <PublicProposalPage />
+              </ThemeProvider>
+            }
+          />
+          <Route
+            path="/assinar/:token"
+            element={
+              <ThemeProvider>
+                <PublicContractPage />
+              </ThemeProvider>
+            }
+          />
           {/* Public booking page — anonymous visitor, token only */}
           <Route
             path="/agendar/:linkId"
