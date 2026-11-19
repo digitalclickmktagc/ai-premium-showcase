@@ -1,12 +1,17 @@
 import type {
+  Appointment,
   ApprovalResult,
+  Availability,
   BoardStage,
+  BookingPage,
+  MarkedDate,
   Calendar,
   ClientStatus,
   Client,
   CreateClientInput,
   CreatePostInput,
   Database,
+  Booking,
   Post,
   PostStatus,
   PublicCalendarView,
@@ -28,6 +33,12 @@ import {
   type AutomationRule,
   type AutomationRun,
 } from "../automation";
+import {
+  DEFAULT_AVAILABILITY,
+  hasConflict,
+  validateAppointment,
+  validateBooking,
+} from "../agenda";
 import { buildSeed } from "./seed";
 import type { DataService } from "./DataService";
 
@@ -36,6 +47,7 @@ const SESSION_KEY = "editorial-calendar:session:v1";
 
 /** Keep the demo blob from growing without bound. */
 const AUTOMATION_LOG_MAX = 500;
+
 
 /**
  * Demo admin credentials. These are for the offline/localStorage demo only and
@@ -74,6 +86,9 @@ export class LocalStorageService implements DataService {
         parsed.calendars ??= [];
         parsed.posts ??= [];
         parsed.boardStages ??= [];
+        parsed.appointments ??= [];
+        parsed.bookings ??= [];
+        parsed.markedDates ??= [];
         parsed.automationRules ??= [];
         parsed.automationRuns ??= [];
         // Legacy records only had the boolean; derive the lifecycle from it.
@@ -411,6 +426,185 @@ export class LocalStorageService implements DataService {
   }
 
   // ── Public share view (isolated + sanitized) ──────────────────
+  // ── Agenda ────────────────────────────────────────────────────
+  async createAppointment(
+    input: Omit<Appointment, "id" | "createdAt">,
+  ): Promise<Appointment> {
+    const invalid = validateAppointment(input);
+    if (invalid) throw new Error(invalid);
+    const db = this.read();
+    const appointment: Appointment = {
+      ...input,
+      title: input.title.trim(),
+      id: uid("appt"),
+      createdAt: nowISO(),
+    };
+    db.appointments = [...(db.appointments ?? []), appointment];
+    this.write(db);
+    return appointment;
+  }
+
+  async updateAppointment(
+    id: string,
+    patch: Partial<Appointment>,
+  ): Promise<Appointment> {
+    const db = this.read();
+    const list = db.appointments ?? [];
+    const current = list.find((a) => a.id === id);
+    if (!current) throw new Error("Compromisso não encontrado.");
+    const next: Appointment = { ...current, ...patch };
+    const invalid = validateAppointment(next);
+    if (invalid) throw new Error(invalid);
+    db.appointments = list.map((a) => (a.id === id ? next : a));
+    this.write(db);
+    return next;
+  }
+
+  async addMarkedDate(date: MarkedDate): Promise<void> {
+    const db = this.read();
+    const list = db.markedDates ?? [];
+    if (list.some((d) => d.id === date.id)) return; // already kept
+    db.markedDates = [...list, date];
+    this.write(db);
+  }
+
+  async removeMarkedDate(id: string): Promise<void> {
+    const db = this.read();
+    db.markedDates = (db.markedDates ?? []).filter((d) => d.id !== id);
+    this.write(db);
+  }
+
+  async saveBookingConfig(input: {
+    availability: Availability;
+    page: Pick<BookingPage, "active" | "title" | "intro">;
+  }): Promise<void> {
+    const db = this.read();
+    db.availability = input.availability;
+    db.bookingPage = {
+      ...(db.bookingPage ?? { linkId: shareToken(), active: false, title: "" }),
+      ...input.page,
+    };
+    this.write(db);
+  }
+
+  async regenerateBookingLink(): Promise<BookingPage> {
+    const db = this.read();
+    const page: BookingPage = {
+      ...(db.bookingPage ?? { active: false, title: "Agendar uma conversa" }),
+      linkId: shareToken(),
+    };
+    db.bookingPage = page;
+    this.write(db);
+    return page;
+  }
+
+  // ── Public booking ────────────────────────────────────────────
+  /** Resolves the page only while it is active — paused behaves as missing. */
+  private livePage(linkId: string) {
+    const db = this.read();
+    const page = db.bookingPage;
+    if (!page || !page.active || page.linkId !== linkId) return null;
+    return { db, page, availability: db.availability ?? DEFAULT_AVAILABILITY };
+  }
+
+  async getPublicBookingPage(linkId: string) {
+    const live = this.livePage(linkId);
+    return live ? { page: live.page, availability: live.availability } : null;
+  }
+
+  async getPublicBusy(linkId: string, from: string, to: string) {
+    const live = this.livePage(linkId);
+    if (!live) return null;
+    const within = (iso: string) => iso.slice(0, 10) >= from && iso.slice(0, 10) <= to;
+    // Start and end only. Who the agency is with is none of the visitor's business.
+    return [
+      ...(live.db.appointments ?? [])
+        .filter((a) => a.status === "marcado" && within(a.start))
+        .map((a) => ({ start: a.start, end: a.end })),
+      ...(live.db.bookings ?? [])
+        .filter((b) => b.status === "confirmada" && within(b.start))
+        .map((b) => ({ start: b.start, end: b.end })),
+    ].sort((a, b) => a.start.localeCompare(b.start));
+  }
+
+  async createPublicBooking(
+    linkId: string,
+    input: { name: string; email: string; start: string; note?: string },
+  ) {
+    const live = this.livePage(linkId);
+    if (!live) throw new Error("Página de agendamento indisponível.");
+    const invalid = validateBooking(input);
+    if (invalid) throw new Error(invalid);
+
+    const { availability } = live;
+    const start = new Date(input.start);
+    if (start.getTime() < Date.now() + availability.noticeHours * 3600_000) {
+      throw new Error("Esse horário está dentro da antecedência mínima.");
+    }
+    const end = new Date(start.getTime() + availability.durationMinutes * 60_000);
+    const slot = { start: input.start, end: end.toISOString() };
+
+    // Re-read right before writing: the window between offering a slot and
+    // taking it is exactly where a double booking happens.
+    const db = this.read();
+    const busy = [
+      ...(db.appointments ?? [])
+        .filter((a) => a.status === "marcado")
+        .map((a) => ({ start: a.start, end: a.end })),
+      ...(db.bookings ?? [])
+        .filter((b) => b.status === "confirmada")
+        .map((b) => ({ start: b.start, end: b.end })),
+    ];
+    if (hasConflict(slot, busy)) {
+      throw new Error("Esse horário acabou de ser ocupado. Escolha outro.");
+    }
+
+    const manageToken = shareToken();
+    const booking: Booking = {
+      id: uid("book"),
+      pageId: live.page.linkId,
+      name: input.name.trim(),
+      email: input.email.trim().toLowerCase(),
+      start: slot.start,
+      end: slot.end,
+      status: "confirmada",
+      manageToken,
+      note: input.note?.trim() || undefined,
+      createdAt: nowISO(),
+    };
+    db.bookings = [...(db.bookings ?? []), booking];
+    db.appointments = [
+      ...(db.appointments ?? []),
+      {
+        id: uid("appt"),
+        title: `${booking.name} (reserva)`,
+        description: booking.email,
+        start: booking.start,
+        end: booking.end,
+        status: "marcado",
+        source: "reserva",
+        createdAt: nowISO(),
+      },
+    ];
+    this.write(db);
+    return { manageToken, start: booking.start, end: booking.end };
+  }
+
+  async cancelPublicBooking(manageToken: string): Promise<void> {
+    const db = this.read();
+    const booking = (db.bookings ?? []).find((b) => b.manageToken === manageToken);
+    if (!booking) throw new Error("Reserva não encontrada.");
+    db.bookings = (db.bookings ?? []).map((b) =>
+      b.id === booking.id ? { ...b, status: "cancelada" as const } : b,
+    );
+    db.appointments = (db.appointments ?? []).map((a) =>
+      a.source === "reserva" && a.start === booking.start && a.end === booking.end
+        ? { ...a, status: "cancelado" as const }
+        : a,
+    );
+    this.write(db);
+  }
+
   // ── Board columns ─────────────────────────────────────────────
   async createBoardStage(input: Omit<BoardStage, "id">): Promise<BoardStage> {
     const db = this.read();

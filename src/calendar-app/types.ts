@@ -202,6 +202,81 @@ export interface Post {
   updatedAt: string;
 }
 
+// ── Agenda (benchmark spec 04) ───────────────────────────────
+
+/** A meeting the agency keeps. The agenda's own entity. */
+export interface Appointment {
+  id: string;
+  title: string;
+  description?: string;
+  clientId?: string;
+  /** ISO datetime. */
+  start: string;
+  end: string;
+  location?: string;
+  status: "marcado" | "cancelado";
+  /** Manual, or created by a public booking. */
+  source: "manual" | "reserva";
+  done?: boolean;
+  createdAt: string;
+}
+
+/** A commemorative or holiday date worth seeing on the calendar. */
+export interface MarkedDate {
+  id: string;
+  /** YYYY-MM-DD for the year it falls in. */
+  date: string;
+  name: string;
+  category: string;
+  color?: string;
+  /**
+   * Dates that need judgement before a brand posts about them (tragedies,
+   * religious observances, political dates). Shown with a badge.
+   */
+  sensitive?: boolean;
+  /** Absent for the built-in catalogue; set for dates the agency added. */
+  custom?: boolean;
+}
+
+export interface AvailabilityWindow {
+  /** HH:MM */
+  start: string;
+  end: string;
+}
+
+/** When the agency can be booked, and the shape of a booking. */
+export interface Availability {
+  /** Windows per weekday (0 = Sunday). */
+  weekdays: Record<number, AvailabilityWindow[]>;
+  durationMinutes: number;
+  /** Hours of notice a visitor must give. */
+  noticeHours: number;
+  /** Buffer kept around every busy block. */
+  gapMinutes: number;
+}
+
+/** The public booking page. Paused behaves exactly like missing. */
+export interface BookingPage {
+  linkId: string;
+  active: boolean;
+  title: string;
+  intro?: string;
+}
+
+export interface Booking {
+  id: string;
+  pageId: string;
+  name: string;
+  email: string;
+  start: string;
+  end: string;
+  status: "confirmada" | "cancelada";
+  /** Lets the visitor cancel without an account. */
+  manageToken: string;
+  note?: string;
+  createdAt: string;
+}
+
 /** Auth session. Clients access via token only, so sessions are admin-only. */
 export interface Session {
   role: "admin";
@@ -228,6 +303,13 @@ export interface Database {
   approvalCodes?: ApprovalCodeEntry[];
   /** Custom board columns, scoped per calendar. Empty means "use the standard four". */
   boardStages?: BoardStage[];
+  /** Agenda (spec 04). */
+  appointments?: Appointment[];
+  bookings?: Booking[];
+  /** Marked dates the agency chose to keep on the calendar. */
+  markedDates?: MarkedDate[];
+  availability?: Availability;
+  bookingPage?: BookingPage;
   /** Stage automations, scoped per calendar. Admin-only. */
   automationRules?: AutomationRule[];
   /** Insert-only execution log for those automations. Admin-only. */

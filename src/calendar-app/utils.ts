@@ -110,10 +110,21 @@ export function initials(name: string): string {
     .join("");
 }
 
-/** Build the absolute client share URL for a token. */
-export function shareUrl(token: string): string {
-  if (typeof window === "undefined") return `/c/${token}`;
-  return `${window.location.origin}/c/${token}`;
+/**
+ * Build an absolute public URL for a token.
+ *
+ * `basePath` is "/c" for a client's calendar and "/agendar" for the booking
+ * page — the same control shows both, so it takes the path rather than
+ * guessing from the token.
+ */
+export function shareUrl(token: string, basePath = "/c"): string {
+  const path = `${basePath}/${token}`;
+  if (typeof window === "undefined") return path;
+  // HashRouter builds (the standalone preview) need the fragment form.
+  const usesHash = window.location.hash.startsWith("#/");
+  return usesHash
+    ? `${window.location.origin}${window.location.pathname}#${path}`
+    : `${window.location.origin}${path}`;
 }
 
 /** URL schemes that are safe to put in an href we render for third parties. */

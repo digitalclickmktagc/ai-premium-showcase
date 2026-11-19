@@ -11,8 +11,12 @@
  * RLS; anonymous clients can only call get_public_calendar(token).
  */
 import type {
+  Appointment,
   ApprovalResult,
+  Availability,
   BoardStage,
+  BookingPage,
+  MarkedDate,
   Calendar,
   Client,
   CreateClientInput,
@@ -27,6 +31,7 @@ import type {
 } from "../types";
 import { shareToken } from "../utils";
 import { validateDecision } from "../approval";
+import { validateAppointment, validateBooking } from "../agenda";
 import {
   validateRule,
   type AutomationRule,
@@ -93,6 +98,40 @@ const toStage = (r: any): BoardStage => ({
   color: r.color,
   category: r.category,
   order: r.position,
+});
+const toAppointment = (r: any): Appointment => ({
+  id: r.id,
+  clientId: r.client_id ?? undefined,
+  title: r.title,
+  description: r.description ?? undefined,
+  start: r.starts_at,
+  end: r.ends_at,
+  location: r.location ?? undefined,
+  status: r.status,
+  source: r.source,
+  done: r.done ?? false,
+  createdAt: r.created_at,
+});
+const toBooking = (r: any) => ({
+  id: r.id,
+  pageId: r.page_id ?? "",
+  name: r.name,
+  email: r.email,
+  start: r.starts_at,
+  end: r.ends_at,
+  status: r.status,
+  manageToken: r.manage_token,
+  note: r.note ?? undefined,
+  createdAt: r.created_at,
+});
+const toMarkedDate = (r: any): MarkedDate => ({
+  id: r.id,
+  date: r.date,
+  name: r.name,
+  category: r.category,
+  color: r.color ?? undefined,
+  sensitive: r.sensitive ?? false,
+  custom: r.custom ?? false,
 });
 const toRule = (r: any): AutomationRule => ({
   id: r.id,
@@ -289,22 +328,49 @@ export class SupabaseService implements DataService {
         posts: [],
         boardStages: [],
         automationRules: [],
+        appointments: [],
+        bookings: [],
+        markedDates: [],
       };
-    const [clients, calendars, posts, stages, rules] = await Promise.all([
-      this.rest<any[]>("clients?select=*"),
-      this.rest<any[]>("calendars?select=*"),
-      this.rest<any[]>("posts?select=*"),
-      this.rest<any[]>("board_stage?select=*&order=position.asc"),
-      // Rules are small and bounded, so they travel with the first load. The
-      // execution log does not: it only grows, and is fetched on demand.
-      this.rest<any[]>("automation_rule?select=*&order=created_at.asc"),
-    ]);
+    const [clients, calendars, posts, stages, rules, appointments, bookings, marked, cfg] =
+      await Promise.all([
+        this.rest<any[]>("clients?select=*"),
+        this.rest<any[]>("calendars?select=*"),
+        this.rest<any[]>("posts?select=*"),
+        this.rest<any[]>("board_stage?select=*&order=position.asc"),
+        // Rules are small and bounded, so they travel with the first load. The
+        // execution log does not: it only grows, and is fetched on demand.
+        this.rest<any[]>("automation_rule?select=*&order=created_at.asc"),
+        this.rest<any[]>("appointment?select=*&order=starts_at.asc"),
+        this.rest<any[]>("booking?select=*&order=starts_at.asc"),
+        this.rest<any[]>("marked_date?select=*&order=date.asc"),
+        this.rest<any[]>("booking_config?select=*&limit=1"),
+      ]);
     return {
       clients: clients.map(toClient),
       calendars: calendars.map(toCalendar),
       posts: posts.map(toPost),
       boardStages: stages.map(toStage),
       automationRules: rules.map(toRule),
+      appointments: appointments.map(toAppointment),
+      bookings: bookings.map(toBooking),
+      markedDates: marked.map(toMarkedDate),
+      availability: cfg[0]
+        ? {
+            weekdays: cfg[0].weekdays ?? {},
+            durationMinutes: cfg[0].duration_minutes,
+            noticeHours: cfg[0].notice_hours,
+            gapMinutes: cfg[0].gap_minutes,
+          }
+        : undefined,
+      bookingPage: cfg[0]
+        ? {
+            linkId: cfg[0].link_id,
+            active: cfg[0].active,
+            title: cfg[0].title,
+            intro: cfg[0].intro ?? undefined,
+          }
+        : undefined,
     };
   }
 
@@ -558,6 +624,177 @@ export class SupabaseService implements DataService {
   }
 
   // ── Public share view (anon RPC, isolated + sanitized) ────────
+  // ── Agenda ────────────────────────────────────────────────────
+  async createAppointment(
+    input: Omit<Appointment, "id" | "createdAt">,
+  ): Promise<Appointment> {
+    const invalid = validateAppointment(input);
+    if (invalid) throw new Error(invalid);
+    const [row] = await this.rest<any[]>("appointment", {
+      method: "POST",
+      headers: { Prefer: "return=representation" },
+      body: JSON.stringify({
+        client_id: input.clientId ?? null,
+        title: input.title.trim(),
+        description: input.description ?? null,
+        starts_at: input.start,
+        ends_at: input.end,
+        location: input.location ?? null,
+        status: input.status,
+        source: input.source,
+        done: input.done ?? false,
+      }),
+    });
+    return toAppointment(row);
+  }
+
+  async updateAppointment(id: string, patch: Partial<Appointment>): Promise<Appointment> {
+    const row: any = {};
+    if (patch.title !== undefined) row.title = patch.title.trim();
+    if (patch.description !== undefined) row.description = patch.description || null;
+    if (patch.clientId !== undefined) row.client_id = patch.clientId || null;
+    if (patch.start !== undefined) row.starts_at = patch.start;
+    if (patch.end !== undefined) row.ends_at = patch.end;
+    if (patch.location !== undefined) row.location = patch.location || null;
+    if (patch.status !== undefined) row.status = patch.status;
+    if (patch.done !== undefined) row.done = patch.done;
+    const [updated] = await this.rest<any[]>(`appointment?id=eq.${encodeURIComponent(id)}`, {
+      method: "PATCH",
+      headers: { Prefer: "return=representation" },
+      body: JSON.stringify(row),
+    });
+    if (!updated) throw new Error("Compromisso não encontrado.");
+    return toAppointment(updated);
+  }
+
+  async addMarkedDate(date: MarkedDate): Promise<void> {
+    await this.rest<void>("marked_date", {
+      method: "POST",
+      headers: { Prefer: "return=minimal,resolution=ignore-duplicates" },
+      body: JSON.stringify({
+        id: date.id,
+        date: date.date,
+        name: date.name,
+        category: date.category,
+        color: date.color ?? null,
+        sensitive: date.sensitive ?? false,
+        custom: date.custom ?? false,
+      }),
+    });
+  }
+
+  async removeMarkedDate(id: string): Promise<void> {
+    await this.rest<void>(`marked_date?id=eq.${encodeURIComponent(id)}`, {
+      method: "DELETE",
+    });
+  }
+
+  async saveBookingConfig(input: {
+    availability: Availability;
+    page: Pick<BookingPage, "active" | "title" | "intro">;
+  }): Promise<void> {
+    await this.rest<void>("booking_config", {
+      method: "POST",
+      headers: { Prefer: "return=minimal,resolution=merge-duplicates" },
+      body: JSON.stringify({
+        id: 1,
+        weekdays: input.availability.weekdays,
+        duration_minutes: input.availability.durationMinutes,
+        notice_hours: input.availability.noticeHours,
+        gap_minutes: input.availability.gapMinutes,
+        active: input.page.active,
+        title: input.page.title,
+        intro: input.page.intro ?? null,
+        // link_id is NOT NULL: on a first save there is nothing to merge into,
+        // so seed one here and let regenerateBookingLink replace it later.
+        link_id: await this.currentLinkId(),
+      }),
+    });
+  }
+
+  private async currentLinkId(): Promise<string> {
+    const [row] = await this.rest<any[]>("booking_config?select=link_id&limit=1");
+    return row?.link_id ?? shareToken();
+  }
+
+  async regenerateBookingLink(): Promise<BookingPage> {
+    const linkId = shareToken();
+    const [row] = await this.rest<any[]>("booking_config?id=eq.1", {
+      method: "PATCH",
+      headers: { Prefer: "return=representation" },
+      body: JSON.stringify({ link_id: linkId }),
+    });
+    if (!row) throw new Error("Configuração de agendamento não encontrada.");
+    return {
+      linkId: row.link_id,
+      active: row.active,
+      title: row.title,
+      intro: row.intro ?? undefined,
+    };
+  }
+
+  // ── Public booking ────────────────────────────────────────────
+  // Four SECURITY DEFINER functions (migration 007). The visitor never
+  // touches a table: a paused page answers exactly like a missing one, and
+  // busy blocks carry no name, no e-mail, nothing.
+  async getPublicBookingPage(linkId: string) {
+    const data = await this.rest<any>("rpc/public_booking_page", {
+      method: "POST",
+      useUser: false,
+      body: JSON.stringify({ p_link: linkId }),
+    });
+    if (!data) return null;
+    return {
+      page: { linkId, active: true, title: data.title, intro: data.intro ?? undefined },
+      availability: {
+        weekdays: data.weekdays ?? {},
+        durationMinutes: data.durationMinutes,
+        noticeHours: data.noticeHours,
+        gapMinutes: data.gapMinutes,
+      },
+    };
+  }
+
+  async getPublicBusy(linkId: string, from: string, to: string) {
+    const data = await this.rest<{ start: string; end: string }[] | null>(
+      "rpc/public_booking_busy",
+      {
+        method: "POST",
+        useUser: false,
+        body: JSON.stringify({ p_link: linkId, p_from: from, p_to: to }),
+      },
+    );
+    return data ?? null;
+  }
+
+  async createPublicBooking(
+    linkId: string,
+    input: { name: string; email: string; start: string; note?: string },
+  ) {
+    const invalid = validateBooking(input);
+    if (invalid) throw new Error(invalid);
+    const data = await this.rest<any>("rpc/public_create_booking", {
+      method: "POST",
+      useUser: false,
+      body: JSON.stringify({
+        p_link: linkId,
+        p_name: input.name,
+        p_email: input.email,
+        p_start: input.start,
+        p_note: input.note ?? null,
+      }),
+    });
+    return { manageToken: data.manageToken, start: data.start, end: data.end };
+  }
+
+  async cancelPublicBooking(manageToken: string): Promise<void> {
+    await this.rest<void>("rpc/public_cancel_booking", {
+      method: "POST",
+      useUser: false,
+      body: JSON.stringify({ p_token: manageToken }),
+    });
+  }
+
   // ── Board columns ─────────────────────────────────────────────
   // Table `board_stage`, admin-only (RLS in 006_colunas_do_quadro.sql).
   // `order` is a reserved word in SQL, so the column is called `position`.

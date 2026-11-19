@@ -1,7 +1,11 @@
 import type { AutomationRule, AutomationRun } from "../automation";
 import type {
+  Appointment,
   ApprovalResult,
+  Availability,
   BoardStage,
+  BookingPage,
+  MarkedDate,
   Calendar,
   Client,
   CreateClientInput,
@@ -138,6 +142,47 @@ export interface DataService {
    * reading the whole log keeps this cheap however long the log grows.
    */
   findAutomationRuns(eventKeys: string[]): Promise<AutomationRun[]>;
+
+  // ── Agenda (spec 04) ──────────────────────────────────────────
+  createAppointment(input: Omit<Appointment, "id" | "createdAt">): Promise<Appointment>;
+  updateAppointment(
+    id: string,
+    patch: Partial<
+      Pick<
+        Appointment,
+        "title" | "description" | "clientId" | "start" | "end" | "location" | "status" | "done"
+      >
+    >,
+  ): Promise<Appointment>;
+  /** Keep a catalogue date on the calendar, or drop it. */
+  addMarkedDate(date: MarkedDate): Promise<void>;
+  removeMarkedDate(id: string): Promise<void>;
+  /** Availability and the public page are saved together: they are one choice. */
+  saveBookingConfig(input: {
+    availability: Availability;
+    page: Pick<BookingPage, "active" | "title" | "intro">;
+  }): Promise<void>;
+  regenerateBookingLink(): Promise<BookingPage>;
+
+  // ── Public booking (no session) ───────────────────────────────
+  /**
+   * A paused page answers exactly like one that never existed: the visitor
+   * cannot even learn that the link was once valid.
+   */
+  getPublicBookingPage(
+    linkId: string,
+  ): Promise<{ page: BookingPage; availability: Availability } | null>;
+  /** Busy blocks with no detail at all — start and end, nothing else. */
+  getPublicBusy(
+    linkId: string,
+    from: string,
+    to: string,
+  ): Promise<{ start: string; end: string }[] | null>;
+  createPublicBooking(
+    linkId: string,
+    input: { name: string; email: string; start: string; note?: string },
+  ): Promise<{ manageToken: string; start: string; end: string }>;
+  cancelPublicBooking(manageToken: string): Promise<void>;
 
   // ── Public (client) share view ────────────────────────────────
   getPublicView(token: string): Promise<PublicCalendarView | null>;

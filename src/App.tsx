@@ -10,6 +10,8 @@ import { ThemeProvider } from "./calendar-app/theme";
 import RequireAuth from "./calendar-app/components/RequireAuth";
 import LoginPage from "./calendar-app/pages/LoginPage";
 import DashboardPage from "./calendar-app/pages/DashboardPage";
+import AgendaPage from "./calendar-app/pages/AgendaPage";
+import PublicBookingPage from "./calendar-app/pages/PublicBookingPage";
 import CalendarPage from "./calendar-app/pages/CalendarPage";
 import ClientViewPage from "./calendar-app/pages/ClientViewPage";
 import ClientHubPage from "./calendar-app/pages/ClientHubPage";
@@ -37,6 +39,14 @@ const AdminApp = () => (
           }
         />
         <Route
+          path="agenda"
+          element={
+            <RequireAuth>
+              <AgendaPage />
+            </RequireAuth>
+          }
+        />
+        <Route
           path="calendars/:calendarId"
           element={
             <RequireAuth>
@@ -60,6 +70,15 @@ const App = () => (
           <Route path="/" element={<Index />} />
           {/* Editorial calendar — admin area */}
           <Route path="/app/*" element={<AdminApp />} />
+          {/* Public booking page — anonymous visitor, token only */}
+          <Route
+            path="/agendar/:linkId"
+            element={
+              <ThemeProvider>
+                <PublicBookingPage />
+              </ThemeProvider>
+            }
+          />
           {/* Editorial calendar — isolated client share view (token only) */}
           <Route
             path="/c/:token"

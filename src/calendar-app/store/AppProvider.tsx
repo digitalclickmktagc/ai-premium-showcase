@@ -9,8 +9,13 @@ import {
   type ReactNode,
 } from "react";
 import type {
+  Appointment,
+  Availability,
   BoardStage,
+  Booking,
+  BookingPage,
   Calendar,
+  MarkedDate,
   Client,
   CreateClientInput,
   CreatePostInput,
@@ -50,6 +55,11 @@ interface AppContextValue {
   posts: Post[];
   boardStages: BoardStage[];
   automationRules: AutomationRule[];
+  appointments: Appointment[];
+  bookings: Booking[];
+  markedDates: MarkedDate[];
+  availability?: Availability;
+  bookingPage?: BookingPage;
 
   // selectors
   getClient: (id: string) => Client | undefined;
@@ -88,6 +98,21 @@ interface AppContextValue {
   deletePost: (id: string) => Promise<Post>;
   restorePost: (id: string, status?: PostStatus) => Promise<Post>;
 
+  // agenda
+  createAppointment: (input: Omit<Appointment, "id" | "createdAt">) => Promise<Appointment>;
+  updateAppointment: (
+    id: string,
+    patch: Partial<Appointment>,
+  ) => Promise<Appointment>;
+  cancelAppointment: (id: string) => Promise<void>;
+  addMarkedDate: (date: MarkedDate) => Promise<void>;
+  removeMarkedDate: (id: string) => Promise<void>;
+  saveBookingConfig: (input: {
+    availability: Availability;
+    page: Pick<BookingPage, "active" | "title" | "intro">;
+  }) => Promise<void>;
+  regenerateBookingLink: () => Promise<BookingPage>;
+
   // board columns
   createStage: (input: Omit<BoardStage, "id">) => Promise<BoardStage>;
   updateStage: (
@@ -121,6 +146,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [posts, setPosts] = useState<Post[]>([]);
   const [automationRules, setAutomationRules] = useState<AutomationRule[]>([]);
   const [boardStages, setBoardStages] = useState<BoardStage[]>([]);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [markedDates, setMarkedDates] = useState<MarkedDate[]>([]);
+  const [availability, setAvailability] = useState<Availability | undefined>();
+  const [bookingPage, setBookingPage] = useState<BookingPage | undefined>();
   // Mirrors `posts` synchronously so an optimistic update can roll back even
   // when the write rejects before React has applied the state updater.
   const postsRef = useRef<Post[]>(posts);
@@ -133,6 +163,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setPosts(db.posts);
     setAutomationRules(db.automationRules ?? []);
     setBoardStages(db.boardStages ?? []);
+    setAppointments(db.appointments ?? []);
+    setBookings(db.bookings ?? []);
+    setMarkedDates(db.markedDates ?? []);
+    setAvailability(db.availability);
+    setBookingPage(db.bookingPage);
   }, [service]);
 
   useEffect(() => {
@@ -227,6 +262,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setPosts([]);
     setAutomationRules([]);
     setBoardStages([]);
+    setAppointments([]);
+    setBookings([]);
+    setMarkedDates([]);
   }, [service]);
 
   // ── mutations (each refreshes local state) ─────────────────
@@ -440,6 +478,61 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [service, refresh],
   );
 
+  // ── Agenda ─────────────────────────────────────────────────
+  const createAppointment = useCallback(
+    async (input: Omit<Appointment, "id" | "createdAt">) => {
+      const res = await service.createAppointment(input);
+      await refresh();
+      return res;
+    },
+    [service, refresh],
+  );
+  const updateAppointment = useCallback(
+    async (id: string, patch: Partial<Appointment>) => {
+      const res = await service.updateAppointment(id, patch);
+      await refresh();
+      return res;
+    },
+    [service, refresh],
+  );
+  /** The spec allows only marcado → cancelado; nothing is ever deleted. */
+  const cancelAppointment = useCallback(
+    async (id: string) => {
+      await service.updateAppointment(id, { status: "cancelado" });
+      await refresh();
+    },
+    [service, refresh],
+  );
+  const addMarkedDate = useCallback(
+    async (date: MarkedDate) => {
+      await service.addMarkedDate(date);
+      await refresh();
+    },
+    [service, refresh],
+  );
+  const removeMarkedDate = useCallback(
+    async (id: string) => {
+      await service.removeMarkedDate(id);
+      await refresh();
+    },
+    [service, refresh],
+  );
+  const saveBookingConfig = useCallback(
+    async (input: {
+      availability: Availability;
+      page: Pick<BookingPage, "active" | "title" | "intro">;
+    }) => {
+      await service.saveBookingConfig(input);
+      await refresh();
+    },
+    [service, refresh],
+  );
+  const regenerateBookingLink = useCallback(async () => {
+    const page = await service.regenerateBookingLink();
+    await refresh();
+    return page;
+  }, [service, refresh]);
+
   // ── Board columns (CRUD) ───────────────────────────────────
   const createStage = useCallback(
     async (input: Omit<BoardStage, "id">) => {
@@ -554,6 +647,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     posts,
     boardStages,
     automationRules,
+    appointments,
+    bookings,
+    markedDates,
+    availability,
+    bookingPage,
     getClient,
     getCalendar,
     getCalendarByClient,
@@ -574,6 +672,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     requestApproval,
     deletePost,
     restorePost,
+    createAppointment,
+    updateAppointment,
+    cancelAppointment,
+    addMarkedDate,
+    removeMarkedDate,
+    saveBookingConfig,
+    regenerateBookingLink,
     createStage,
     updateStage,
     deleteStage,

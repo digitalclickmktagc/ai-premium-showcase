@@ -14,13 +14,16 @@ export default function ShareLink({
   token,
   onRegenerate,
   compact,
+  basePath,
 }: {
   token: string;
   onRegenerate?: () => void | Promise<void>;
   compact?: boolean;
+  /** "/c" for a client's calendar, "/agendar" for the booking page. */
+  basePath?: string;
 }) {
   const [copied, setCopied] = useState(false);
-  const url = shareUrl(token);
+  const url = shareUrl(token, basePath);
 
   const copy = async () => {
     try {

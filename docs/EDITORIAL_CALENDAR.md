@@ -300,6 +300,41 @@ same card's checklist in the same second would have one overwrite the other.
 With a single admin account that cannot happen; it is worth revisiting if
 F00 ever brings real multi-user.
 
+## Agenda and public booking (benchmark spec 04)
+
+The agenda at `/app/agenda` is a **projection**: it owns appointments and
+bookings and nothing else. A post's publication date and a review waiting on
+the client are read from the modules that own them, every time. The spec's
+acceptance test is that a rebuilt projection equals the incremental one; the
+cheapest way to pass that forever is to keep no incremental copy, which is
+what `buildAgenda` does.
+
+Month, week, day and list all read the same projection over a different range.
+The per-type counters double as filters, and an item is *late* when its day has
+passed and its source is not done — a marked date is never late.
+
+**Marked dates** are computed, not stored: movable feasts come from Easter, so
+no year runs out of holidays. Scope is national plus Distrito Federal, as
+decided (D5), with the commercial dates an agency actually plans around
+(Dia das Mães, Black Friday) beside them. Dates a brand should think twice
+about carry a *sensível* badge. Only what the agency keeps shows on the agenda.
+
+**Booking.** The visitor sees when the agency is free and nothing else: busy
+blocks arrive with no name, no e-mail, no title. A paused page answers exactly
+like one that never existed. The buffer between bookings applies on both sides
+of a busy block, and the minimum notice is enforced twice — in the offered
+slots and again on the server when the booking is taken.
+
+Two visitors taking the same slot is settled in the database, not in the app:
+`booking` carries an exclusion constraint over its time range, so the second
+insert loses no matter how close the two requests are. Verified against a real
+PostgreSQL, along with the refusals for overlaps, bad e-mail, a paused page,
+and anonymous reads of the tables.
+
+External calendar sync (`conexao_calendario` in the spec) is deliberately
+absent: the owner decided against it (D7), and the table alone would promise a
+sync that never happens.
+
 ## Verifying the security model
 
 `supabase/verificacao-seguranca.sql` re-checks, against a live database, every

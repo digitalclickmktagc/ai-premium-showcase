@@ -2,6 +2,7 @@ import { useMemo, useState, type ReactNode } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   CalendarDays,
+  CalendarRange,
   LayoutGrid,
   LogOut,
   Menu,
@@ -19,10 +20,13 @@ import { ThemeToggle } from "../theme";
 
 function NavContent({
   activeClientId,
+  section,
   onNavigate,
   onNewClient,
 }: {
   activeClientId?: string;
+  /** Which top-level area is open, for pages that are not a client. */
+  section?: "agenda";
   onNavigate?: () => void;
   onNewClient: () => void;
 }) {
@@ -64,13 +68,25 @@ function NavContent({
           onClick={() => go("/app")}
           className={cn(
             "flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-            !activeClientId
+            !activeClientId && !section
               ? "bg-primary/15 text-foreground"
               : "text-muted-foreground hover:bg-foreground/[0.06] hover:text-foreground",
           )}
         >
           <LayoutGrid className="h-4 w-4" />
           Todos os clientes
+        </button>
+        <button
+          onClick={() => go("/app/agenda")}
+          className={cn(
+            "mt-0.5 flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+            section === "agenda"
+              ? "bg-primary/15 text-foreground"
+              : "text-muted-foreground hover:bg-foreground/[0.06] hover:text-foreground",
+          )}
+        >
+          <CalendarRange className="h-4 w-4" />
+          Agenda
         </button>
       </div>
 
@@ -157,10 +173,12 @@ function NavContent({
 export default function AdminLayout({
   children,
   activeClientId,
+  section,
   title,
 }: {
   children: ReactNode;
   activeClientId?: string;
+  section?: "agenda";
   title?: string;
 }) {
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -173,6 +191,7 @@ export default function AdminLayout({
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 border-r border-border bg-card lg:block">
         <NavContent
           activeClientId={activeClientId}
+          section={section}
           onNewClient={() => setNewClientOpen(true)}
         />
       </aside>
