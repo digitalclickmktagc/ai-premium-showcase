@@ -16,6 +16,8 @@ import type {
   ContractingProcess,
   CrmTask,
   Idea,
+  MonthlyPlan,
+  PautaItem,
   Deal,
   Interaction,
   FinanceAccount,
@@ -84,6 +86,8 @@ interface AppContextValue {
   interactions: Interaction[];
   crmTasks: CrmTask[];
   ideas: Idea[];
+  plans: MonthlyPlan[];
+  pautaItems: PautaItem[];
   blocks: ContactBlock[];
   processes: ContractingProcess[];
   accounts: FinanceAccount[];
@@ -136,6 +140,12 @@ interface AppContextValue {
   requestApproval: (id: string, teamMessage?: string) => Promise<Post>;
   deletePost: (id: string) => Promise<Post>;
   restorePost: (id: string, status?: PostStatus) => Promise<Post>;
+
+  // pauta única e planejamento mensal
+  savePlan: (p: MonthlyPlan) => Promise<MonthlyPlan>;
+  deletePlan: (id: string) => Promise<void>;
+  savePautaItems: (items: PautaItem[]) => Promise<PautaItem[]>;
+  deletePautaItems: (ids: string[]) => Promise<void>;
 
   // banco de ideias
   saveIdea: (i: Idea) => Promise<Idea>;
@@ -230,6 +240,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [interactions, setInteractions] = useState<Interaction[]>([]);
   const [crmTasks, setCrmTasks] = useState<CrmTask[]>([]);
   const [ideas, setIdeas] = useState<Idea[]>([]);
+  const [plans, setPlans] = useState<MonthlyPlan[]>([]);
+  const [pautaItems, setPautaItems] = useState<PautaItem[]>([]);
   const [blocks, setBlocks] = useState<ContactBlock[]>([]);
   const [processes, setProcesses] = useState<ContractingProcess[]>([]);
   const [accounts, setAccounts] = useState<FinanceAccount[]>([]);
@@ -270,6 +282,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setInteractions(db.interactions ?? []);
     setCrmTasks(db.crmTasks ?? []);
     setIdeas(db.ideas ?? []);
+    setPlans(db.plans ?? []);
+    setPautaItems(db.pautaItems ?? []);
     setBlocks(db.blocks ?? []);
     setProcesses(db.processes ?? []);
     setAccounts(db.accounts ?? []);
@@ -629,6 +643,36 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const res = await service.addInteraction(i);
       await refresh();
       return res;
+    },
+    [service, refresh],
+  );
+  const savePlan = useCallback(
+    async (p: MonthlyPlan) => {
+      const res = await service.savePlan(p);
+      await refresh();
+      return res;
+    },
+    [service, refresh],
+  );
+  const deletePlan = useCallback(
+    async (id: string) => {
+      await service.deletePlan(id);
+      await refresh();
+    },
+    [service, refresh],
+  );
+  const savePautaItems = useCallback(
+    async (items: PautaItem[]) => {
+      const res = await service.savePautaItems(items);
+      await refresh();
+      return res;
+    },
+    [service, refresh],
+  );
+  const deletePautaItems = useCallback(
+    async (ids: string[]) => {
+      await service.deletePautaItems(ids);
+      await refresh();
     },
     [service, refresh],
   );
@@ -1211,6 +1255,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     interactions,
     crmTasks,
     ideas,
+    plans,
+    pautaItems,
+    savePlan,
+    deletePlan,
+    savePautaItems,
+    deletePautaItems,
     saveIdea,
     deleteIdea,
     blocks,

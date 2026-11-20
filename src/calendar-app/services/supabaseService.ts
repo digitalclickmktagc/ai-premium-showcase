@@ -18,6 +18,8 @@ import type {
   ContractingProcess,
   CrmTask,
   Idea,
+  MonthlyPlan,
+  PautaItem,
   Deal,
   Interaction,
   FinanceAccount,
@@ -181,6 +183,42 @@ const toInteraction = (r: any): Interaction => ({
   author: r.author ?? undefined,
   content: r.content,
   answered: r.answered ?? undefined,
+});
+const toPlan = (r: any): MonthlyPlan => ({
+  id: r.id,
+  clientId: r.client_id,
+  month: r.month,
+  goals: r.goals ?? [],
+  objectives: r.objectives ?? [],
+  improvements: r.improvements ?? [],
+  pillars: r.pillars ?? [],
+  funnel: r.funnel ?? { descoberta: 0, interesse: 0, conversao: 0, fidelizacao: 0 },
+  actions: r.actions ?? [],
+  closing: r.closing ?? undefined,
+  status: r.status,
+  validatedAt: r.validated_at ?? undefined,
+  createdAt: r.created_at,
+  updatedAt: r.updated_at,
+});
+const toPautaItem = (r: any): PautaItem => ({
+  id: r.id,
+  clientId: r.client_id,
+  date: r.date,
+  kind: r.kind,
+  title: r.title,
+  channels: r.channels ?? [],
+  format: r.format ?? undefined,
+  briefing: r.briefing ?? undefined,
+  caption: r.caption ?? undefined,
+  pillarId: r.pillar_id ?? undefined,
+  funnel: r.funnel ?? undefined,
+  owner: r.owner ?? undefined,
+  status: r.status,
+  postId: r.post_id ?? undefined,
+  calendarId: r.calendar_id ?? undefined,
+  seriesId: r.series_id ?? undefined,
+  createdAt: r.created_at,
+  updatedAt: r.updated_at,
 });
 const toIdea = (r: any): Idea => ({
   id: r.id,
@@ -703,6 +741,8 @@ export class SupabaseService implements DataService {
         interactions: [],
         crmTasks: [],
         ideas: [],
+        plans: [],
+        pautaItems: [],
         blocks: [],
         processes: [],
       };
@@ -728,6 +768,8 @@ export class SupabaseService implements DataService {
       interactions,
       crmTasks,
       ideas,
+      plans,
+      pautaRows,
       blocks,
       processes,
     ] = await Promise.all([
@@ -754,6 +796,8 @@ export class SupabaseService implements DataService {
         this.rest<any[]>("crm_interaction?select=*&order=at.desc"),
         this.rest<any[]>("crm_task?select=*&order=due_on.asc"),
         this.rest<any[]>("idea?select=*&order=created_at.desc"),
+        this.rest<any[]>("monthly_plan?select=*&order=month.desc"),
+        this.rest<any[]>("pauta_item?select=*&order=date.asc"),
         this.rest<any[]>("crm_block?select=*"),
         this.rest<any[]>("contracting_process?select=*"),
       ]);
@@ -778,6 +822,8 @@ export class SupabaseService implements DataService {
       interactions: interactions.map(toInteraction),
       crmTasks: crmTasks.map(toCrmTask),
       ideas: ideas.map(toIdea),
+      plans: plans.map(toPlan),
+      pautaItems: pautaRows.map(toPautaItem),
       blocks: blocks.map(toBlock),
       processes: processes.map(toProcess),
       availability: cfg[0]
@@ -1087,6 +1133,73 @@ export class SupabaseService implements DataService {
     });
     return toInteraction(row);
   }
+  async savePlan(plan: MonthlyPlan): Promise<MonthlyPlan> {
+    const [row] = await this.rest<any[]>("monthly_plan", {
+      method: "POST",
+      headers: { Prefer: "return=representation,resolution=merge-duplicates" },
+      body: JSON.stringify({
+        id: plan.id,
+        client_id: plan.clientId,
+        month: plan.month,
+        goals: plan.goals,
+        objectives: plan.objectives,
+        improvements: plan.improvements,
+        pillars: plan.pillars,
+        funnel: plan.funnel,
+        actions: plan.actions,
+        closing: plan.closing ?? null,
+        status: plan.status,
+        validated_at: plan.validatedAt ?? null,
+        created_at: plan.createdAt,
+        updated_at: new Date().toISOString(),
+      }),
+    });
+    return toPlan(row);
+  }
+
+  async deletePlan(id: string): Promise<void> {
+    await this.rest<void>(`monthly_plan?id=eq.${encodeURIComponent(id)}`, { method: "DELETE" });
+  }
+
+  async savePautaItems(items: PautaItem[]): Promise<PautaItem[]> {
+    if (items.length === 0) return [];
+    // One request for a whole weekly series: twelve round trips to write one
+    // repetition is how a plan ends up half saved.
+    const rows = await this.rest<any[]>("pauta_item", {
+      method: "POST",
+      headers: { Prefer: "return=representation,resolution=merge-duplicates" },
+      body: JSON.stringify(
+        items.map((item) => ({
+          id: item.id,
+          client_id: item.clientId,
+          date: item.date,
+          kind: item.kind,
+          title: item.title.trim(),
+          channels: item.channels,
+          format: item.format ?? null,
+          briefing: item.briefing ?? null,
+          caption: item.caption ?? null,
+          pillar_id: item.pillarId ?? null,
+          funnel: item.funnel ?? null,
+          owner: item.owner ?? null,
+          status: item.status,
+          post_id: item.postId ?? null,
+          calendar_id: item.calendarId ?? null,
+          series_id: item.seriesId ?? null,
+          created_at: item.createdAt,
+          updated_at: new Date().toISOString(),
+        })),
+      ),
+    });
+    return rows.map(toPautaItem);
+  }
+
+  async deletePautaItems(ids: string[]): Promise<void> {
+    if (ids.length === 0) return;
+    const list = ids.map((id) => `"${encodeURIComponent(id)}"`).join(",");
+    await this.rest<void>(`pauta_item?id=in.(${list})`, { method: "DELETE" });
+  }
+
   async saveIdea(idea: Idea): Promise<Idea> {
     const [row] = await this.rest<any[]>("idea", {
       method: "POST",

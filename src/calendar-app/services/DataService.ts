@@ -7,6 +7,8 @@ import type {
   ContractingProcess,
   CrmTask,
   Idea,
+  MonthlyPlan,
+  PautaItem,
   Deal,
   Interaction,
   FinanceAccount,
@@ -161,6 +163,13 @@ export interface DataService {
   // ── Banco de ideias (ficha 08) ────────────────────────────────
   saveIdea(idea: Idea): Promise<Idea>;
   deleteIdea(id: string): Promise<void>;
+
+  // ── Pauta única e planejamento mensal (ficha 17) ──────────────
+  savePlan(plan: MonthlyPlan): Promise<MonthlyPlan>;
+  deletePlan(id: string): Promise<void>;
+  /** Saves one item or a whole weekly series in one go. */
+  savePautaItems(items: PautaItem[]): Promise<PautaItem[]>;
+  deletePautaItems(ids: string[]): Promise<void>;
 
   // ── CRM e orquestrador (specs 09 e 10) ────────────────────────
   saveDeal(deal: Deal): Promise<Deal>;

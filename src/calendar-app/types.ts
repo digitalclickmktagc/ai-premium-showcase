@@ -670,6 +670,96 @@ export interface ApprovalCodeEntry {
   expiresAt: number;
 }
 
+// ── Pauta única e planejamento mensal (ficha 17, F17a) ───────
+
+export type FunnelStage = "descoberta" | "interesse" | "conversao" | "fidelizacao";
+
+/** A content pillar and the share of the month it should take. */
+export interface Pillar {
+  id: string;
+  name: string;
+  /** Percent, 0–100. The pillars of a plan add up to 100. */
+  share: number;
+}
+
+export interface PlanGoal {
+  id: string;
+  name: string;
+  target: string;
+  /** What the same goal said last month, for comparison. */
+  previous?: string;
+}
+
+export interface PlanObjective {
+  id: string;
+  text: string;
+  indicator: string;
+}
+
+export interface PlanAction {
+  id: string;
+  title: string;
+  startsOn?: string;
+  endsOn?: string;
+  /** Integer cents, like every other value in the app. */
+  budget?: number;
+  channel?: string;
+  owner?: string;
+}
+
+export type PlanStatus = "rascunho" | "validado";
+
+/** The month's plan for one client (planejamento mensal). */
+export interface MonthlyPlan {
+  id: string;
+  clientId: string;
+  /** YYYY-MM. */
+  month: string;
+  goals: PlanGoal[];
+  objectives: PlanObjective[];
+  improvements: string[];
+  pillars: Pillar[];
+  funnel: Record<FunnelStage, number>;
+  actions: PlanAction[];
+  closing?: string;
+  status: PlanStatus;
+  validatedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type PautaKind = "post" | "story";
+export type PautaStatus = "ideia" | "pronta" | "convertida";
+
+/**
+ * One pauta item. This is the single planning entity the benchmark's own
+ * critique asks for: the monthly plan, the internal plan and the stories
+ * calendar are views of this, not three tables.
+ */
+export interface PautaItem {
+  id: string;
+  clientId: string;
+  /** YYYY-MM-DD. */
+  date: string;
+  kind: PautaKind;
+  title: string;
+  channels: string[];
+  format?: string;
+  briefing?: string;
+  caption?: string;
+  pillarId?: string;
+  funnel?: FunnelStage;
+  owner?: string;
+  status: PautaStatus;
+  /** The card this item became, once it was converted. */
+  postId?: string;
+  calendarId?: string;
+  /** Shared by every item of one weekly repetition. */
+  seriesId?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 /** Banco de ideias de pauta (ficha 08). */
 export type IdeaStatus = "nova" | "na_pauta" | "usada" | "arquivada";
 
@@ -740,6 +830,9 @@ export interface Database {
   bookingPage?: BookingPage;
   /** Banco de ideias de pauta (ficha 08). */
   ideas?: Idea[];
+  /** Pauta única e planejamento mensal (ficha 17). */
+  plans?: MonthlyPlan[];
+  pautaItems?: PautaItem[];
   /** Stage automations, scoped per calendar. Admin-only. */
   automationRules?: AutomationRule[];
   /** Insert-only execution log for those automations. Admin-only. */

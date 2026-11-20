@@ -6,6 +6,8 @@ import type {
   ContractingProcess,
   CrmTask,
   Idea,
+  MonthlyPlan,
+  PautaItem,
   Deal,
   Interaction,
   FinanceAccount,
@@ -36,6 +38,7 @@ import type {
 } from "../types";
 import { randomClientColor, shareToken, uid } from "../utils";
 import { normalizeStatus } from "../health";
+import { validatePlan, validatePlanItem as validatePautaItem } from "../pauta";
 import {
   APPROVAL_CODE_TTL_MS,
   codesMatch,
@@ -130,6 +133,8 @@ export class LocalStorageService implements DataService {
         parsed.interactions ??= [];
         parsed.crmTasks ??= [];
         parsed.ideas ??= [];
+        parsed.plans ??= [];
+        parsed.pautaItems ??= [];
         parsed.blocks ??= [];
         parsed.processes ??= [];
         parsed.accounts ??= [];
@@ -520,6 +525,56 @@ export class LocalStorageService implements DataService {
     );
     this.write(db);
     return interaction;
+  }
+
+  // ── Pauta única e planejamento mensal ─────────────────────────
+  async savePlan(plan: MonthlyPlan): Promise<MonthlyPlan> {
+    const invalid = validatePlan(plan);
+    if (invalid) throw new Error(invalid);
+    const db = this.read();
+    const list = db.plans ?? [];
+    const clash = list.find(
+      (p) => p.id !== plan.id && p.clientId === plan.clientId && p.month === plan.month,
+    );
+    // One plan per client per month: two would be two sources of truth for
+    // the same pillars, and the pauta reads from one of them.
+    if (clash) throw new Error("Este cliente já tem planejamento para este mês.");
+    const next = { ...plan, updatedAt: nowISO() };
+    db.plans = list.some((p) => p.id === plan.id)
+      ? list.map((p) => (p.id === plan.id ? next : p))
+      : [...list, next];
+    this.write(db);
+    return next;
+  }
+
+  async deletePlan(id: string): Promise<void> {
+    const db = this.read();
+    db.plans = (db.plans ?? []).filter((p) => p.id !== id);
+    this.write(db);
+  }
+
+  async savePautaItems(items: PautaItem[]): Promise<PautaItem[]> {
+    const db = this.read();
+    const list = db.pautaItems ?? [];
+    const byId = new Map(list.map((i) => [i.id, i]));
+    const saved: PautaItem[] = [];
+    for (const item of items) {
+      const invalid = validatePautaItem(item);
+      if (invalid) throw new Error(invalid);
+      const next = { ...item, updatedAt: nowISO() };
+      byId.set(item.id, next);
+      saved.push(next);
+    }
+    db.pautaItems = [...byId.values()];
+    this.write(db);
+    return saved;
+  }
+
+  async deletePautaItems(ids: string[]): Promise<void> {
+    const db = this.read();
+    const gone = new Set(ids);
+    db.pautaItems = (db.pautaItems ?? []).filter((i) => !gone.has(i.id));
+    this.write(db);
   }
 
   // ── Banco de ideias ───────────────────────────────────────────
