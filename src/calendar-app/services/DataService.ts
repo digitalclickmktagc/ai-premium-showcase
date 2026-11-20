@@ -6,6 +6,7 @@ import type {
   Contract,
   ContractingProcess,
   CrmTask,
+  Idea,
   Deal,
   Interaction,
   FinanceAccount,
@@ -156,6 +157,10 @@ export interface DataService {
    * reading the whole log keeps this cheap however long the log grows.
    */
   findAutomationRuns(eventKeys: string[]): Promise<AutomationRun[]>;
+
+  // ── Banco de ideias (ficha 08) ────────────────────────────────
+  saveIdea(idea: Idea): Promise<Idea>;
+  deleteIdea(id: string): Promise<void>;
 
   // ── CRM e orquestrador (specs 09 e 10) ────────────────────────
   saveDeal(deal: Deal): Promise<Deal>;

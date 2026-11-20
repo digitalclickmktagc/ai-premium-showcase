@@ -55,6 +55,8 @@ function makeService(updatePost: DataService["updatePost"], db: Database): DataS
     saveDeal: notUsed as unknown as DataService["saveDeal"],
     deleteDeal: async () => undefined,
     addInteraction: notUsed as unknown as DataService["addInteraction"],
+    saveIdea: notUsed as unknown as DataService["saveIdea"],
+    deleteIdea: notUsed as unknown as DataService["deleteIdea"],
     saveCrmTask: notUsed as unknown as DataService["saveCrmTask"],
     deleteCrmTask: async () => undefined,
     saveBlock: notUsed as unknown as DataService["saveBlock"],

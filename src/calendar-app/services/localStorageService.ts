@@ -5,6 +5,7 @@ import type {
   Contract,
   ContractingProcess,
   CrmTask,
+  Idea,
   Deal,
   Interaction,
   FinanceAccount,
@@ -128,6 +129,7 @@ export class LocalStorageService implements DataService {
         parsed.deals ??= [];
         parsed.interactions ??= [];
         parsed.crmTasks ??= [];
+        parsed.ideas ??= [];
         parsed.blocks ??= [];
         parsed.processes ??= [];
         parsed.accounts ??= [];
@@ -283,6 +285,7 @@ export class LocalStorageService implements DataService {
       contentType: input.contentType?.trim() || undefined,
       referenceLink: input.referenceLink?.trim() || undefined,
       internalNotes: input.internalNotes?.trim() || undefined,
+      ideaId: input.ideaId || undefined,
       rescheduleHistory: [],
       createdAt: nowISO(),
       updatedAt: nowISO(),
@@ -517,6 +520,27 @@ export class LocalStorageService implements DataService {
     );
     this.write(db);
     return interaction;
+  }
+
+  // ── Banco de ideias ───────────────────────────────────────────
+  async saveIdea(idea: Idea): Promise<Idea> {
+    if (!idea.text.trim()) throw new Error("Escreva a ideia.");
+    const db = this.read();
+    const list = db.ideas ?? [];
+    db.ideas = list.some((i) => i.id === idea.id)
+      ? list.map((i) => (i.id === idea.id ? idea : i))
+      : [...list, idea];
+    this.write(db);
+    return idea;
+  }
+
+  async deleteIdea(id: string): Promise<void> {
+    const db = this.read();
+    db.ideas = (db.ideas ?? []).filter((i) => i.id !== id);
+    // The cards an idea produced stay where they are; they only lose the
+    // back-reference, so nothing in the calendar disappears with the idea.
+    db.posts = db.posts.map((p) => (p.ideaId === id ? { ...p, ideaId: undefined } : p));
+    this.write(db);
   }
 
   async saveCrmTask(task: CrmTask): Promise<CrmTask> {
@@ -1274,6 +1298,7 @@ export class LocalStorageService implements DataService {
           attachments: _attachments,
           timeEntries: _time,
           stageId: _stage,
+          ideaId: _idea,
           ...rest
         }) => rest,
       );

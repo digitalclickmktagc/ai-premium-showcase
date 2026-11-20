@@ -15,6 +15,7 @@ import type {
   Contract,
   ContractingProcess,
   CrmTask,
+  Idea,
   Deal,
   Interaction,
   FinanceAccount,
@@ -82,6 +83,7 @@ interface AppContextValue {
   deals: Deal[];
   interactions: Interaction[];
   crmTasks: CrmTask[];
+  ideas: Idea[];
   blocks: ContactBlock[];
   processes: ContractingProcess[];
   accounts: FinanceAccount[];
@@ -134,6 +136,10 @@ interface AppContextValue {
   requestApproval: (id: string, teamMessage?: string) => Promise<Post>;
   deletePost: (id: string) => Promise<Post>;
   restorePost: (id: string, status?: PostStatus) => Promise<Post>;
+
+  // banco de ideias
+  saveIdea: (i: Idea) => Promise<Idea>;
+  deleteIdea: (id: string) => Promise<void>;
 
   // crm
   saveDeal: (d: Deal) => Promise<Deal>;
@@ -223,6 +229,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [deals, setDeals] = useState<Deal[]>([]);
   const [interactions, setInteractions] = useState<Interaction[]>([]);
   const [crmTasks, setCrmTasks] = useState<CrmTask[]>([]);
+  const [ideas, setIdeas] = useState<Idea[]>([]);
   const [blocks, setBlocks] = useState<ContactBlock[]>([]);
   const [processes, setProcesses] = useState<ContractingProcess[]>([]);
   const [accounts, setAccounts] = useState<FinanceAccount[]>([]);
@@ -262,6 +269,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setDeals(db.deals ?? []);
     setInteractions(db.interactions ?? []);
     setCrmTasks(db.crmTasks ?? []);
+    setIdeas(db.ideas ?? []);
     setBlocks(db.blocks ?? []);
     setProcesses(db.processes ?? []);
     setAccounts(db.accounts ?? []);
@@ -621,6 +629,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const res = await service.addInteraction(i);
       await refresh();
       return res;
+    },
+    [service, refresh],
+  );
+  const saveIdea = useCallback(
+    async (i: Idea) => {
+      const res = await service.saveIdea(i);
+      await refresh();
+      return res;
+    },
+    [service, refresh],
+  );
+  const deleteIdea = useCallback(
+    async (id: string) => {
+      await service.deleteIdea(id);
+      await refresh();
     },
     [service, refresh],
   );
@@ -1187,6 +1210,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     deals,
     interactions,
     crmTasks,
+    ideas,
+    saveIdea,
+    deleteIdea,
     blocks,
     processes,
     accounts,

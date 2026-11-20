@@ -192,6 +192,8 @@ export interface Post {
   comments?: PostComment[];
   attachments?: PostAttachment[];
   timeEntries?: TimeEntry[];
+  /** Idea this card came from, when it was created from the banco de ideias. */
+  ideaId?: string;
   /**
    * Custom column the card sits in, when the calendar defines its own.
    * `status` is still kept in step with that column's category, so nothing
@@ -668,6 +670,39 @@ export interface ApprovalCodeEntry {
   expiresAt: number;
 }
 
+/** Banco de ideias de pauta (ficha 08). */
+export type IdeaStatus = "nova" | "na_pauta" | "usada" | "arquivada";
+
+/** An idea is either about one client or about nothing in particular. */
+export type IdeaScope = { kind: "geral" } | { kind: "cliente"; clientId: string };
+
+/** A card an idea produced. The post keeps the other half of the link. */
+export interface IdeaUse {
+  postId: string;
+  calendarId: string;
+  at: string;
+}
+
+export interface Idea {
+  id: string;
+  /** The line as typed, markers included. */
+  text: string;
+  scope: IdeaScope;
+  /** Lowercased `#tags` read out of the text. */
+  tags: string[];
+  /** Lowercased `@mentions` read out of the text. */
+  mentions: string[];
+  /** Content format, when a tag named one (reels, carrossel, story...). */
+  format?: string;
+  status: IdeaStatus;
+  /** One entry per person who voted. */
+  votes: string[];
+  usedBy: IdeaUse[];
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 /** Full persisted database shape (used by the localStorage adapter). */
 export interface Database {
   clients: Client[];
@@ -703,6 +738,8 @@ export interface Database {
   markedDates?: MarkedDate[];
   availability?: Availability;
   bookingPage?: BookingPage;
+  /** Banco de ideias de pauta (ficha 08). */
+  ideas?: Idea[];
   /** Stage automations, scoped per calendar. Admin-only. */
   automationRules?: AutomationRule[];
   /** Insert-only execution log for those automations. Admin-only. */
@@ -723,6 +760,7 @@ export type PublicPost = Omit<
   | "attachments"
   | "timeEntries"
   | "stageId"
+  | "ideaId"
 >;
 
 export interface PublicCalendarView {
@@ -774,6 +812,8 @@ export interface CreatePostInput {
   contentType?: string;
   referenceLink?: string;
   internalNotes?: string;
+  /** Set when the card was created from an idea in the banco de ideias. */
+  ideaId?: string;
 }
 
 export type UpdatePostInput = Partial<

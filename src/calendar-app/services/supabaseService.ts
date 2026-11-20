@@ -17,6 +17,7 @@ import type {
   Contract,
   ContractingProcess,
   CrmTask,
+  Idea,
   Deal,
   Interaction,
   FinanceAccount,
@@ -112,6 +113,7 @@ const toPost = (r: any): Post => ({
   attachments: r.attachments ?? undefined,
   timeEntries: r.time_entries ?? undefined,
   stageId: r.stage_id ?? undefined,
+  ideaId: r.idea_id ?? undefined,
   createdAt: r.created_at,
   updatedAt: r.updated_at,
 });
@@ -179,6 +181,24 @@ const toInteraction = (r: any): Interaction => ({
   author: r.author ?? undefined,
   content: r.content,
   answered: r.answered ?? undefined,
+});
+const toIdea = (r: any): Idea => ({
+  id: r.id,
+  text: r.text,
+  scope: r.client_id ? { kind: "cliente", clientId: r.client_id } : { kind: "geral" },
+  tags: r.tags ?? [],
+  mentions: r.mentions ?? [],
+  format: r.format ?? undefined,
+  status: r.status,
+  votes: r.votes ?? [],
+  usedBy: (r.used_by ?? []).map((u: any) => ({
+    postId: u.postId,
+    calendarId: u.calendarId,
+    at: u.at,
+  })),
+  createdBy: r.created_by,
+  createdAt: r.created_at,
+  updatedAt: r.updated_at,
 });
 const toCrmTask = (r: any): CrmTask => ({
   id: r.id,
@@ -682,6 +702,7 @@ export class SupabaseService implements DataService {
         deals: [],
         interactions: [],
         crmTasks: [],
+        ideas: [],
         blocks: [],
         processes: [],
       };
@@ -706,6 +727,7 @@ export class SupabaseService implements DataService {
       deals,
       interactions,
       crmTasks,
+      ideas,
       blocks,
       processes,
     ] = await Promise.all([
@@ -731,6 +753,7 @@ export class SupabaseService implements DataService {
         this.rest<any[]>("crm_deal?select=*&order=updated_at.desc"),
         this.rest<any[]>("crm_interaction?select=*&order=at.desc"),
         this.rest<any[]>("crm_task?select=*&order=due_on.asc"),
+        this.rest<any[]>("idea?select=*&order=created_at.desc"),
         this.rest<any[]>("crm_block?select=*"),
         this.rest<any[]>("contracting_process?select=*"),
       ]);
@@ -754,6 +777,7 @@ export class SupabaseService implements DataService {
       deals: deals.map(toDeal),
       interactions: interactions.map(toInteraction),
       crmTasks: crmTasks.map(toCrmTask),
+      ideas: ideas.map(toIdea),
       blocks: blocks.map(toBlock),
       processes: processes.map(toProcess),
       availability: cfg[0]
@@ -851,6 +875,7 @@ export class SupabaseService implements DataService {
         content_type: input.contentType?.trim() || null,
         reference_link: input.referenceLink?.trim() || null,
         internal_notes: input.internalNotes?.trim() || null,
+        idea_id: input.ideaId ?? null,
         reschedule_history: [],
       }),
     });
@@ -1062,6 +1087,32 @@ export class SupabaseService implements DataService {
     });
     return toInteraction(row);
   }
+  async saveIdea(idea: Idea): Promise<Idea> {
+    const [row] = await this.rest<any[]>("idea", {
+      method: "POST",
+      headers: { Prefer: "return=representation,resolution=merge-duplicates" },
+      body: JSON.stringify({
+        id: idea.id,
+        text: idea.text.trim(),
+        client_id: idea.scope.kind === "cliente" ? idea.scope.clientId : null,
+        tags: idea.tags,
+        mentions: idea.mentions,
+        format: idea.format ?? null,
+        status: idea.status,
+        votes: idea.votes,
+        used_by: idea.usedBy,
+        created_by: idea.createdBy,
+        created_at: idea.createdAt,
+        updated_at: new Date().toISOString(),
+      }),
+    });
+    return toIdea(row);
+  }
+
+  async deleteIdea(id: string): Promise<void> {
+    await this.rest<void>(`idea?id=eq.${encodeURIComponent(id)}`, { method: "DELETE" });
+  }
+
   async saveCrmTask(task: CrmTask): Promise<CrmTask> {
     const [row] = await this.rest<any[]>("crm_task", {
       method: "POST",
