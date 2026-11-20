@@ -7,10 +7,13 @@ import type {
   CrmTask,
   Dossier,
   DossierTemplate,
+  HealthWeights,
   Idea,
   MonthlyPlan,
   PautaItem,
+  Project,
   PublicDossier,
+  Squad,
   Deal,
   Interaction,
   FinanceAccount,
@@ -43,6 +46,7 @@ import { randomClientColor, shareToken, uid } from "../utils";
 import { normalizeStatus } from "../health";
 import { validatePlan, validatePlanItem as validatePautaItem } from "../pauta";
 import { publicSections, validateTemplate } from "../dossier";
+import { validateProject, validateSquad, validateWeights } from "../projects";
 import {
   APPROVAL_CODE_TTL_MS,
   codesMatch,
@@ -140,6 +144,8 @@ export class LocalStorageService implements DataService {
         parsed.plans ??= [];
         parsed.dossierTemplates ??= [];
         parsed.dossiers ??= [];
+        parsed.projects ??= [];
+        parsed.squads ??= [];
         parsed.pautaItems ??= [];
         parsed.blocks ??= [];
         parsed.processes ??= [];
@@ -531,6 +537,65 @@ export class LocalStorageService implements DataService {
     );
     this.write(db);
     return interaction;
+  }
+
+  // ── Projetos e squads ─────────────────────────────────────────
+  async saveProject(project: Project): Promise<Project> {
+    const invalid = validateProject(project);
+    if (invalid) throw new Error(invalid);
+    const db = this.read();
+    if (!db.clients.some((c) => c.id === project.clientId))
+      throw new Error("Cliente não encontrado.");
+    const list = db.projects ?? [];
+    const next = { ...project, updatedAt: nowISO() };
+    db.projects = list.some((p) => p.id === project.id)
+      ? list.map((p) => (p.id === project.id ? next : p))
+      : [...list, next];
+    this.write(db);
+    return next;
+  }
+
+  async deleteProject(id: string): Promise<void> {
+    const db = this.read();
+    db.projects = (db.projects ?? []).filter((p) => p.id !== id);
+    // The work stays: cards and entries only lose the project they pointed
+    // at. Removing a cost centre must not remove the costs.
+    db.posts = db.posts.map((p) => (p.projectId === id ? { ...p, projectId: undefined } : p));
+    db.entries = (db.entries ?? []).map((e) =>
+      e.projectId === id ? { ...e, projectId: undefined } : e,
+    );
+    this.write(db);
+  }
+
+  async saveSquad(squad: Squad): Promise<Squad> {
+    const invalid = validateSquad(squad);
+    if (invalid) throw new Error(invalid);
+    const db = this.read();
+    const list = db.squads ?? [];
+    const next = { ...squad, updatedAt: nowISO() };
+    db.squads = list.some((s) => s.id === squad.id)
+      ? list.map((s) => (s.id === squad.id ? next : s))
+      : [...list, next];
+    this.write(db);
+    return next;
+  }
+
+  async deleteSquad(id: string): Promise<void> {
+    const db = this.read();
+    db.squads = (db.squads ?? []).filter((s) => s.id !== id);
+    // Projects outlive the squad; they just have no squad (ficha 14).
+    db.projects = (db.projects ?? []).map((p) =>
+      p.squadId === id ? { ...p, squadId: undefined } : p,
+    );
+    this.write(db);
+  }
+
+  async saveHealthWeights(weights: HealthWeights): Promise<void> {
+    const invalid = validateWeights(weights);
+    if (invalid) throw new Error(invalid);
+    const db = this.read();
+    db.healthWeights = weights;
+    this.write(db);
   }
 
   // ── Dossiê estratégico ────────────────────────────────────────

@@ -38,7 +38,8 @@ export default function EntryDialog({
   defaultMonth?: string;
   onOpenChange: (open: boolean) => void;
 }) {
-  const { accounts, categories, clients, saveEntry, deleteEntry, saveSeries } = useApp();
+  const { accounts, categories, clients, projects, saveEntry, deleteEntry, saveSeries } =
+    useApp();
   const isEdit = Boolean(entry);
   const settled = entry?.status === "liquidado";
 
@@ -49,6 +50,7 @@ export default function EntryDialog({
   const [accountId, setAccountId] = useState(NONE);
   const [categoryId, setCategoryId] = useState(NONE);
   const [clientId, setClientId] = useState(NONE);
+  const [projectId, setProjectId] = useState(NONE);
   const [note, setNote] = useState("");
   const [repeat, setRepeat] = useState<"nao" | SeriesKind>("nao");
   const [count, setCount] = useState("12");
@@ -64,6 +66,7 @@ export default function EntryDialog({
     setAccountId(entry?.accountId ?? NONE);
     setCategoryId(entry?.categoryId ?? NONE);
     setClientId(entry?.clientId ?? NONE);
+    setProjectId(entry?.projectId ?? NONE);
     setNote(entry?.note ?? "");
     setRepeat("nao");
     setCount("12");
@@ -90,6 +93,7 @@ export default function EntryDialog({
           categoryId: categoryId === NONE ? undefined : categoryId,
           accountId: accountId === NONE ? undefined : accountId,
           clientId: clientId === NONE ? undefined : clientId,
+          projectId: projectId === NONE ? undefined : projectId,
           createdAt: new Date().toISOString(),
         });
         toast.success(
@@ -251,6 +255,25 @@ export default function EntryDialog({
                       {c.name}
                     </SelectItem>
                   ))}
+                </SelectContent>
+              </Select>
+            </div>
+            {/* Centro de custo: é o que faz o resultado por projeto existir. */}
+            <div className="space-y-1.5">
+              <Label>Projeto</Label>
+              <Select value={projectId} onValueChange={setProjectId}>
+                <SelectTrigger aria-label="Projeto">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={NONE}>Sem projeto</SelectItem>
+                  {projects
+                    .filter((p) => clientId === NONE || p.clientId === clientId)
+                    .map((p) => (
+                      <SelectItem key={p.id} value={p.id}>
+                        {p.name}
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
             </div>

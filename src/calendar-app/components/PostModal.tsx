@@ -6,9 +6,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import type { Post, PostStatus } from "../types";
 import { statusConfig } from "../status";
+
+const PROJECT_NONE = "__none__";
 import { formatLongDay, formatTimestamp, todayISO } from "../utils";
 import { useApp } from "../store/AppProvider";
 import { StatusPicker } from "./StatusBadge";
@@ -42,6 +51,7 @@ export default function PostModal({
   const [description, setDescription] = useState("");
   const [referenceLink, setReferenceLink] = useState("");
   const [internalNotes, setInternalNotes] = useState("");
+  const [projectId, setProjectId] = useState(PROJECT_NONE);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -53,7 +63,14 @@ export default function PostModal({
     setDescription(post?.description ?? "");
     setReferenceLink(post?.referenceLink ?? "");
     setInternalNotes(post?.internalNotes ?? "");
+    setProjectId(post?.projectId ?? PROJECT_NONE);
   }, [open, post, defaultDate]);
+
+  // Only this client's projects: a card belongs to the client's work, and
+  // offering another client's project is how a cost centre gets the wrong card.
+  const ownerCalendarId = post?.calendarId ?? calendarId;
+  const ownerClientId = app.calendars.find((c) => c.id === ownerCalendarId)?.clientId;
+  const projectOptions = app.projects.filter((p) => p.clientId === ownerClientId);
 
   const history = post?.rescheduleHistory ?? [];
   const cfg = statusConfig(post?.status ?? status);
@@ -79,6 +96,7 @@ export default function PostModal({
           description,
           referenceLink,
           internalNotes,
+          projectId: projectId === PROJECT_NONE ? "" : projectId,
         });
         toast.success(dateChanged ? "Post salvo e reagendado." : "Post atualizado.");
       } else if (calendarId) {
@@ -91,6 +109,7 @@ export default function PostModal({
           description,
           referenceLink,
           internalNotes,
+          projectId: projectId === PROJECT_NONE ? undefined : projectId,
         });
         toast.success("Post criado.");
       }
@@ -206,6 +225,25 @@ export default function PostModal({
             <Label>Status</Label>
             <StatusPicker value={status} onChange={setStatus} />
           </div>
+
+          {projectOptions.length > 0 && (
+            <div className="space-y-1.5">
+              <Label htmlFor="post-project">Projeto</Label>
+              <Select value={projectId} onValueChange={setProjectId}>
+                <SelectTrigger id="post-project" aria-label="Projeto">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={PROJECT_NONE}>Sem projeto</SelectItem>
+                  {projectOptions.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           <div className="space-y-1.5">
             <Label htmlFor="post-desc">Descrição / legenda</Label>

@@ -17,6 +17,9 @@ import type {
   CrmTask,
   Dossier,
   DossierTemplate,
+  HealthWeights,
+  Project,
+  Squad,
   Idea,
   MonthlyPlan,
   PautaItem,
@@ -52,6 +55,7 @@ import {
   type SagaContext,
 } from "../orchestrator";
 import { BILLING_LABEL, isRecurring, proposalTotals } from "../proposals";
+import { projectFromContract } from "../projects";
 import { DEFAULT_RENEW_NOTICE_DAYS, hashText, isEffective } from "../contracts";
 import { formatMoney } from "../money";
 import { shareToken, todayISO, uid } from "../utils";
@@ -92,6 +96,9 @@ interface AppContextValue {
   pautaItems: PautaItem[];
   dossierTemplates: DossierTemplate[];
   dossiers: Dossier[];
+  projects: Project[];
+  squads: Squad[];
+  healthWeights?: HealthWeights;
   blocks: ContactBlock[];
   processes: ContractingProcess[];
   accounts: FinanceAccount[];
@@ -144,6 +151,13 @@ interface AppContextValue {
   requestApproval: (id: string, teamMessage?: string) => Promise<Post>;
   deletePost: (id: string) => Promise<Post>;
   restorePost: (id: string, status?: PostStatus) => Promise<Post>;
+
+  // projetos e squads
+  saveProject: (p: Project) => Promise<Project>;
+  deleteProject: (id: string) => Promise<void>;
+  saveSquad: (s: Squad) => Promise<Squad>;
+  deleteSquad: (id: string) => Promise<void>;
+  saveHealthWeights: (w: HealthWeights) => Promise<void>;
 
   // dossiê estratégico
   saveDossierTemplate: (t: DossierTemplate) => Promise<DossierTemplate>;
@@ -252,6 +266,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [pautaItems, setPautaItems] = useState<PautaItem[]>([]);
   const [dossierTemplates, setDossierTemplates] = useState<DossierTemplate[]>([]);
   const [dossiers, setDossiers] = useState<Dossier[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [squads, setSquads] = useState<Squad[]>([]);
+  const [healthWeights, setHealthWeights] = useState<HealthWeights | undefined>();
   const [blocks, setBlocks] = useState<ContactBlock[]>([]);
   const [processes, setProcesses] = useState<ContractingProcess[]>([]);
   const [accounts, setAccounts] = useState<FinanceAccount[]>([]);
@@ -280,6 +297,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const proposalsRef = useRef<Proposal[]>([]);
   const processesRef = useRef<ContractingProcess[]>([]);
   const dealsRef = useRef<Deal[]>([]);
+  const projectsRef = useRef<Project[]>([]);
 
   const refresh = useCallback(async () => {
     const db = await service.getDatabase();
@@ -296,6 +314,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setPautaItems(db.pautaItems ?? []);
     setDossierTemplates(db.dossierTemplates ?? []);
     setDossiers(db.dossiers ?? []);
+    setProjects(db.projects ?? []);
+    setSquads(db.squads ?? []);
+    setHealthWeights(db.healthWeights);
     setBlocks(db.blocks ?? []);
     setProcesses(db.processes ?? []);
     setAccounts(db.accounts ?? []);
@@ -658,6 +679,43 @@ export function AppProvider({ children }: { children: ReactNode }) {
     },
     [service, refresh],
   );
+  const saveProject = useCallback(
+    async (p: Project) => {
+      const res = await service.saveProject(p);
+      await refresh();
+      return res;
+    },
+    [service, refresh],
+  );
+  const deleteProject = useCallback(
+    async (id: string) => {
+      await service.deleteProject(id);
+      await refresh();
+    },
+    [service, refresh],
+  );
+  const saveSquad = useCallback(
+    async (sq: Squad) => {
+      const res = await service.saveSquad(sq);
+      await refresh();
+      return res;
+    },
+    [service, refresh],
+  );
+  const deleteSquad = useCallback(
+    async (id: string) => {
+      await service.deleteSquad(id);
+      await refresh();
+    },
+    [service, refresh],
+  );
+  const saveHealthWeights = useCallback(
+    async (w: HealthWeights) => {
+      await service.saveHealthWeights(w);
+      await refresh();
+    },
+    [service, refresh],
+  );
   const saveDossierTemplate = useCallback(
     async (t: DossierTemplate) => {
       const res = await service.saveDossierTemplate(t);
@@ -869,6 +927,25 @@ export function AppProvider({ children }: { children: ReactNode }) {
       ensureBoard: async (clientId) => {
         const calendar = calendarsRef.current.find((c) => c.clientId === clientId);
         return calendar?.id ?? "";
+      },
+      /**
+       * One contract, one project (ficha 14). The contract id is the key, so
+       * a retry finds the project it already opened instead of a second one.
+       */
+      ensureProject: async (proposal, clientId, contractId) => {
+        const existing = projectsRef.current.find((p) => p.contractId === contractId);
+        if (existing) return existing.id;
+        const totals = proposalTotals(proposal.items);
+        const project = projectFromContract(
+          clientId,
+          contractId,
+          proposal.title.trim() || "Projeto",
+          // O valor do projeto é o compromisso do primeiro ano: é o que o
+          // contrato de fato vale, e é por ele que a margem faz sentido.
+          totals.firstYear,
+        );
+        const saved = await service.saveProject(project);
+        return saved.id;
       },
       markDealWon: async (dealId) => {
         const deal = dealsRef.current.find((d) => d.id === dealId);
@@ -1269,6 +1346,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   proposalsRef.current = proposals;
   processesRef.current = processes;
   dealsRef.current = deals;
+  projectsRef.current = projects;
 
   const value: AppContextValue = {
     serviceName: service.name,
@@ -1287,6 +1365,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
     pautaItems,
     dossierTemplates,
     dossiers,
+    projects,
+    squads,
+    healthWeights,
+    saveProject,
+    deleteProject,
+    saveSquad,
+    deleteSquad,
+    saveHealthWeights,
     saveDossierTemplate,
     saveDossier,
     savePlan,

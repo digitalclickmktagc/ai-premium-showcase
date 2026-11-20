@@ -58,6 +58,10 @@ function makeCtx(over: Partial<Ctx> = {}): Ctx & {
       count("ensureBoard");
       return "cal1";
     }),
+    ensureProject: vi.fn(async () => {
+      count("ensureProject");
+      return "prj1";
+    }),
     markDealWon: vi.fn(async () => {
       count("markDealWon");
     }),

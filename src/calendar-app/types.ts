@@ -194,6 +194,8 @@ export interface Post {
   timeEntries?: TimeEntry[];
   /** Idea this card came from, when it was created from the banco de ideias. */
   ideaId?: string;
+  /** Project this card belongs to (ficha 14). */
+  projectId?: string;
   /**
    * Custom column the card sits in, when the calendar defines its own.
    * `status` is still kept in step with that column's category, so nothing
@@ -306,6 +308,7 @@ export type SagaStepKey =
   | "ativar_servicos"
   | "criar_financeiro"
   | "criar_quadro"
+  | "criar_projeto"
   | "concluir";
 
 export type SagaStepStatus = "pendente" | "feito" | "falhou" | "pulado";
@@ -384,6 +387,8 @@ export interface FinanceSeries {
   categoryId?: string;
   accountId?: string;
   clientId?: string;
+  /** Cost centre carried into every charge the series projects. */
+  projectId?: string;
   createdAt: string;
 }
 
@@ -405,6 +410,8 @@ export interface FinanceEntry {
   document?: string;
   note?: string;
   seriesId?: string;
+  /** Cost centre: the project this entry belongs to (ficha 14). */
+  projectId?: string;
   /** 1-based position in a `parcelada` series. */
   seriesPosition?: number;
   origin: "manual" | "serie" | "contrato";
@@ -670,6 +677,58 @@ export interface ApprovalCodeEntry {
   expiresAt: number;
 }
 
+// ── Projetos e squads (ficha 14) ─────────────────────────────
+
+export type ProjectStatus = "ativo" | "pausado" | "concluido" | "cancelado";
+
+/**
+ * A project groups a client's work with a deadline and a value, and doubles
+ * as the cost centre the finance module reports by.
+ */
+export interface Project {
+  id: string;
+  name: string;
+  clientId: string;
+  squadId?: string;
+  /** Service from the catalogue this project delivers, when it maps to one. */
+  serviceId?: string;
+  /** YYYY-MM-DD. */
+  dueDate?: string;
+  /** Integer cents. */
+  value: number;
+  status: ProjectStatus;
+  color?: string;
+  /** Contract that gave birth to the project, when the saga created it. */
+  contractId?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * The weights of the squad's health score. They are data, and the screen
+ * shows the arithmetic — the benchmark's own critique is that its score is
+ * never explained to the person reading it.
+ */
+export interface HealthWeights {
+  prazo: number;
+  progresso: number;
+  entrega: number;
+}
+
+export interface Squad {
+  id: string;
+  name: string;
+  description?: string;
+  color?: string;
+  icon?: string;
+  /** Names, not logins: this app has one account (see ficha 01/F00). */
+  lead?: string;
+  members: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 // ── Dossiê estratégico (ficha 16) ────────────────────────────
 
 /** How one section of the dossier is filled in. */
@@ -910,6 +969,11 @@ export interface Database {
   /** Dossiê estratégico (ficha 16). */
   dossierTemplates?: DossierTemplate[];
   dossiers?: Dossier[];
+  /** Projetos e squads (ficha 14). */
+  projects?: Project[];
+  squads?: Squad[];
+  /** Weights of the squad health score, editable by the agency. */
+  healthWeights?: HealthWeights;
   /** Stage automations, scoped per calendar. Admin-only. */
   automationRules?: AutomationRule[];
   /** Insert-only execution log for those automations. Admin-only. */
@@ -931,6 +995,7 @@ export type PublicPost = Omit<
   | "timeEntries"
   | "stageId"
   | "ideaId"
+  | "projectId"
 >;
 
 export interface PublicCalendarView {
@@ -984,6 +1049,7 @@ export interface CreatePostInput {
   internalNotes?: string;
   /** Set when the card was created from an idea in the banco de ideias. */
   ideaId?: string;
+  projectId?: string;
 }
 
 export type UpdatePostInput = Partial<
@@ -1001,5 +1067,6 @@ export type UpdatePostInput = Partial<
     | "attachments"
     | "timeEntries"
     | "stageId"
+    | "projectId"
   >
 >;

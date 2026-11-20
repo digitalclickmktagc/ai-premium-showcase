@@ -8,10 +8,13 @@ import type {
   CrmTask,
   Dossier,
   DossierTemplate,
+  HealthWeights,
   Idea,
   MonthlyPlan,
   PautaItem,
+  Project,
   PublicDossier,
+  Squad,
   Deal,
   Interaction,
   FinanceAccount,
@@ -166,6 +169,14 @@ export interface DataService {
   // ── Banco de ideias (ficha 08) ────────────────────────────────
   saveIdea(idea: Idea): Promise<Idea>;
   deleteIdea(id: string): Promise<void>;
+
+  // ── Projetos e squads (ficha 14) ──────────────────────────────
+  saveProject(project: Project): Promise<Project>;
+  /** Cards and entries keep their work; they only lose the project. */
+  deleteProject(id: string): Promise<void>;
+  saveSquad(squad: Squad): Promise<Squad>;
+  deleteSquad(id: string): Promise<void>;
+  saveHealthWeights(weights: HealthWeights): Promise<void>;
 
   // ── Dossiê estratégico (ficha 16) ─────────────────────────────
   saveDossierTemplate(template: DossierTemplate): Promise<DossierTemplate>;

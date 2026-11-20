@@ -19,10 +19,13 @@ import type {
   CrmTask,
   Dossier,
   DossierTemplate,
+  HealthWeights,
   Idea,
   MonthlyPlan,
   PautaItem,
+  Project,
   PublicDossier,
+  Squad,
   Deal,
   Interaction,
   FinanceAccount,
@@ -119,6 +122,7 @@ const toPost = (r: any): Post => ({
   timeEntries: r.time_entries ?? undefined,
   stageId: r.stage_id ?? undefined,
   ideaId: r.idea_id ?? undefined,
+  projectId: r.project_id ?? undefined,
   createdAt: r.created_at,
   updatedAt: r.updated_at,
 });
@@ -186,6 +190,32 @@ const toInteraction = (r: any): Interaction => ({
   author: r.author ?? undefined,
   content: r.content,
   answered: r.answered ?? undefined,
+});
+const toProject = (r: any): Project => ({
+  id: r.id,
+  name: r.name,
+  clientId: r.client_id,
+  squadId: r.squad_id ?? undefined,
+  serviceId: r.service_id ?? undefined,
+  dueDate: r.due_date ?? undefined,
+  value: Number(r.value_cents ?? 0),
+  status: r.status,
+  color: r.color ?? undefined,
+  contractId: r.contract_id ?? undefined,
+  notes: r.notes ?? undefined,
+  createdAt: r.created_at,
+  updatedAt: r.updated_at,
+});
+const toSquad = (r: any): Squad => ({
+  id: r.id,
+  name: r.name,
+  description: r.description ?? undefined,
+  color: r.color ?? undefined,
+  icon: r.icon ?? undefined,
+  lead: r.lead ?? undefined,
+  members: r.members ?? [],
+  createdAt: r.created_at,
+  updatedAt: r.updated_at,
 });
 const toDossierTemplate = (r: any): DossierTemplate => ({
   id: r.id,
@@ -333,6 +363,7 @@ const toEntry = (r: any): FinanceEntry => ({
   accountId: r.account_id ?? undefined,
   categoryId: r.category_id ?? undefined,
   clientId: r.client_id ?? undefined,
+  projectId: r.project_id ?? undefined,
   method: r.method ?? undefined,
   document: r.document ?? undefined,
   note: r.note ?? undefined,
@@ -354,6 +385,7 @@ const entryRow = (e: FinanceEntry) => ({
   account_id: e.accountId ?? null,
   category_id: e.categoryId ?? null,
   client_id: e.clientId ?? null,
+  project_id: e.projectId ?? null,
   method: e.method ?? null,
   document: e.document ?? null,
   note: e.note ?? null,
@@ -377,6 +409,7 @@ const toSeries = (r: any): FinanceSeries => ({
   categoryId: r.category_id ?? undefined,
   accountId: r.account_id ?? undefined,
   clientId: r.client_id ?? undefined,
+  projectId: r.project_id ?? undefined,
   createdAt: r.created_at,
 });
 const seriesRow = (s: FinanceSeries) => ({
@@ -394,6 +427,7 @@ const seriesRow = (s: FinanceSeries) => ({
   category_id: s.categoryId ?? null,
   account_id: s.accountId ?? null,
   client_id: s.clientId ?? null,
+  project_id: s.projectId ?? null,
 });
 const toTransfer = (r: any): Transfer => ({
   id: r.id,
@@ -765,6 +799,8 @@ export class SupabaseService implements DataService {
         pautaItems: [],
         dossierTemplates: [],
         dossiers: [],
+        projects: [],
+        squads: [],
         blocks: [],
         processes: [],
       };
@@ -794,6 +830,9 @@ export class SupabaseService implements DataService {
       pautaRows,
       dossierTemplates,
       dossiers,
+      projects,
+      squads,
+      agencySettings,
       blocks,
       processes,
     ] = await Promise.all([
@@ -824,6 +863,9 @@ export class SupabaseService implements DataService {
         this.rest<any[]>("pauta_item?select=*&order=date.asc"),
         this.rest<any[]>("dossier_template?select=*&order=created_at.asc"),
         this.rest<any[]>("dossier?select=*"),
+        this.rest<any[]>("project?select=*&order=created_at.desc"),
+        this.rest<any[]>("squad?select=*&order=name.asc"),
+        this.rest<any[]>("agency_settings?select=*&limit=1"),
         this.rest<any[]>("crm_block?select=*"),
         this.rest<any[]>("contracting_process?select=*"),
       ]);
@@ -852,6 +894,9 @@ export class SupabaseService implements DataService {
       pautaItems: pautaRows.map(toPautaItem),
       dossierTemplates: dossierTemplates.map(toDossierTemplate),
       dossiers: dossiers.map(toDossier),
+      projects: projects.map(toProject),
+      squads: squads.map(toSquad),
+      healthWeights: agencySettings[0]?.health_weights ?? undefined,
       blocks: blocks.map(toBlock),
       processes: processes.map(toProcess),
       availability: cfg[0]
@@ -950,6 +995,7 @@ export class SupabaseService implements DataService {
         reference_link: input.referenceLink?.trim() || null,
         internal_notes: input.internalNotes?.trim() || null,
         idea_id: input.ideaId ?? null,
+        project_id: input.projectId ?? null,
         reschedule_history: [],
       }),
     });
@@ -978,6 +1024,7 @@ export class SupabaseService implements DataService {
     if (patch.attachments !== undefined) row.attachments = patch.attachments;
     if (patch.timeEntries !== undefined) row.time_entries = patch.timeEntries;
     if (patch.stageId !== undefined) row.stage_id = patch.stageId || null;
+    if (patch.projectId !== undefined) row.project_id = patch.projectId || null;
     if (patch.date !== undefined) {
       row.date = patch.date;
       if (patch.date !== current.date) {
@@ -1161,6 +1208,66 @@ export class SupabaseService implements DataService {
     });
     return toInteraction(row);
   }
+  async saveProject(project: Project): Promise<Project> {
+    const [row] = await this.rest<any[]>("project", {
+      method: "POST",
+      headers: { Prefer: "return=representation,resolution=merge-duplicates" },
+      body: JSON.stringify({
+        id: project.id,
+        name: project.name.trim(),
+        client_id: project.clientId,
+        squad_id: project.squadId ?? null,
+        service_id: project.serviceId ?? null,
+        due_date: project.dueDate ?? null,
+        value_cents: project.value,
+        status: project.status,
+        color: project.color ?? null,
+        contract_id: project.contractId ?? null,
+        notes: project.notes ?? null,
+        created_at: project.createdAt,
+        updated_at: new Date().toISOString(),
+      }),
+    });
+    return toProject(row);
+  }
+
+  async deleteProject(id: string): Promise<void> {
+    // posts.project_id and finance_entry.project_id are ON DELETE SET NULL:
+    // removing a cost centre must not remove the work or the costs.
+    await this.rest<void>(`project?id=eq.${encodeURIComponent(id)}`, { method: "DELETE" });
+  }
+
+  async saveSquad(squad: Squad): Promise<Squad> {
+    const [row] = await this.rest<any[]>("squad", {
+      method: "POST",
+      headers: { Prefer: "return=representation,resolution=merge-duplicates" },
+      body: JSON.stringify({
+        id: squad.id,
+        name: squad.name.trim(),
+        description: squad.description ?? null,
+        color: squad.color ?? null,
+        icon: squad.icon ?? null,
+        lead: squad.lead ?? null,
+        members: squad.members,
+        created_at: squad.createdAt,
+        updated_at: new Date().toISOString(),
+      }),
+    });
+    return toSquad(row);
+  }
+
+  async deleteSquad(id: string): Promise<void> {
+    await this.rest<void>(`squad?id=eq.${encodeURIComponent(id)}`, { method: "DELETE" });
+  }
+
+  async saveHealthWeights(weights: HealthWeights): Promise<void> {
+    await this.rest<void>("agency_settings", {
+      method: "POST",
+      headers: { Prefer: "return=minimal,resolution=merge-duplicates" },
+      body: JSON.stringify({ id: 1, health_weights: weights }),
+    });
+  }
+
   async saveDossierTemplate(template: DossierTemplate): Promise<DossierTemplate> {
     const [row] = await this.rest<any[]>("dossier_template", {
       method: "POST",

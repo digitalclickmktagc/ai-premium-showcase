@@ -111,6 +111,7 @@ export function projectSeries(
         accountId: series.accountId,
         categoryId: series.categoryId,
         clientId: series.clientId,
+        projectId: series.projectId,
         seriesId: series.id,
         seriesPosition: i + 1,
         origin: "serie",

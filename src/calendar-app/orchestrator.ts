@@ -26,6 +26,7 @@ export const STEP_ORDER: SagaStepKey[] = [
   "ativar_servicos",
   "criar_financeiro",
   "criar_quadro",
+  "criar_projeto",
   "concluir",
 ];
 
@@ -36,6 +37,7 @@ export const STEP_LABEL: Record<SagaStepKey, string> = {
   ativar_servicos: "Ativar os serviços contratados",
   criar_financeiro: "Criar as cobranças",
   criar_quadro: "Preparar o calendário",
+  criar_projeto: "Abrir o projeto",
   concluir: "Concluir",
 };
 
@@ -65,6 +67,11 @@ export interface SagaContext {
   createBilling: (proposal: Proposal, clientId: string) => Promise<string[]>;
   /** Make sure the client has a calendar to work in; returns its id. */
   ensureBoard: (clientId: string) => Promise<string>;
+  /**
+   * Open the project this contract pays for (ficha 14), returning its id.
+   * Must be idempotent: one contract, one project, however many retries.
+   */
+  ensureProject: (proposal: Proposal, clientId: string, contractId: string) => Promise<string>;
   /** Mark the deal won. */
   markDealWon: (dealId: string, proposal: Proposal) => Promise<void>;
   now?: () => string;
@@ -193,6 +200,20 @@ export async function advanceProcess(
             status: "feito",
             attempts: step.attempts + 1,
             result: { calendarId },
+            at: now(),
+          });
+          break;
+        }
+
+        case "criar_projeto": {
+          const contractId = stepOf(process, "gerar_contrato").result!.contractId!;
+          const projectId =
+            step.result?.projectId ??
+            (await ctx.ensureProject(proposal, process.clientId!, contractId));
+          process = withStep(process, key, {
+            status: "feito",
+            attempts: step.attempts + 1,
+            result: { projectId },
             at: now(),
           });
           break;
