@@ -19,6 +19,8 @@ import type {
   PublicDossier,
   PublicForm,
   Script,
+  WebhookDelivery,
+  WebhookSubscription,
   Squad,
   Deal,
   Interaction,
@@ -174,6 +176,12 @@ export interface DataService {
   // ── Banco de ideias (ficha 08) ────────────────────────────────
   saveIdea(idea: Idea): Promise<Idea>;
   deleteIdea(id: string): Promise<void>;
+
+  // ── Webhooks de saída (ficha 22) ──────────────────────────────
+  saveWebhook(subscription: WebhookSubscription): Promise<WebhookSubscription>;
+  deleteWebhook(id: string): Promise<void>;
+  /** Enqueues one delivery by hand — the "test this endpoint" button. */
+  enqueueWebhookTest(subscriptionId: string): Promise<WebhookDelivery>;
 
   // ── Roteiros (ficha 17) ───────────────────────────────────────
   /** Refused when someone else saved a newer version meanwhile. */

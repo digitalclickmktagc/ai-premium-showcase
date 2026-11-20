@@ -18,6 +18,8 @@ import type {
   PublicDossier,
   PublicForm,
   Script,
+  WebhookDelivery,
+  WebhookSubscription,
   Squad,
   Deal,
   Interaction,
@@ -54,6 +56,11 @@ import { publicSections, validateTemplate } from "../dossier";
 import { validateProject, validateSquad, validateWeights } from "../projects";
 import { isOpen as isFormOpen, validateAnswers, validateForm } from "../forms";
 import { validateScript } from "../scripts";
+import {
+  buildPayload as buildWebhookPayload,
+  newDelivery as newWebhookDelivery,
+  validateSubscription,
+} from "../webhooks";
 import {
   APPROVAL_CODE_TTL_MS,
   codesMatch,
@@ -153,6 +160,8 @@ export class LocalStorageService implements DataService {
         parsed.dossiers ??= [];
         parsed.statementLines ??= [];
         parsed.scripts ??= [];
+        parsed.webhooks ??= [];
+        parsed.webhookDeliveries ??= [];
         parsed.forms ??= [];
         parsed.formResponses ??= [];
         parsed.projects ??= [];
@@ -548,6 +557,41 @@ export class LocalStorageService implements DataService {
     );
     this.write(db);
     return interaction;
+  }
+
+  // ── Webhooks de saída ─────────────────────────────────────────
+  async saveWebhook(subscription: WebhookSubscription): Promise<WebhookSubscription> {
+    const invalid = validateSubscription(subscription);
+    if (invalid) throw new Error(invalid);
+    const db = this.read();
+    const list = db.webhooks ?? [];
+    const next = { ...subscription, updatedAt: nowISO() };
+    db.webhooks = list.some((w) => w.id === subscription.id)
+      ? list.map((w) => (w.id === subscription.id ? next : w))
+      : [...list, next];
+    this.write(db);
+    return next;
+  }
+
+  async deleteWebhook(id: string): Promise<void> {
+    const db = this.read();
+    db.webhooks = (db.webhooks ?? []).filter((w) => w.id !== id);
+    db.webhookDeliveries = (db.webhookDeliveries ?? []).filter((d) => d.subscriptionId !== id);
+    this.write(db);
+  }
+
+  async enqueueWebhookTest(subscriptionId: string): Promise<WebhookDelivery> {
+    const db = this.read();
+    const subscription = (db.webhooks ?? []).find((w) => w.id === subscriptionId);
+    if (!subscription) throw new Error("Assinatura não encontrada.");
+    const delivery = newWebhookDelivery(
+      subscriptionId,
+      subscription.events[0] ?? "post.aprovado",
+      buildWebhookPayload(subscription.events[0] ?? "post.aprovado", { teste: true }),
+    );
+    db.webhookDeliveries = [...(db.webhookDeliveries ?? []), delivery];
+    this.write(db);
+    return delivery;
   }
 
   // ── Roteiros ──────────────────────────────────────────────────

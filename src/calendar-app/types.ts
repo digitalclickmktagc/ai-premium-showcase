@@ -677,6 +677,46 @@ export interface ApprovalCodeEntry {
   expiresAt: number;
 }
 
+// ── Webhooks de saída (ficha 22, F22) ────────────────────────
+
+export type WebhookEvent =
+  | "post.aprovado"
+  | "post.ajuste_pedido"
+  | "post.publicado"
+  | "proposta.aceita"
+  | "contrato.assinado"
+  | "financeiro.liquidado"
+  | "agendamento.criado";
+
+export interface WebhookSubscription {
+  id: string;
+  /** https only. */
+  url: string;
+  events: WebhookEvent[];
+  /** Shared secret used to sign every delivery. Never leaves the agency. */
+  secret: string;
+  active: boolean;
+  description?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type WebhookDeliveryStatus = "pendente" | "entregue" | "falhou";
+
+export interface WebhookDelivery {
+  id: string;
+  subscriptionId: string;
+  event: WebhookEvent;
+  payload: Record<string, unknown>;
+  status: WebhookDeliveryStatus;
+  attempts: number;
+  nextAttemptAt?: string;
+  responseStatus?: number;
+  error?: string;
+  deliveredAt?: string;
+  createdAt: string;
+}
+
 // ── Roteiros de vídeo e stories (ficha 17, F17c) ─────────────
 
 export type ScriptKind = "video" | "stories";
@@ -1107,6 +1147,9 @@ export interface Database {
   statementLines?: StatementLine[];
   /** Roteiros de vídeo e stories (ficha 17). */
   scripts?: Script[];
+  /** Webhooks de saída (ficha 22). */
+  webhooks?: WebhookSubscription[];
+  webhookDeliveries?: WebhookDelivery[];
   /** Formulários de briefing (ficha 17). */
   forms?: BriefingForm[];
   formResponses?: FormResponse[];

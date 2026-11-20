@@ -30,6 +30,8 @@ import type {
   PublicDossier,
   PublicForm,
   Script,
+  WebhookDelivery,
+  WebhookSubscription,
   Squad,
   Deal,
   Interaction,
@@ -195,6 +197,29 @@ const toInteraction = (r: any): Interaction => ({
   author: r.author ?? undefined,
   content: r.content,
   answered: r.answered ?? undefined,
+});
+const toWebhook = (r: any): WebhookSubscription => ({
+  id: r.id,
+  url: r.url,
+  events: r.events ?? [],
+  secret: r.secret,
+  active: r.active,
+  description: r.description ?? undefined,
+  createdAt: r.created_at,
+  updatedAt: r.updated_at,
+});
+const toWebhookDelivery = (r: any): WebhookDelivery => ({
+  id: r.id,
+  subscriptionId: r.subscription_id,
+  event: r.event,
+  payload: r.payload ?? {},
+  status: r.status,
+  attempts: r.attempts ?? 0,
+  nextAttemptAt: r.next_attempt_at ?? undefined,
+  responseStatus: r.response_status ?? undefined,
+  error: r.error ?? undefined,
+  deliveredAt: r.delivered_at ?? undefined,
+  createdAt: r.created_at,
 });
 const toScript = (r: any): Script => ({
   id: r.id,
@@ -857,6 +882,8 @@ export class SupabaseService implements DataService {
         squads: [],
         statementLines: [],
         scripts: [],
+        webhooks: [],
+        webhookDeliveries: [],
         forms: [],
         formResponses: [],
         blocks: [],
@@ -892,6 +919,8 @@ export class SupabaseService implements DataService {
       squads,
       statementLines,
       scripts,
+      webhooks,
+      webhookDeliveries,
       forms,
       formResponses,
       agencySettings,
@@ -929,6 +958,9 @@ export class SupabaseService implements DataService {
         this.rest<any[]>("squad?select=*&order=name.asc"),
         this.rest<any[]>("statement_line?select=*&order=date.desc"),
         this.rest<any[]>("script?select=*&order=created_at.desc"),
+        this.rest<any[]>("webhook_subscription?select=*&order=created_at.asc"),
+        // O histórico cresce sem parar: só as últimas entregas viajam.
+        this.rest<any[]>("webhook_delivery?select=*&order=created_at.desc&limit=200"),
         this.rest<any[]>("briefing_form?select=*&order=created_at.desc"),
         this.rest<any[]>("form_response?select=*&order=at.desc"),
         this.rest<any[]>("agency_settings?select=*&limit=1"),
@@ -964,6 +996,8 @@ export class SupabaseService implements DataService {
       squads: squads.map(toSquad),
       statementLines: statementLines.map(toStatementLine),
       scripts: scripts.map(toScript),
+      webhooks: webhooks.map(toWebhook),
+      webhookDeliveries: webhookDeliveries.map(toWebhookDelivery),
       forms: forms.map(toForm),
       formResponses: formResponses.map(toFormResponse),
       healthWeights: agencySettings[0]?.health_weights ?? undefined,
@@ -1278,6 +1312,53 @@ export class SupabaseService implements DataService {
     });
     return toInteraction(row);
   }
+  async saveWebhook(subscription: WebhookSubscription): Promise<WebhookSubscription> {
+    const [row] = await this.rest<any[]>("webhook_subscription", {
+      method: "POST",
+      headers: { Prefer: "return=representation,resolution=merge-duplicates" },
+      body: JSON.stringify({
+        id: subscription.id,
+        url: subscription.url.trim(),
+        events: subscription.events,
+        secret: subscription.secret,
+        active: subscription.active,
+        description: subscription.description ?? null,
+        created_at: subscription.createdAt,
+        updated_at: new Date().toISOString(),
+      }),
+    });
+    return toWebhook(row);
+  }
+
+  async deleteWebhook(id: string): Promise<void> {
+    await this.rest<void>(`webhook_subscription?id=eq.${encodeURIComponent(id)}`, {
+      method: "DELETE",
+    });
+  }
+
+  async enqueueWebhookTest(subscriptionId: string): Promise<WebhookDelivery> {
+    const [sub] = await this.rest<any[]>(
+      `webhook_subscription?id=eq.${encodeURIComponent(subscriptionId)}&select=*`,
+    );
+    if (!sub) throw new Error("Assinatura não encontrada.");
+    const event = (sub.events ?? [])[0] ?? "post.aprovado";
+    const [row] = await this.rest<any[]>("webhook_delivery", {
+      method: "POST",
+      headers: { Prefer: "return=representation" },
+      body: JSON.stringify({
+        subscription_id: subscriptionId,
+        event,
+        payload: {
+          id: crypto.randomUUID(),
+          event,
+          at: new Date().toISOString(),
+          data: { teste: true },
+        },
+      }),
+    });
+    return toWebhookDelivery(row);
+  }
+
   async saveScript(script: Script): Promise<Script> {
     // The version check lives in the database too (a trigger), so a race
     // between two tabs is refused there and not only here.

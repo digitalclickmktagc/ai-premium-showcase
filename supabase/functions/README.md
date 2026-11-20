@@ -63,3 +63,59 @@ e-mail na caixa do cliente. Chamando duas vezes seguidas, a segunda deve voltar
 - Enquanto `RESEND_API_KEY` e `APPROVAL_FROM_EMAIL` não existirem, a função
   responde `501` e o app avisa que o envio não está configurado, em vez de
   fingir que enviou.
+
+## `dispatch-webhooks`
+
+Entrega os eventos que os gatilhos da migração `018_webhooks.sql` enfileiram em
+`webhook_delivery`.
+
+### Por que é uma função, e não SQL
+
+O Postgres não faz POST para fora (sem `pg_net`, que o plano grátis não traz
+habilitado por padrão). Os gatilhos **enfileiram**; esta função **entrega**.
+A separação também é o que torna o evento confiável: quem decide que algo
+aconteceu é o banco, não o navegador, então o evento dispara venha a mudança
+deste app, do link público do cliente ou de alguém editando a linha na mão.
+
+### O que ela faz
+
+1. Pega até 25 entregas pendentes e vencidas.
+2. Assina o corpo exato com HMAC-SHA256 usando o segredo da assinatura, e
+   manda em `X-Orkestrya-Signature: sha256=<hex>`.
+3. 2xx vira `entregue`. Qualquer outra coisa agenda nova tentativa com espera
+   crescente (1 min, 5 min, 30 min, 2 h) e desiste na quinta — endpoint morto
+   martelado para sempre é como uma agência leva bloqueio de IP.
+
+### Como publicar e agendar
+
+```bash
+supabase functions deploy dispatch-webhooks --no-verify-jwt
+```
+
+E um agendamento de minuto em minuto, no SQL editor do projeto:
+
+```sql
+select cron.schedule('webhooks', '* * * * *', $$
+  select net.http_post(
+    url := 'https://<project>.supabase.co/functions/v1/dispatch-webhooks',
+    headers := jsonb_build_object('Authorization', 'Bearer <anon key>'))
+$$);
+```
+
+### Enquanto isso não existir
+
+A fila cresce e **nada sai**. A tela de integrações diz isso em português, com
+o número de entregas paradas: promessa de entrega que não entrega é pior do
+que não ter webhook nenhum.
+
+### Como quem recebe confere a assinatura
+
+```js
+const assinatura = req.headers["x-orkestrya-signature"];
+const esperado = "sha256=" + crypto.createHmac("sha256", SEGREDO)
+  .update(corpoBruto).digest("hex");
+// compare em tempo constante (crypto.timingSafeEqual)
+```
+
+O corpo precisa ser o **bruto**, byte a byte: reserializar o JSON muda a
+assinatura.

@@ -8,6 +8,7 @@ import {
   ClipboardList,
   FolderKanban,
   Lightbulb,
+  Plug,
   ListChecks,
   Sun,
   Target,
@@ -36,7 +37,7 @@ function NavContent({
 }: {
   activeClientId?: string;
   /** Which top-level area is open, for pages that are not a client. */
-  section?: "hoje" | "pauta" | "ideias" | "dossie" | "projetos" | "ferramentas" | "formularios" | "agenda" | "comercial" | "financeiro" | "crm";
+  section?: "hoje" | "pauta" | "ideias" | "dossie" | "projetos" | "ferramentas" | "formularios" | "integracoes" | "agenda" | "comercial" | "financeiro" | "crm";
   onNavigate?: () => void;
   onNewClient: () => void;
 }) {
@@ -207,6 +208,18 @@ function NavContent({
           Ferramentas
         </button>
         <button
+          onClick={() => go("/app/integracoes")}
+          className={cn(
+            "mt-0.5 flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+            section === "integracoes"
+              ? "bg-primary/15 text-foreground"
+              : "text-muted-foreground hover:bg-foreground/[0.06] hover:text-foreground",
+          )}
+        >
+          <Plug className="h-4 w-4" />
+          Integrações
+        </button>
+        <button
           onClick={() => go("/app/agenda")}
           className={cn(
             "mt-0.5 flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
@@ -308,7 +321,7 @@ export default function AdminLayout({
 }: {
   children: ReactNode;
   activeClientId?: string;
-  section?: "hoje" | "pauta" | "ideias" | "dossie" | "projetos" | "ferramentas" | "formularios" | "agenda" | "comercial" | "financeiro" | "crm";
+  section?: "hoje" | "pauta" | "ideias" | "dossie" | "projetos" | "ferramentas" | "formularios" | "integracoes" | "agenda" | "comercial" | "financeiro" | "crm";
   title?: string;
 }) {
   const [sheetOpen, setSheetOpen] = useState(false);

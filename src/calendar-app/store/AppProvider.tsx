@@ -20,6 +20,8 @@ import type {
   DossierTemplate,
   FormResponse,
   Script,
+  WebhookDelivery,
+  WebhookSubscription,
   HealthWeights,
   Project,
   Squad,
@@ -104,6 +106,8 @@ interface AppContextValue {
   squads: Squad[];
   statementLines: StatementLine[];
   scripts: Script[];
+  webhooks: WebhookSubscription[];
+  webhookDeliveries: WebhookDelivery[];
   forms: BriefingForm[];
   formResponses: FormResponse[];
   healthWeights?: HealthWeights;
@@ -159,6 +163,11 @@ interface AppContextValue {
   requestApproval: (id: string, teamMessage?: string) => Promise<Post>;
   deletePost: (id: string) => Promise<Post>;
   restorePost: (id: string, status?: PostStatus) => Promise<Post>;
+
+  // webhooks
+  saveWebhook: (w: WebhookSubscription) => Promise<WebhookSubscription>;
+  deleteWebhook: (id: string) => Promise<void>;
+  enqueueWebhookTest: (id: string) => Promise<WebhookDelivery>;
 
   // roteiros
   saveScript: (s: Script) => Promise<Script>;
@@ -290,6 +299,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [squads, setSquads] = useState<Squad[]>([]);
   const [statementLines, setStatementLines] = useState<StatementLine[]>([]);
   const [scripts, setScripts] = useState<Script[]>([]);
+  const [webhooks, setWebhooks] = useState<WebhookSubscription[]>([]);
+  const [webhookDeliveries, setWebhookDeliveries] = useState<WebhookDelivery[]>([]);
   const [forms, setForms] = useState<BriefingForm[]>([]);
   const [formResponses, setFormResponses] = useState<FormResponse[]>([]);
   const [healthWeights, setHealthWeights] = useState<HealthWeights | undefined>();
@@ -342,6 +353,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setSquads(db.squads ?? []);
     setStatementLines(db.statementLines ?? []);
     setScripts(db.scripts ?? []);
+    setWebhooks(db.webhooks ?? []);
+    setWebhookDeliveries(db.webhookDeliveries ?? []);
     setForms(db.forms ?? []);
     setFormResponses(db.formResponses ?? []);
     setHealthWeights(db.healthWeights);
@@ -702,6 +715,29 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const addInteraction = useCallback(
     async (i: Interaction) => {
       const res = await service.addInteraction(i);
+      await refresh();
+      return res;
+    },
+    [service, refresh],
+  );
+  const saveWebhook = useCallback(
+    async (w: WebhookSubscription) => {
+      const res = await service.saveWebhook(w);
+      await refresh();
+      return res;
+    },
+    [service, refresh],
+  );
+  const deleteWebhook = useCallback(
+    async (id: string) => {
+      await service.deleteWebhook(id);
+      await refresh();
+    },
+    [service, refresh],
+  );
+  const enqueueWebhookTest = useCallback(
+    async (id: string) => {
+      const res = await service.enqueueWebhookTest(id);
       await refresh();
       return res;
     },
@@ -1442,6 +1478,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     squads,
     statementLines,
     scripts,
+    webhooks,
+    webhookDeliveries,
+    saveWebhook,
+    deleteWebhook,
+    enqueueWebhookTest,
     forms,
     formResponses,
     saveScript,
