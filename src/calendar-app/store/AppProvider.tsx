@@ -15,8 +15,10 @@ import type {
   Contract,
   ContractingProcess,
   CrmTask,
+  BriefingForm,
   Dossier,
   DossierTemplate,
+  FormResponse,
   HealthWeights,
   Project,
   Squad,
@@ -100,6 +102,8 @@ interface AppContextValue {
   projects: Project[];
   squads: Squad[];
   statementLines: StatementLine[];
+  forms: BriefingForm[];
+  formResponses: FormResponse[];
   healthWeights?: HealthWeights;
   blocks: ContactBlock[];
   processes: ContractingProcess[];
@@ -153,6 +157,10 @@ interface AppContextValue {
   requestApproval: (id: string, teamMessage?: string) => Promise<Post>;
   deletePost: (id: string) => Promise<Post>;
   restorePost: (id: string, status?: PostStatus) => Promise<Post>;
+
+  // formulários de briefing
+  saveForm: (f: BriefingForm) => Promise<BriefingForm>;
+  deleteForm: (id: string) => Promise<void>;
 
   // conciliação de extrato
   saveStatementLines: (lines: StatementLine[]) => Promise<StatementLine[]>;
@@ -275,6 +283,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [projects, setProjects] = useState<Project[]>([]);
   const [squads, setSquads] = useState<Squad[]>([]);
   const [statementLines, setStatementLines] = useState<StatementLine[]>([]);
+  const [forms, setForms] = useState<BriefingForm[]>([]);
+  const [formResponses, setFormResponses] = useState<FormResponse[]>([]);
   const [healthWeights, setHealthWeights] = useState<HealthWeights | undefined>();
   const [blocks, setBlocks] = useState<ContactBlock[]>([]);
   const [processes, setProcesses] = useState<ContractingProcess[]>([]);
@@ -324,6 +334,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setProjects(db.projects ?? []);
     setSquads(db.squads ?? []);
     setStatementLines(db.statementLines ?? []);
+    setForms(db.forms ?? []);
+    setFormResponses(db.formResponses ?? []);
     setHealthWeights(db.healthWeights);
     setBlocks(db.blocks ?? []);
     setProcesses(db.processes ?? []);
@@ -684,6 +696,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const res = await service.addInteraction(i);
       await refresh();
       return res;
+    },
+    [service, refresh],
+  );
+  const saveForm = useCallback(
+    async (f: BriefingForm) => {
+      const res = await service.saveForm(f);
+      await refresh();
+      return res;
+    },
+    [service, refresh],
+  );
+  const deleteForm = useCallback(
+    async (id: string) => {
+      await service.deleteForm(id);
+      await refresh();
     },
     [service, refresh],
   );
@@ -1391,6 +1418,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     projects,
     squads,
     statementLines,
+    forms,
+    formResponses,
+    saveForm,
+    deleteForm,
     healthWeights,
     saveStatementLines,
     deleteStatementLine,

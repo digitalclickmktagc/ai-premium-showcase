@@ -6,8 +6,10 @@ import type {
   Contract,
   ContractingProcess,
   CrmTask,
+  BriefingForm,
   Dossier,
   DossierTemplate,
+  FormResponse,
   HealthWeights,
   Idea,
   MonthlyPlan,
@@ -15,6 +17,7 @@ import type {
   Project,
   StatementLine,
   PublicDossier,
+  PublicForm,
   Squad,
   Deal,
   Interaction,
@@ -170,6 +173,19 @@ export interface DataService {
   // ── Banco de ideias (ficha 08) ────────────────────────────────
   saveIdea(idea: Idea): Promise<Idea>;
   deleteIdea(id: string): Promise<void>;
+
+  // ── Formulários de briefing (ficha 17) ────────────────────────
+  saveForm(form: BriefingForm): Promise<BriefingForm>;
+  /** Deleting a form takes its answers with it — the ficha's own rule. */
+  deleteForm(id: string): Promise<void>;
+  /** Anonymous: serves the form only while it is active. */
+  getPublicForm(token: string): Promise<PublicForm | null>;
+  /** Anonymous: records one answer. */
+  submitForm(
+    token: string,
+    answers: Record<string, string | string[] | number>,
+    respondent?: string,
+  ): Promise<{ ok: boolean; reason?: string }>;
 
   // ── Conciliação de extrato (ficha 13) ─────────────────────────
   /** Saves imported lines and the ones a reconciliation changed. */

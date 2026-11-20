@@ -677,6 +677,64 @@ export interface ApprovalCodeEntry {
   expiresAt: number;
 }
 
+// ── Formulários de briefing (ficha 17, F17b) ─────────────────
+
+export type FormQuestionKind =
+  | "texto"
+  | "texto_longo"
+  | "estrelas"
+  | "nota10"
+  | "simnao"
+  | "lista"
+  | "multipla"
+  | "escala"
+  | "data";
+
+export interface FormQuestion {
+  id: string;
+  kind: FormQuestionKind;
+  label: string;
+  hint?: string;
+  required: boolean;
+  /** For `lista` and `multipla`. */
+  options?: string[];
+  scaleMin?: number;
+  scaleMax?: number;
+}
+
+export type FormStatus = "ativo" | "pausado";
+
+export interface BriefingForm {
+  id: string;
+  title: string;
+  description?: string;
+  clientId?: string;
+  questions: FormQuestion[];
+  status: FormStatus;
+  /** The public link. Regenerating it invalidates the old address. */
+  shareToken: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type FormAnswerValue = string | string[] | number;
+
+export interface FormResponse {
+  id: string;
+  formId: string;
+  answers: Record<string, FormAnswerValue>;
+  respondent?: string;
+  at: string;
+}
+
+/** What the public form page serves: no responses, no internal ids. */
+export interface PublicForm {
+  id: string;
+  title: string;
+  description?: string;
+  questions: FormQuestion[];
+}
+
 // ── Conciliação de extrato (ficha 13, F13b) ──────────────────
 
 export type StatementLineStatus = "a_conferir" | "conferida" | "ignorada";
@@ -995,6 +1053,9 @@ export interface Database {
   dossiers?: Dossier[];
   /** Conciliação de extrato (ficha 13). */
   statementLines?: StatementLine[];
+  /** Formulários de briefing (ficha 17). */
+  forms?: BriefingForm[];
+  formResponses?: FormResponse[];
   /** Projetos e squads (ficha 14). */
   projects?: Project[];
   squads?: Squad[];

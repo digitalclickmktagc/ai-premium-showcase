@@ -5,8 +5,10 @@ import type {
   Contract,
   ContractingProcess,
   CrmTask,
+  BriefingForm,
   Dossier,
   DossierTemplate,
+  FormResponse,
   HealthWeights,
   Idea,
   MonthlyPlan,
@@ -14,6 +16,7 @@ import type {
   Project,
   StatementLine,
   PublicDossier,
+  PublicForm,
   Squad,
   Deal,
   Interaction,
@@ -48,6 +51,7 @@ import { normalizeStatus } from "../health";
 import { validatePlan, validatePlanItem as validatePautaItem } from "../pauta";
 import { publicSections, validateTemplate } from "../dossier";
 import { validateProject, validateSquad, validateWeights } from "../projects";
+import { isOpen as isFormOpen, validateAnswers, validateForm } from "../forms";
 import {
   APPROVAL_CODE_TTL_MS,
   codesMatch,
@@ -146,6 +150,8 @@ export class LocalStorageService implements DataService {
         parsed.dossierTemplates ??= [];
         parsed.dossiers ??= [];
         parsed.statementLines ??= [];
+        parsed.forms ??= [];
+        parsed.formResponses ??= [];
         parsed.projects ??= [];
         parsed.squads ??= [];
         parsed.pautaItems ??= [];
@@ -539,6 +545,64 @@ export class LocalStorageService implements DataService {
     );
     this.write(db);
     return interaction;
+  }
+
+  // ── Formulários de briefing ───────────────────────────────────
+  async saveForm(form: BriefingForm): Promise<BriefingForm> {
+    const invalid = validateForm(form);
+    if (invalid) throw new Error(invalid);
+    const db = this.read();
+    const list = db.forms ?? [];
+    const next = { ...form, updatedAt: nowISO() };
+    // Editing never touches what people already answered.
+    db.forms = list.some((f) => f.id === form.id)
+      ? list.map((f) => (f.id === form.id ? next : f))
+      : [...list, next];
+    this.write(db);
+    return next;
+  }
+
+  async deleteForm(id: string): Promise<void> {
+    const db = this.read();
+    db.forms = (db.forms ?? []).filter((f) => f.id !== id);
+    db.formResponses = (db.formResponses ?? []).filter((r) => r.formId !== id);
+    this.write(db);
+  }
+
+  async getPublicForm(token: string): Promise<PublicForm | null> {
+    const db = this.read();
+    const form = (db.forms ?? []).find((f) => f.shareToken === token);
+    // A paused form is indistinguishable from one that never existed.
+    if (!form || !isFormOpen(form)) return null;
+    return {
+      id: form.id,
+      title: form.title,
+      description: form.description,
+      questions: form.questions,
+    };
+  }
+
+  async submitForm(
+    token: string,
+    answers: Record<string, string | string[] | number>,
+    respondent?: string,
+  ): Promise<{ ok: boolean; reason?: string }> {
+    const db = this.read();
+    const form = (db.forms ?? []).find((f) => f.shareToken === token);
+    if (!form || !isFormOpen(form)) return { ok: false, reason: "Formulário indisponível." };
+    const problems = validateAnswers(form, answers);
+    const first = Object.values(problems)[0];
+    if (first) return { ok: false, reason: first };
+    const response: FormResponse = {
+      id: uid("resp"),
+      formId: form.id,
+      answers,
+      respondent: respondent?.trim() || undefined,
+      at: nowISO(),
+    };
+    db.formResponses = [...(db.formResponses ?? []), response];
+    this.write(db);
+    return { ok: true };
   }
 
   // ── Conciliação de extrato ────────────────────────────────────

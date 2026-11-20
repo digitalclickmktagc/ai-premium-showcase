@@ -21,6 +21,8 @@ import PautaPage from "./calendar-app/pages/PautaPage";
 import DossierPage from "./calendar-app/pages/DossierPage";
 import ProjectsPage from "./calendar-app/pages/ProjectsPage";
 import ToolsPage from "./calendar-app/pages/ToolsPage";
+import FormsPage from "./calendar-app/pages/FormsPage";
+import PublicFormPage from "./calendar-app/pages/PublicFormPage";
 import PublicDossierPage from "./calendar-app/pages/PublicDossierPage";
 import PublicProposalPage from "./calendar-app/pages/PublicProposalPage";
 import PublicContractPage from "./calendar-app/pages/PublicContractPage";
@@ -55,6 +57,14 @@ const AdminApp = () => (
           element={
             <RequireAuth>
               <TodayPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="formularios"
+          element={
+            <RequireAuth>
+              <FormsPage />
             </RequireAuth>
           }
         />
@@ -168,6 +178,15 @@ const App = () => (
             element={
               <ThemeProvider>
                 <PublicContractPage />
+              </ThemeProvider>
+            }
+          />
+          {/* Briefing form — anonymous, token only */}
+          <Route
+            path="/responder/:token"
+            element={
+              <ThemeProvider>
+                <PublicFormPage />
               </ThemeProvider>
             }
           />

@@ -17,8 +17,10 @@ import type {
   Contract,
   ContractingProcess,
   CrmTask,
+  BriefingForm,
   Dossier,
   DossierTemplate,
+  FormResponse,
   HealthWeights,
   Idea,
   MonthlyPlan,
@@ -26,6 +28,7 @@ import type {
   Project,
   StatementLine,
   PublicDossier,
+  PublicForm,
   Squad,
   Deal,
   Interaction,
@@ -191,6 +194,24 @@ const toInteraction = (r: any): Interaction => ({
   author: r.author ?? undefined,
   content: r.content,
   answered: r.answered ?? undefined,
+});
+const toForm = (r: any): BriefingForm => ({
+  id: r.id,
+  title: r.title,
+  description: r.description ?? undefined,
+  clientId: r.client_id ?? undefined,
+  questions: r.questions ?? [],
+  status: r.status,
+  shareToken: r.share_token,
+  createdAt: r.created_at,
+  updatedAt: r.updated_at,
+});
+const toFormResponse = (r: any): FormResponse => ({
+  id: r.id,
+  formId: r.form_id,
+  answers: r.answers ?? {},
+  respondent: r.respondent ?? undefined,
+  at: r.at,
 });
 const toStatementLine = (r: any): StatementLine => ({
   id: r.id,
@@ -816,6 +837,8 @@ export class SupabaseService implements DataService {
         projects: [],
         squads: [],
         statementLines: [],
+        forms: [],
+        formResponses: [],
         blocks: [],
         processes: [],
       };
@@ -848,6 +871,8 @@ export class SupabaseService implements DataService {
       projects,
       squads,
       statementLines,
+      forms,
+      formResponses,
       agencySettings,
       blocks,
       processes,
@@ -882,6 +907,8 @@ export class SupabaseService implements DataService {
         this.rest<any[]>("project?select=*&order=created_at.desc"),
         this.rest<any[]>("squad?select=*&order=name.asc"),
         this.rest<any[]>("statement_line?select=*&order=date.desc"),
+        this.rest<any[]>("briefing_form?select=*&order=created_at.desc"),
+        this.rest<any[]>("form_response?select=*&order=at.desc"),
         this.rest<any[]>("agency_settings?select=*&limit=1"),
         this.rest<any[]>("crm_block?select=*"),
         this.rest<any[]>("contracting_process?select=*"),
@@ -914,6 +941,8 @@ export class SupabaseService implements DataService {
       projects: projects.map(toProject),
       squads: squads.map(toSquad),
       statementLines: statementLines.map(toStatementLine),
+      forms: forms.map(toForm),
+      formResponses: formResponses.map(toFormResponse),
       healthWeights: agencySettings[0]?.health_weights ?? undefined,
       blocks: blocks.map(toBlock),
       processes: processes.map(toProcess),
@@ -1226,6 +1255,57 @@ export class SupabaseService implements DataService {
     });
     return toInteraction(row);
   }
+  async saveForm(form: BriefingForm): Promise<BriefingForm> {
+    const [row] = await this.rest<any[]>("briefing_form", {
+      method: "POST",
+      headers: { Prefer: "return=representation,resolution=merge-duplicates" },
+      body: JSON.stringify({
+        id: form.id,
+        title: form.title.trim(),
+        description: form.description ?? null,
+        client_id: form.clientId ?? null,
+        questions: form.questions,
+        status: form.status,
+        share_token: form.shareToken,
+        created_at: form.createdAt,
+        updated_at: new Date().toISOString(),
+      }),
+    });
+    return toForm(row);
+  }
+
+  async deleteForm(id: string): Promise<void> {
+    // form_response.form_id is ON DELETE CASCADE: the answers go with it,
+    // which is the ficha's rule and what the screen warns about.
+    await this.rest<void>(`briefing_form?id=eq.${encodeURIComponent(id)}`, { method: "DELETE" });
+  }
+
+  async getPublicForm(token: string): Promise<PublicForm | null> {
+    const data = await this.rest<PublicForm | null>("rpc/public_form", {
+      method: "POST",
+      useUser: false,
+      body: JSON.stringify({ p_token: token }),
+    });
+    return data ?? null;
+  }
+
+  async submitForm(
+    token: string,
+    answers: Record<string, string | string[] | number>,
+    respondent?: string,
+  ): Promise<{ ok: boolean; reason?: string }> {
+    try {
+      await this.rest<void>("rpc/public_submit_form", {
+        method: "POST",
+        useUser: false,
+        body: JSON.stringify({ p_token: token, p_answers: answers, p_respondent: respondent ?? null }),
+      });
+      return { ok: true };
+    } catch (err) {
+      return { ok: false, reason: err instanceof Error ? err.message : "Não deu para enviar." };
+    }
+  }
+
   async saveStatementLines(lines: StatementLine[]): Promise<StatementLine[]> {
     if (lines.length === 0) return [];
     const rows = await this.rest<any[]>("statement_line", {
