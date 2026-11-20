@@ -252,6 +252,105 @@ export interface ImportRow {
   phone?: string;
 }
 
+/**
+ * Reads a contact list: CSV with a header in any column order, or the VCF an
+ * address book exports. Columns are found by name because no two exports
+ * agree on their order.
+ */
+export function parseContactRows(text: string): { rows: ImportRow[]; errors: string[] } {
+  if (/BEGIN:VCARD/i.test(text)) return parseVcf(text);
+
+  const lines = text.split(/\r?\n/).filter((l) => l.trim());
+  if (lines.length === 0) return { rows: [], errors: ["Arquivo vazio."] };
+
+  const separator = [";", ",", "\t"]
+    .map((sep) => ({ sep, count: lines[0].split(sep).length }))
+    .sort((a, b) => b.count - a.count)[0].sep;
+
+  const header = splitRow(lines[0], separator).map((h) => h.toLowerCase());
+  const at = (...names: string[]) =>
+    header.findIndex((h) => names.some((n) => h.includes(n)));
+
+  let nameAt = at("nome", "name", "razão", "razao");
+  let companyAt = at("empresa", "company", "fantasia");
+  let documentAt = at("documento", "cnpj", "cpf", "document");
+  let emailAt = at("email", "e-mail");
+  let phoneAt = at("telefone", "celular", "phone", "whats");
+
+  const hasHeader = nameAt >= 0 || emailAt >= 0 || phoneAt >= 0;
+  const body = hasHeader ? lines.slice(1) : lines;
+  if (!hasHeader) {
+    nameAt = 0;
+    emailAt = 1;
+    phoneAt = 2;
+    companyAt = -1;
+    documentAt = -1;
+  }
+
+  const rows: ImportRow[] = [];
+  const errors: string[] = [];
+  body.forEach((raw, index) => {
+    const cells = splitRow(raw, separator);
+    const pick = (i: number) => (i >= 0 ? (cells[i] ?? "").trim() : "");
+    const name = pick(nameAt) || pick(companyAt) || pick(emailAt);
+    if (!name) {
+      errors.push(`Linha ${index + (hasHeader ? 2 : 1)}: sem nome e sem contato.`);
+      return;
+    }
+    rows.push({
+      name,
+      company: pick(companyAt) || undefined,
+      document: pick(documentAt) || undefined,
+      email: pick(emailAt) || undefined,
+      phone: pick(phoneAt) || undefined,
+    });
+  });
+  return { rows, errors };
+}
+
+function splitRow(line: string, separator: string): string[] {
+  const out: string[] = [];
+  let current = "";
+  let quoted = false;
+  for (let i = 0; i < line.length; i += 1) {
+    const ch = line[i];
+    if (ch === '"') {
+      if (quoted && line[i + 1] === '"') {
+        current += '"';
+        i += 1;
+      } else quoted = !quoted;
+    } else if (ch === separator && !quoted) {
+      out.push(current);
+      current = "";
+    } else current += ch;
+  }
+  out.push(current);
+  return out.map((c) => c.trim());
+}
+
+function parseVcf(text: string): { rows: ImportRow[]; errors: string[] } {
+  const rows: ImportRow[] = [];
+  const errors: string[] = [];
+  const cards = text.split(/BEGIN:VCARD/i).slice(1);
+  cards.forEach((card, index) => {
+    const field = (tag: string) =>
+      card.match(new RegExp(`^${tag}[^:\r\n]*:(.*)$`, "im"))?.[1]?.trim();
+    const name = field("FN") || field("N")?.replace(/;+/g, " ").trim() || "";
+    const org = field("ORG")?.replace(/;+$/, "");
+    if (!name && !org) {
+      errors.push(`Cartão ${index + 1}: sem nome.`);
+      return;
+    }
+    rows.push({
+      name: name || org!,
+      company: org || undefined,
+      email: field("EMAIL") || undefined,
+      phone: field("TEL") || undefined,
+    });
+  });
+  return { rows, errors };
+}
+
 export interface ImportPreview {
   row: ImportRow;
   /** An existing deal this row matches. */

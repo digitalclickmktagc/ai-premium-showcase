@@ -19,6 +19,7 @@ import {
   validateDeal,
   weightedPipeline,
   withoutNextStep,
+  parseContactRows,
 } from "./crm";
 import type { ContactBlock, Deal, Interaction } from "./types";
 
@@ -291,5 +292,66 @@ describe("validation", () => {
   it("wants a name", () => {
     expect(validateDeal({ name: " " })).toBeTruthy();
     expect(validateDeal({ name: "Padaria" })).toBeNull();
+  });
+});
+
+describe("parseContactRows", () => {
+  it("reads a CSV with a header in any order", () => {
+    const csv = [
+      "E-mail;Nome;Telefone;CNPJ;Empresa",
+      "contato@aurora.com;Aurora Café;(61) 99999-0000;12.345.678/0001-90;Aurora Café Ltda",
+    ].join("\n");
+    const out = parseContactRows(csv);
+    expect(out.errors).toEqual([]);
+    expect(out.rows[0]).toEqual({
+      name: "Aurora Café",
+      company: "Aurora Café Ltda",
+      document: "12.345.678/0001-90",
+      email: "contato@aurora.com",
+      phone: "(61) 99999-0000",
+    });
+  });
+
+  it("falls back to nome, email, telefone when there is no header", () => {
+    const out = parseContactRows("Aurora;contato@aurora.com;61999990000");
+    expect(out.rows[0]).toMatchObject({ name: "Aurora", email: "contato@aurora.com" });
+  });
+
+  it("names a row by company or e-mail when the name column is empty", () => {
+    const csv = ["Nome;Empresa;Email", ";Aurora Ltda;contato@aurora.com"].join("\n");
+    expect(parseContactRows(csv).rows[0].name).toBe("Aurora Ltda");
+  });
+
+  it("reports a row with nothing in it instead of importing a blank", () => {
+    const csv = ["Nome;Email;Telefone", "Aurora;a@b.com;1", ";;"].join("\n");
+    const out = parseContactRows(csv);
+    expect(out.rows).toHaveLength(1);
+    expect(out.errors[0]).toMatch(/Linha 3/);
+  });
+
+  it("keeps a separator that lives inside quotes", () => {
+    const csv = ['Nome;Empresa;Email', '"Aurora, Café";Aurora Ltda;a@b.com'].join("\n");
+    expect(parseContactRows(csv).rows[0].name).toBe("Aurora, Café");
+  });
+
+  it("reads a VCF address book", () => {
+    const vcf = `BEGIN:VCARD
+VERSION:3.0
+FN:Bruno Martins
+ORG:Clínica Bem Viver;
+EMAIL;TYPE=INTERNET:bruno@bemviver.com
+TEL;TYPE=CELL:+55 61 98888-0000
+END:VCARD
+BEGIN:VCARD
+FN:Sem contato
+END:VCARD`;
+    const out = parseContactRows(vcf);
+    expect(out.rows[0]).toEqual({
+      name: "Bruno Martins",
+      company: "Clínica Bem Viver",
+      email: "bruno@bemviver.com",
+      phone: "+55 61 98888-0000",
+    });
+    expect(out.rows[1].name).toBe("Sem contato");
   });
 });

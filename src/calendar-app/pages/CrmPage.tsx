@@ -1,11 +1,13 @@
 import { useCallback, useMemo, useState } from "react";
-import { Ban, Flame, Plus, Target, TrendingUp, Users } from "lucide-react";
+import { Ban, FileUp, Flame, Plus, Target, TrendingUp, Users } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import AdminLayout from "../components/AdminLayout";
 import DealDialog from "../components/DealDialog";
+import ImportContactsDialog from "../components/ImportContactsDialog";
+import BlocklistDialog from "../components/BlocklistDialog";
 import EmptyState from "../components/EmptyState";
 import { useApp } from "../store/AppProvider";
 import { useDragToReschedule } from "../hooks/useDragToReschedule";
@@ -40,6 +42,8 @@ export default function CrmPage() {
 
   const [phase, setPhase] = useState<DealPhase>("oportunidade");
   const [editing, setEditing] = useState<Deal | null | undefined>();
+  const [importing, setImporting] = useState(false);
+  const [blocklist, setBlocklist] = useState(false);
 
   const funnel = useMemo(() => stagesOf(stages, phase), [stages, phase]);
   const ofPhase = useMemo(
@@ -102,9 +106,18 @@ export default function CrmPage() {
             </span>
           </p>
         </div>
-        <Button className="gap-1.5" onClick={() => setEditing(null)}>
-          <Plus className="h-4 w-4" /> Novo negócio
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" className="gap-1.5" onClick={() => setImporting(true)}>
+            <FileUp className="h-4 w-4" /> Importar contatos
+          </Button>
+          <Button variant="outline" className="gap-1.5" onClick={() => setBlocklist(true)}>
+            <Ban className="h-4 w-4" /> Bloqueios
+            {blocks.length > 0 && <span className="text-muted-foreground">{blocks.length}</span>}
+          </Button>
+          <Button className="gap-1.5" onClick={() => setEditing(null)}>
+            <Plus className="h-4 w-4" /> Novo negócio
+          </Button>
+        </div>
       </div>
 
       {(noNextStep.length > 0 || cold.length > 0) && (
@@ -262,6 +275,8 @@ export default function CrmPage() {
         phase={phase}
         onOpenChange={(v) => !v && setEditing(undefined)}
       />
+      <ImportContactsDialog open={importing} onOpenChange={setImporting} />
+      <BlocklistDialog open={blocklist} onOpenChange={setBlocklist} />
     </AdminLayout>
   );
 }
