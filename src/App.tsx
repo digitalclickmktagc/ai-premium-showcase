@@ -15,6 +15,7 @@ import PublicBookingPage from "./calendar-app/pages/PublicBookingPage";
 import CommercialPage from "./calendar-app/pages/CommercialPage";
 import FinancePage from "./calendar-app/pages/FinancePage";
 import CrmPage from "./calendar-app/pages/CrmPage";
+import TodayPage from "./calendar-app/pages/TodayPage";
 import PublicProposalPage from "./calendar-app/pages/PublicProposalPage";
 import PublicContractPage from "./calendar-app/pages/PublicContractPage";
 import CalendarPage from "./calendar-app/pages/CalendarPage";
@@ -40,6 +41,14 @@ const AdminApp = () => (
           element={
             <RequireAuth>
               <DashboardPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="hoje"
+          element={
+            <RequireAuth>
+              <TodayPage />
             </RequireAuth>
           }
         />
