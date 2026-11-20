@@ -15,6 +15,8 @@ import type {
   Contract,
   ContractingProcess,
   CrmTask,
+  Assessment,
+  AssessmentTemplate,
   BriefingForm,
   Dossier,
   DossierTemplate,
@@ -106,6 +108,8 @@ interface AppContextValue {
   squads: Squad[];
   statementLines: StatementLine[];
   scripts: Script[];
+  assessmentTemplates: AssessmentTemplate[];
+  assessments: Assessment[];
   webhooks: WebhookSubscription[];
   webhookDeliveries: WebhookDelivery[];
   forms: BriefingForm[];
@@ -163,6 +167,11 @@ interface AppContextValue {
   requestApproval: (id: string, teamMessage?: string) => Promise<Post>;
   deletePost: (id: string) => Promise<Post>;
   restorePost: (id: string, status?: PostStatus) => Promise<Post>;
+
+  // análise de perfil e concorrência
+  saveAssessmentTemplate: (t: AssessmentTemplate) => Promise<AssessmentTemplate>;
+  saveAssessment: (a: Assessment) => Promise<Assessment>;
+  deleteAssessment: (id: string) => Promise<void>;
 
   // webhooks
   saveWebhook: (w: WebhookSubscription) => Promise<WebhookSubscription>;
@@ -299,6 +308,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [squads, setSquads] = useState<Squad[]>([]);
   const [statementLines, setStatementLines] = useState<StatementLine[]>([]);
   const [scripts, setScripts] = useState<Script[]>([]);
+  const [assessmentTemplates, setAssessmentTemplates] = useState<AssessmentTemplate[]>([]);
+  const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [webhooks, setWebhooks] = useState<WebhookSubscription[]>([]);
   const [webhookDeliveries, setWebhookDeliveries] = useState<WebhookDelivery[]>([]);
   const [forms, setForms] = useState<BriefingForm[]>([]);
@@ -353,6 +364,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setSquads(db.squads ?? []);
     setStatementLines(db.statementLines ?? []);
     setScripts(db.scripts ?? []);
+    setAssessmentTemplates(db.assessmentTemplates ?? []);
+    setAssessments(db.assessments ?? []);
     setWebhooks(db.webhooks ?? []);
     setWebhookDeliveries(db.webhookDeliveries ?? []);
     setForms(db.forms ?? []);
@@ -717,6 +730,29 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const res = await service.addInteraction(i);
       await refresh();
       return res;
+    },
+    [service, refresh],
+  );
+  const saveAssessmentTemplate = useCallback(
+    async (t: AssessmentTemplate) => {
+      const res = await service.saveAssessmentTemplate(t);
+      await refresh();
+      return res;
+    },
+    [service, refresh],
+  );
+  const saveAssessment = useCallback(
+    async (a: Assessment) => {
+      const res = await service.saveAssessment(a);
+      await refresh();
+      return res;
+    },
+    [service, refresh],
+  );
+  const deleteAssessment = useCallback(
+    async (id: string) => {
+      await service.deleteAssessment(id);
+      await refresh();
     },
     [service, refresh],
   );
@@ -1478,6 +1514,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     squads,
     statementLines,
     scripts,
+    assessmentTemplates,
+    assessments,
+    saveAssessmentTemplate,
+    saveAssessment,
+    deleteAssessment,
     webhooks,
     webhookDeliveries,
     saveWebhook,

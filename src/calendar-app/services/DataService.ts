@@ -6,6 +6,8 @@ import type {
   Contract,
   ContractingProcess,
   CrmTask,
+  Assessment,
+  AssessmentTemplate,
   BriefingForm,
   Dossier,
   DossierTemplate,
@@ -176,6 +178,11 @@ export interface DataService {
   // ── Banco de ideias (ficha 08) ────────────────────────────────
   saveIdea(idea: Idea): Promise<Idea>;
   deleteIdea(id: string): Promise<void>;
+
+  // ── Análise de perfil e concorrência (ficha 17) ───────────────
+  saveAssessmentTemplate(template: AssessmentTemplate): Promise<AssessmentTemplate>;
+  saveAssessment(assessment: Assessment): Promise<Assessment>;
+  deleteAssessment(id: string): Promise<void>;
 
   // ── Webhooks de saída (ficha 22) ──────────────────────────────
   saveWebhook(subscription: WebhookSubscription): Promise<WebhookSubscription>;

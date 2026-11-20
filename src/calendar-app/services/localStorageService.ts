@@ -5,6 +5,8 @@ import type {
   Contract,
   ContractingProcess,
   CrmTask,
+  Assessment,
+  AssessmentTemplate,
   BriefingForm,
   Dossier,
   DossierTemplate,
@@ -56,6 +58,10 @@ import { publicSections, validateTemplate } from "../dossier";
 import { validateProject, validateSquad, validateWeights } from "../projects";
 import { isOpen as isFormOpen, validateAnswers, validateForm } from "../forms";
 import { validateScript } from "../scripts";
+import {
+  validateAssessment,
+  validateTemplate as validateAssessmentTemplate,
+} from "../assessment";
 import {
   buildPayload as buildWebhookPayload,
   newDelivery as newWebhookDelivery,
@@ -160,6 +166,8 @@ export class LocalStorageService implements DataService {
         parsed.dossiers ??= [];
         parsed.statementLines ??= [];
         parsed.scripts ??= [];
+        parsed.assessmentTemplates ??= [];
+        parsed.assessments ??= [];
         parsed.webhooks ??= [];
         parsed.webhookDeliveries ??= [];
         parsed.forms ??= [];
@@ -557,6 +565,39 @@ export class LocalStorageService implements DataService {
     );
     this.write(db);
     return interaction;
+  }
+
+  // ── Análise de perfil e concorrência ──────────────────────────
+  async saveAssessmentTemplate(template: AssessmentTemplate): Promise<AssessmentTemplate> {
+    const invalid = validateAssessmentTemplate(template);
+    if (invalid) throw new Error(invalid);
+    const db = this.read();
+    const list = db.assessmentTemplates ?? [];
+    const next = { ...template, updatedAt: nowISO() };
+    db.assessmentTemplates = list.some((t) => t.id === template.id)
+      ? list.map((t) => (t.id === template.id ? next : t))
+      : [...list, next];
+    this.write(db);
+    return next;
+  }
+
+  async saveAssessment(assessment: Assessment): Promise<Assessment> {
+    const invalid = validateAssessment(assessment);
+    if (invalid) throw new Error(invalid);
+    const db = this.read();
+    const list = db.assessments ?? [];
+    const next = { ...assessment, updatedAt: nowISO() };
+    db.assessments = list.some((a) => a.id === assessment.id)
+      ? list.map((a) => (a.id === assessment.id ? next : a))
+      : [...list, next];
+    this.write(db);
+    return next;
+  }
+
+  async deleteAssessment(id: string): Promise<void> {
+    const db = this.read();
+    db.assessments = (db.assessments ?? []).filter((a) => a.id !== id);
+    this.write(db);
   }
 
   // ── Webhooks de saída ─────────────────────────────────────────

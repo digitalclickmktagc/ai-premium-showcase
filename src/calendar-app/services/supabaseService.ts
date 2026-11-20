@@ -17,6 +17,8 @@ import type {
   Contract,
   ContractingProcess,
   CrmTask,
+  Assessment,
+  AssessmentTemplate,
   BriefingForm,
   Dossier,
   DossierTemplate,
@@ -197,6 +199,27 @@ const toInteraction = (r: any): Interaction => ({
   author: r.author ?? undefined,
   content: r.content,
   answered: r.answered ?? undefined,
+});
+const toAssessmentTemplate = (r: any): AssessmentTemplate => ({
+  id: r.id,
+  name: r.name,
+  questions: r.questions ?? [],
+  bands: r.bands ?? [],
+  createdAt: r.created_at,
+  updatedAt: r.updated_at,
+});
+const toAssessment = (r: any): Assessment => ({
+  id: r.id,
+  clientId: r.client_id,
+  templateId: r.template_id,
+  title: r.title,
+  subjects: r.subjects ?? [],
+  scores: r.scores ?? {},
+  conclusions: r.conclusions ?? undefined,
+  status: r.status,
+  concludedAt: r.concluded_at ?? undefined,
+  createdAt: r.created_at,
+  updatedAt: r.updated_at,
 });
 const toWebhook = (r: any): WebhookSubscription => ({
   id: r.id,
@@ -882,6 +905,8 @@ export class SupabaseService implements DataService {
         squads: [],
         statementLines: [],
         scripts: [],
+        assessmentTemplates: [],
+        assessments: [],
         webhooks: [],
         webhookDeliveries: [],
         forms: [],
@@ -919,6 +944,8 @@ export class SupabaseService implements DataService {
       squads,
       statementLines,
       scripts,
+      assessmentTemplates,
+      assessments,
       webhooks,
       webhookDeliveries,
       forms,
@@ -958,6 +985,8 @@ export class SupabaseService implements DataService {
         this.rest<any[]>("squad?select=*&order=name.asc"),
         this.rest<any[]>("statement_line?select=*&order=date.desc"),
         this.rest<any[]>("script?select=*&order=created_at.desc"),
+        this.rest<any[]>("assessment_template?select=*&order=created_at.asc"),
+        this.rest<any[]>("assessment?select=*&order=created_at.desc"),
         this.rest<any[]>("webhook_subscription?select=*&order=created_at.asc"),
         // O histórico cresce sem parar: só as últimas entregas viajam.
         this.rest<any[]>("webhook_delivery?select=*&order=created_at.desc&limit=200"),
@@ -996,6 +1025,8 @@ export class SupabaseService implements DataService {
       squads: squads.map(toSquad),
       statementLines: statementLines.map(toStatementLine),
       scripts: scripts.map(toScript),
+      assessmentTemplates: assessmentTemplates.map(toAssessmentTemplate),
+      assessments: assessments.map(toAssessment),
       webhooks: webhooks.map(toWebhook),
       webhookDeliveries: webhookDeliveries.map(toWebhookDelivery),
       forms: forms.map(toForm),
@@ -1312,6 +1343,47 @@ export class SupabaseService implements DataService {
     });
     return toInteraction(row);
   }
+  async saveAssessmentTemplate(template: AssessmentTemplate): Promise<AssessmentTemplate> {
+    const [row] = await this.rest<any[]>("assessment_template", {
+      method: "POST",
+      headers: { Prefer: "return=representation,resolution=merge-duplicates" },
+      body: JSON.stringify({
+        id: template.id,
+        name: template.name.trim(),
+        questions: template.questions,
+        bands: template.bands,
+        created_at: template.createdAt,
+        updated_at: new Date().toISOString(),
+      }),
+    });
+    return toAssessmentTemplate(row);
+  }
+
+  async saveAssessment(assessment: Assessment): Promise<Assessment> {
+    const [row] = await this.rest<any[]>("assessment", {
+      method: "POST",
+      headers: { Prefer: "return=representation,resolution=merge-duplicates" },
+      body: JSON.stringify({
+        id: assessment.id,
+        client_id: assessment.clientId,
+        template_id: assessment.templateId,
+        title: assessment.title.trim(),
+        subjects: assessment.subjects,
+        scores: assessment.scores,
+        conclusions: assessment.conclusions ?? null,
+        status: assessment.status,
+        concluded_at: assessment.concludedAt ?? null,
+        created_at: assessment.createdAt,
+        updated_at: new Date().toISOString(),
+      }),
+    });
+    return toAssessment(row);
+  }
+
+  async deleteAssessment(id: string): Promise<void> {
+    await this.rest<void>(`assessment?id=eq.${encodeURIComponent(id)}`, { method: "DELETE" });
+  }
+
   async saveWebhook(subscription: WebhookSubscription): Promise<WebhookSubscription> {
     const [row] = await this.rest<any[]>("webhook_subscription", {
       method: "POST",

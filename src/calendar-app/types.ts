@@ -677,6 +677,56 @@ export interface ApprovalCodeEntry {
   expiresAt: number;
 }
 
+// ── Análise de perfil e concorrência (ficha 17, F17d) ────────
+
+export interface AssessmentQuestion {
+  id: string;
+  group: string;
+  label: string;
+  /** Relative weight inside the score. Always greater than zero. */
+  weight: number;
+}
+
+export interface AssessmentBand {
+  /** Minimum score, 0–100, for this verdict. */
+  min: number;
+  label: string;
+}
+
+export interface AssessmentTemplate {
+  id: string;
+  name: string;
+  questions: AssessmentQuestion[];
+  bands: AssessmentBand[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AssessmentSubject {
+  id: string;
+  name: string;
+  kind: "cliente" | "concorrente";
+  handle?: string;
+  followers?: number;
+  frequency?: string;
+  notes?: string;
+}
+
+export interface Assessment {
+  id: string;
+  clientId: string;
+  templateId: string;
+  title: string;
+  subjects: AssessmentSubject[];
+  /** subjectId → questionId → 0..5. */
+  scores: Record<string, Record<string, number>>;
+  conclusions?: string;
+  status: "em_andamento" | "concluida";
+  concludedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // ── Webhooks de saída (ficha 22, F22) ────────────────────────
 
 export type WebhookEvent =
@@ -1147,6 +1197,9 @@ export interface Database {
   statementLines?: StatementLine[];
   /** Roteiros de vídeo e stories (ficha 17). */
   scripts?: Script[];
+  /** Análise de perfil e concorrência (ficha 17). */
+  assessmentTemplates?: AssessmentTemplate[];
+  assessments?: Assessment[];
   /** Webhooks de saída (ficha 22). */
   webhooks?: WebhookSubscription[];
   webhookDeliveries?: WebhookDelivery[];
