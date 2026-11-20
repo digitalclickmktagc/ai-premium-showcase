@@ -17,9 +17,12 @@ import type {
   Contract,
   ContractingProcess,
   CrmTask,
+  Dossier,
+  DossierTemplate,
   Idea,
   MonthlyPlan,
   PautaItem,
+  PublicDossier,
   Deal,
   Interaction,
   FinanceAccount,
@@ -183,6 +186,23 @@ const toInteraction = (r: any): Interaction => ({
   author: r.author ?? undefined,
   content: r.content,
   answered: r.answered ?? undefined,
+});
+const toDossierTemplate = (r: any): DossierTemplate => ({
+  id: r.id,
+  name: r.name,
+  sections: r.sections ?? [],
+  createdAt: r.created_at,
+  updatedAt: r.updated_at,
+});
+const toDossier = (r: any): Dossier => ({
+  id: r.id,
+  clientId: r.client_id,
+  templateId: r.template_id,
+  sections: r.sections ?? [],
+  shareToken: r.share_token ?? undefined,
+  shareEnabled: r.share_enabled ?? false,
+  createdAt: r.created_at,
+  updatedAt: r.updated_at,
 });
 const toPlan = (r: any): MonthlyPlan => ({
   id: r.id,
@@ -743,6 +763,8 @@ export class SupabaseService implements DataService {
         ideas: [],
         plans: [],
         pautaItems: [],
+        dossierTemplates: [],
+        dossiers: [],
         blocks: [],
         processes: [],
       };
@@ -770,6 +792,8 @@ export class SupabaseService implements DataService {
       ideas,
       plans,
       pautaRows,
+      dossierTemplates,
+      dossiers,
       blocks,
       processes,
     ] = await Promise.all([
@@ -798,6 +822,8 @@ export class SupabaseService implements DataService {
         this.rest<any[]>("idea?select=*&order=created_at.desc"),
         this.rest<any[]>("monthly_plan?select=*&order=month.desc"),
         this.rest<any[]>("pauta_item?select=*&order=date.asc"),
+        this.rest<any[]>("dossier_template?select=*&order=created_at.asc"),
+        this.rest<any[]>("dossier?select=*"),
         this.rest<any[]>("crm_block?select=*"),
         this.rest<any[]>("contracting_process?select=*"),
       ]);
@@ -824,6 +850,8 @@ export class SupabaseService implements DataService {
       ideas: ideas.map(toIdea),
       plans: plans.map(toPlan),
       pautaItems: pautaRows.map(toPautaItem),
+      dossierTemplates: dossierTemplates.map(toDossierTemplate),
+      dossiers: dossiers.map(toDossier),
       blocks: blocks.map(toBlock),
       processes: processes.map(toProcess),
       availability: cfg[0]
@@ -1133,6 +1161,51 @@ export class SupabaseService implements DataService {
     });
     return toInteraction(row);
   }
+  async saveDossierTemplate(template: DossierTemplate): Promise<DossierTemplate> {
+    const [row] = await this.rest<any[]>("dossier_template", {
+      method: "POST",
+      headers: { Prefer: "return=representation,resolution=merge-duplicates" },
+      body: JSON.stringify({
+        id: template.id,
+        name: template.name.trim(),
+        sections: template.sections,
+        created_at: template.createdAt,
+        updated_at: new Date().toISOString(),
+      }),
+    });
+    return toDossierTemplate(row);
+  }
+
+  async saveDossier(dossier: Dossier): Promise<Dossier> {
+    const [row] = await this.rest<any[]>("dossier", {
+      method: "POST",
+      headers: { Prefer: "return=representation,resolution=merge-duplicates" },
+      body: JSON.stringify({
+        id: dossier.id,
+        client_id: dossier.clientId,
+        template_id: dossier.templateId,
+        sections: dossier.sections,
+        share_token: dossier.shareToken ?? null,
+        share_enabled: dossier.shareEnabled,
+        created_at: dossier.createdAt,
+        updated_at: new Date().toISOString(),
+      }),
+    });
+    return toDossier(row);
+  }
+
+  async getPublicDossier(token: string): Promise<PublicDossier | null> {
+    // A SECURITY DEFINER function, called anonymously: the anon role has no
+    // grant on `dossier`, so the internal sections are not merely filtered
+    // in the client — they never leave the database.
+    const data = await this.rest<PublicDossier | null>("rpc/public_dossier", {
+      method: "POST",
+      useUser: false,
+      body: JSON.stringify({ p_token: token }),
+    });
+    return data ?? null;
+  }
+
   async savePlan(plan: MonthlyPlan): Promise<MonthlyPlan> {
     const [row] = await this.rest<any[]>("monthly_plan", {
       method: "POST",

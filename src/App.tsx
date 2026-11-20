@@ -18,6 +18,8 @@ import CrmPage from "./calendar-app/pages/CrmPage";
 import TodayPage from "./calendar-app/pages/TodayPage";
 import IdeasPage from "./calendar-app/pages/IdeasPage";
 import PautaPage from "./calendar-app/pages/PautaPage";
+import DossierPage from "./calendar-app/pages/DossierPage";
+import PublicDossierPage from "./calendar-app/pages/PublicDossierPage";
 import PublicProposalPage from "./calendar-app/pages/PublicProposalPage";
 import PublicContractPage from "./calendar-app/pages/PublicContractPage";
 import CalendarPage from "./calendar-app/pages/CalendarPage";
@@ -51,6 +53,14 @@ const AdminApp = () => (
           element={
             <RequireAuth>
               <TodayPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="dossie"
+          element={
+            <RequireAuth>
+              <DossierPage />
             </RequireAuth>
           }
         />
@@ -140,6 +150,15 @@ const App = () => (
             element={
               <ThemeProvider>
                 <PublicContractPage />
+              </ThemeProvider>
+            }
+          />
+          {/* Client's strategy page — read-only, token only */}
+          <Route
+            path="/estrategia/:token"
+            element={
+              <ThemeProvider>
+                <PublicDossierPage />
               </ThemeProvider>
             }
           />

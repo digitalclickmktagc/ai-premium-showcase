@@ -5,9 +5,12 @@ import type {
   Contract,
   ContractingProcess,
   CrmTask,
+  Dossier,
+  DossierTemplate,
   Idea,
   MonthlyPlan,
   PautaItem,
+  PublicDossier,
   Deal,
   Interaction,
   FinanceAccount,
@@ -39,6 +42,7 @@ import type {
 import { randomClientColor, shareToken, uid } from "../utils";
 import { normalizeStatus } from "../health";
 import { validatePlan, validatePlanItem as validatePautaItem } from "../pauta";
+import { publicSections, validateTemplate } from "../dossier";
 import {
   APPROVAL_CODE_TTL_MS,
   codesMatch,
@@ -134,6 +138,8 @@ export class LocalStorageService implements DataService {
         parsed.crmTasks ??= [];
         parsed.ideas ??= [];
         parsed.plans ??= [];
+        parsed.dossierTemplates ??= [];
+        parsed.dossiers ??= [];
         parsed.pautaItems ??= [];
         parsed.blocks ??= [];
         parsed.processes ??= [];
@@ -525,6 +531,49 @@ export class LocalStorageService implements DataService {
     );
     this.write(db);
     return interaction;
+  }
+
+  // ── Dossiê estratégico ────────────────────────────────────────
+  async saveDossierTemplate(template: DossierTemplate): Promise<DossierTemplate> {
+    const invalid = validateTemplate(template);
+    if (invalid) throw new Error(invalid);
+    const db = this.read();
+    const list = db.dossierTemplates ?? [];
+    const next = { ...template, updatedAt: nowISO() };
+    db.dossierTemplates = list.some((t) => t.id === template.id)
+      ? list.map((t) => (t.id === template.id ? next : t))
+      : [...list, next];
+    this.write(db);
+    return next;
+  }
+
+  async saveDossier(dossier: Dossier): Promise<Dossier> {
+    const db = this.read();
+    if (!db.clients.some((c) => c.id === dossier.clientId))
+      throw new Error("Cliente não encontrado.");
+    const list = db.dossiers ?? [];
+    const next = { ...dossier, updatedAt: nowISO() };
+    db.dossiers = list.some((d) => d.id === dossier.id)
+      ? list.map((d) => (d.id === dossier.id ? next : d))
+      : [...list, next];
+    this.write(db);
+    return next;
+  }
+
+  async getPublicDossier(token: string): Promise<PublicDossier | null> {
+    const db = this.read();
+    const dossier = (db.dossiers ?? []).find((d) => d.shareToken === token);
+    // A paused link has to look exactly like a link that never existed.
+    if (!dossier || !dossier.shareEnabled) return null;
+    const template = (db.dossierTemplates ?? []).find((t) => t.id === dossier.templateId);
+    const client = db.clients.find((c) => c.id === dossier.clientId);
+    if (!template || !client) return null;
+    const { defs, sections } = publicSections(dossier, template);
+    return {
+      client: { name: client.name, logoUrl: client.logoUrl, color: client.color },
+      template: { name: template.name, sections: defs },
+      sections,
+    };
   }
 
   // ── Pauta única e planejamento mensal ─────────────────────────

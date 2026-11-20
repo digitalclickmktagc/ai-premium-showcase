@@ -670,6 +670,80 @@ export interface ApprovalCodeEntry {
   expiresAt: number;
 }
 
+// ── Dossiê estratégico (ficha 16) ────────────────────────────
+
+/** How one section of the dossier is filled in. */
+export type DossierSectionKind = "texto" | "campos" | "lista" | "imagens" | "tabela";
+
+/** Who may read a section. Internal sections never cross the public link. */
+export type DossierVisibility = "cliente" | "interno";
+
+export interface DossierFieldDef {
+  id: string;
+  label: string;
+  hint?: string;
+}
+
+/**
+ * One section of the agency's dossier model. The benchmark's own critique is
+ * that its sections are fixed; here they are data the agency edits.
+ */
+export interface DossierSectionDef {
+  id: string;
+  title: string;
+  kind: DossierSectionKind;
+  /** For `campos`, the fields; for `tabela`, the columns. */
+  fields?: DossierFieldDef[];
+  hint?: string;
+  defaultVisibility: DossierVisibility;
+}
+
+export interface DossierTemplate {
+  id: string;
+  name: string;
+  sections: DossierSectionDef[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DossierImage {
+  id: string;
+  url: string;
+  caption?: string;
+}
+
+/** The content of one section for one client. */
+export interface DossierSection {
+  sectionId: string;
+  visibility: DossierVisibility;
+  text?: string;
+  /** `campos`: field id → value. */
+  values?: Record<string, string>;
+  list?: string[];
+  images?: DossierImage[];
+  /** `tabela`: one object per row, keyed by column id. */
+  rows?: Record<string, string>[];
+}
+
+export interface Dossier {
+  id: string;
+  clientId: string;
+  templateId: string;
+  sections: DossierSection[];
+  /** Public read link. Absent until the agency generates one. */
+  shareToken?: string;
+  shareEnabled: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** What the public strategy link serves. Internal sections are not here. */
+export interface PublicDossier {
+  client: { name: string; logoUrl?: string; color: string };
+  template: { name: string; sections: DossierSectionDef[] };
+  sections: DossierSection[];
+}
+
 // ── Pauta única e planejamento mensal (ficha 17, F17a) ───────
 
 export type FunnelStage = "descoberta" | "interesse" | "conversao" | "fidelizacao";
@@ -833,6 +907,9 @@ export interface Database {
   /** Pauta única e planejamento mensal (ficha 17). */
   plans?: MonthlyPlan[];
   pautaItems?: PautaItem[];
+  /** Dossiê estratégico (ficha 16). */
+  dossierTemplates?: DossierTemplate[];
+  dossiers?: Dossier[];
   /** Stage automations, scoped per calendar. Admin-only. */
   automationRules?: AutomationRule[];
   /** Insert-only execution log for those automations. Admin-only. */

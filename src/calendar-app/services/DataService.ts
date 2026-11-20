@@ -6,9 +6,12 @@ import type {
   Contract,
   ContractingProcess,
   CrmTask,
+  Dossier,
+  DossierTemplate,
   Idea,
   MonthlyPlan,
   PautaItem,
+  PublicDossier,
   Deal,
   Interaction,
   FinanceAccount,
@@ -163,6 +166,15 @@ export interface DataService {
   // ── Banco de ideias (ficha 08) ────────────────────────────────
   saveIdea(idea: Idea): Promise<Idea>;
   deleteIdea(id: string): Promise<void>;
+
+  // ── Dossiê estratégico (ficha 16) ─────────────────────────────
+  saveDossierTemplate(template: DossierTemplate): Promise<DossierTemplate>;
+  saveDossier(dossier: Dossier): Promise<Dossier>;
+  /**
+   * The client's read-only strategy page. Anonymous: it must never serve a
+   * section marked internal, and never anything of another client.
+   */
+  getPublicDossier(token: string): Promise<PublicDossier | null>;
 
   // ── Pauta única e planejamento mensal (ficha 17) ──────────────
   savePlan(plan: MonthlyPlan): Promise<MonthlyPlan>;

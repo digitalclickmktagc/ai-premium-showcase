@@ -15,6 +15,8 @@ import type {
   Contract,
   ContractingProcess,
   CrmTask,
+  Dossier,
+  DossierTemplate,
   Idea,
   MonthlyPlan,
   PautaItem,
@@ -88,6 +90,8 @@ interface AppContextValue {
   ideas: Idea[];
   plans: MonthlyPlan[];
   pautaItems: PautaItem[];
+  dossierTemplates: DossierTemplate[];
+  dossiers: Dossier[];
   blocks: ContactBlock[];
   processes: ContractingProcess[];
   accounts: FinanceAccount[];
@@ -140,6 +144,10 @@ interface AppContextValue {
   requestApproval: (id: string, teamMessage?: string) => Promise<Post>;
   deletePost: (id: string) => Promise<Post>;
   restorePost: (id: string, status?: PostStatus) => Promise<Post>;
+
+  // dossiê estratégico
+  saveDossierTemplate: (t: DossierTemplate) => Promise<DossierTemplate>;
+  saveDossier: (d: Dossier) => Promise<Dossier>;
 
   // pauta única e planejamento mensal
   savePlan: (p: MonthlyPlan) => Promise<MonthlyPlan>;
@@ -242,6 +250,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [ideas, setIdeas] = useState<Idea[]>([]);
   const [plans, setPlans] = useState<MonthlyPlan[]>([]);
   const [pautaItems, setPautaItems] = useState<PautaItem[]>([]);
+  const [dossierTemplates, setDossierTemplates] = useState<DossierTemplate[]>([]);
+  const [dossiers, setDossiers] = useState<Dossier[]>([]);
   const [blocks, setBlocks] = useState<ContactBlock[]>([]);
   const [processes, setProcesses] = useState<ContractingProcess[]>([]);
   const [accounts, setAccounts] = useState<FinanceAccount[]>([]);
@@ -284,6 +294,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setIdeas(db.ideas ?? []);
     setPlans(db.plans ?? []);
     setPautaItems(db.pautaItems ?? []);
+    setDossierTemplates(db.dossierTemplates ?? []);
+    setDossiers(db.dossiers ?? []);
     setBlocks(db.blocks ?? []);
     setProcesses(db.processes ?? []);
     setAccounts(db.accounts ?? []);
@@ -641,6 +653,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const addInteraction = useCallback(
     async (i: Interaction) => {
       const res = await service.addInteraction(i);
+      await refresh();
+      return res;
+    },
+    [service, refresh],
+  );
+  const saveDossierTemplate = useCallback(
+    async (t: DossierTemplate) => {
+      const res = await service.saveDossierTemplate(t);
+      await refresh();
+      return res;
+    },
+    [service, refresh],
+  );
+  const saveDossier = useCallback(
+    async (d: Dossier) => {
+      const res = await service.saveDossier(d);
       await refresh();
       return res;
     },
@@ -1257,6 +1285,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     ideas,
     plans,
     pautaItems,
+    dossierTemplates,
+    dossiers,
+    saveDossierTemplate,
+    saveDossier,
     savePlan,
     deletePlan,
     savePautaItems,
