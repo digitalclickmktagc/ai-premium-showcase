@@ -17,6 +17,7 @@ import type {
   StatementLine,
   PublicDossier,
   PublicForm,
+  Script,
   Squad,
   Deal,
   Interaction,
@@ -52,6 +53,7 @@ import { validatePlan, validatePlanItem as validatePautaItem } from "../pauta";
 import { publicSections, validateTemplate } from "../dossier";
 import { validateProject, validateSquad, validateWeights } from "../projects";
 import { isOpen as isFormOpen, validateAnswers, validateForm } from "../forms";
+import { validateScript } from "../scripts";
 import {
   APPROVAL_CODE_TTL_MS,
   codesMatch,
@@ -150,6 +152,7 @@ export class LocalStorageService implements DataService {
         parsed.dossierTemplates ??= [];
         parsed.dossiers ??= [];
         parsed.statementLines ??= [];
+        parsed.scripts ??= [];
         parsed.forms ??= [];
         parsed.formResponses ??= [];
         parsed.projects ??= [];
@@ -545,6 +548,31 @@ export class LocalStorageService implements DataService {
     );
     this.write(db);
     return interaction;
+  }
+
+  // ── Roteiros ──────────────────────────────────────────────────
+  async saveScript(script: Script): Promise<Script> {
+    const invalid = validateScript(script);
+    if (invalid) throw new Error(invalid);
+    const db = this.read();
+    const list = db.scripts ?? [];
+    const stored = list.find((s) => s.id === script.id);
+    // Optimistic locking: two people on the same script is normal; silently
+    // throwing one of them away is not.
+    if (stored && stored.version > script.version)
+      throw new Error("Alguém salvou este roteiro enquanto você editava. Recarregue para não perder o trabalho dessa pessoa.");
+    const next = { ...script, version: script.version + 1, updatedAt: nowISO() };
+    db.scripts = stored
+      ? list.map((s) => (s.id === script.id ? next : s))
+      : [...list, next];
+    this.write(db);
+    return next;
+  }
+
+  async deleteScript(id: string): Promise<void> {
+    const db = this.read();
+    db.scripts = (db.scripts ?? []).filter((s) => s.id !== id);
+    this.write(db);
   }
 
   // ── Formulários de briefing ───────────────────────────────────

@@ -84,6 +84,8 @@ function fakeBackend(db: Database) {
     saveDeal: notUsed as unknown as DataService["saveDeal"],
     deleteDeal: async () => undefined,
     addInteraction: notUsed as unknown as DataService["addInteraction"],
+    saveScript: notUsed as unknown as DataService["saveScript"],
+    deleteScript: notUsed as unknown as DataService["deleteScript"],
     saveForm: notUsed as unknown as DataService["saveForm"],
     deleteForm: notUsed as unknown as DataService["deleteForm"],
     getPublicForm: notUsed as unknown as DataService["getPublicForm"],

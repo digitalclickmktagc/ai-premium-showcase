@@ -1,5 +1,6 @@
 import { useState, type KeyboardEvent } from "react";
 import {
+  Film,
   CheckSquare,
   Clock,
   ExternalLink,
@@ -34,6 +35,7 @@ import {
 } from "../cards";
 import { formatTimestamp } from "../utils";
 import { useApp } from "../store/AppProvider";
+import ScriptEditor from "./ScriptEditor";
 
 /**
  * The card's production workspace (benchmark spec 02): checklist, internal
@@ -142,7 +144,7 @@ export default function CardWorkspace({ post }: { post: Post }) {
       </div>
 
       <Tabs defaultValue="checklist" className="p-3">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="checklist" className="text-xs">
             <CheckSquare className="h-3.5 w-3.5 sm:mr-1" />
             <span className="hidden sm:inline">Checklist</span>
@@ -157,6 +159,10 @@ export default function CardWorkspace({ post }: { post: Post }) {
             <Paperclip className="h-3.5 w-3.5 sm:mr-1" />
             <span className="hidden sm:inline">Anexos</span>
             {count(attachments.length)}
+          </TabsTrigger>
+          <TabsTrigger value="roteiro" className="text-xs">
+            <Film className="h-3.5 w-3.5 sm:mr-1" />
+            <span className="hidden sm:inline">Roteiro</span>
           </TabsTrigger>
           <TabsTrigger value="tempo" className="text-xs">
             <Clock className="h-3.5 w-3.5 sm:mr-1" />
@@ -342,6 +348,11 @@ export default function CardWorkspace({ post }: { post: Post }) {
             Anexos são links (Drive, Dropbox, Figma). Enviar o arquivo em si exige o
             Storage do Supabase, que ainda não está configurado.
           </p>
+        </TabsContent>
+
+        {/* ── Roteiro (ficha 17, F17c) ── */}
+        <TabsContent value="roteiro" className="mt-3">
+          <ScriptEditor post={post} />
         </TabsContent>
 
         {/* ── Tempo ── */}

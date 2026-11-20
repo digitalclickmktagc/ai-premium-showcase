@@ -677,6 +677,58 @@ export interface ApprovalCodeEntry {
   expiresAt: number;
 }
 
+// ── Roteiros de vídeo e stories (ficha 17, F17c) ─────────────
+
+export type ScriptKind = "video" | "stories";
+
+export type StoryScreenKind =
+  | "texto"
+  | "enquete"
+  | "caixinha"
+  | "quiz"
+  | "contagem"
+  | "link"
+  | "produto"
+  | "bastidor";
+
+export interface ScriptScene {
+  id: string;
+  /** Stories only: what the screen is. */
+  screenKind?: StoryScreenKind;
+  shot?: string;
+  speech?: string;
+  onScreen?: string;
+  soundtrack?: string;
+  seconds?: number;
+  /** Internal. Never leaves the agency. */
+  notes?: string;
+  imageUrl?: string;
+}
+
+export type ScriptStatus = "rascunho" | "em_revisao" | "aprovado";
+
+/** A script belongs to a card; the card is what the client decides on. */
+export interface Script {
+  id: string;
+  postId: string;
+  kind: ScriptKind;
+  title: string;
+  goal?: string;
+  audience?: string;
+  tone?: string;
+  cta?: string;
+  hashtags?: string;
+  caption?: string;
+  scenes: ScriptScene[];
+  /** Ids of the optional columns switched on for this script. */
+  fields: string[];
+  status: ScriptStatus;
+  /** Bumped on every save; an older version is refused. */
+  version: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // ── Formulários de briefing (ficha 17, F17b) ─────────────────
 
 export type FormQuestionKind =
@@ -1053,6 +1105,8 @@ export interface Database {
   dossiers?: Dossier[];
   /** Conciliação de extrato (ficha 13). */
   statementLines?: StatementLine[];
+  /** Roteiros de vídeo e stories (ficha 17). */
+  scripts?: Script[];
   /** Formulários de briefing (ficha 17). */
   forms?: BriefingForm[];
   formResponses?: FormResponse[];

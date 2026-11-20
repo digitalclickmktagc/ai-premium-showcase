@@ -18,6 +18,7 @@ import type {
   StatementLine,
   PublicDossier,
   PublicForm,
+  Script,
   Squad,
   Deal,
   Interaction,
@@ -173,6 +174,11 @@ export interface DataService {
   // ── Banco de ideias (ficha 08) ────────────────────────────────
   saveIdea(idea: Idea): Promise<Idea>;
   deleteIdea(id: string): Promise<void>;
+
+  // ── Roteiros (ficha 17) ───────────────────────────────────────
+  /** Refused when someone else saved a newer version meanwhile. */
+  saveScript(script: Script): Promise<Script>;
+  deleteScript(id: string): Promise<void>;
 
   // ── Formulários de briefing (ficha 17) ────────────────────────
   saveForm(form: BriefingForm): Promise<BriefingForm>;

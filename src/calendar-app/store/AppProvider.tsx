@@ -19,6 +19,7 @@ import type {
   Dossier,
   DossierTemplate,
   FormResponse,
+  Script,
   HealthWeights,
   Project,
   Squad,
@@ -102,6 +103,7 @@ interface AppContextValue {
   projects: Project[];
   squads: Squad[];
   statementLines: StatementLine[];
+  scripts: Script[];
   forms: BriefingForm[];
   formResponses: FormResponse[];
   healthWeights?: HealthWeights;
@@ -157,6 +159,10 @@ interface AppContextValue {
   requestApproval: (id: string, teamMessage?: string) => Promise<Post>;
   deletePost: (id: string) => Promise<Post>;
   restorePost: (id: string, status?: PostStatus) => Promise<Post>;
+
+  // roteiros
+  saveScript: (s: Script) => Promise<Script>;
+  deleteScript: (id: string) => Promise<void>;
 
   // formulários de briefing
   saveForm: (f: BriefingForm) => Promise<BriefingForm>;
@@ -283,6 +289,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [projects, setProjects] = useState<Project[]>([]);
   const [squads, setSquads] = useState<Squad[]>([]);
   const [statementLines, setStatementLines] = useState<StatementLine[]>([]);
+  const [scripts, setScripts] = useState<Script[]>([]);
   const [forms, setForms] = useState<BriefingForm[]>([]);
   const [formResponses, setFormResponses] = useState<FormResponse[]>([]);
   const [healthWeights, setHealthWeights] = useState<HealthWeights | undefined>();
@@ -334,6 +341,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setProjects(db.projects ?? []);
     setSquads(db.squads ?? []);
     setStatementLines(db.statementLines ?? []);
+    setScripts(db.scripts ?? []);
     setForms(db.forms ?? []);
     setFormResponses(db.formResponses ?? []);
     setHealthWeights(db.healthWeights);
@@ -696,6 +704,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const res = await service.addInteraction(i);
       await refresh();
       return res;
+    },
+    [service, refresh],
+  );
+  const saveScript = useCallback(
+    async (sc: Script) => {
+      const res = await service.saveScript(sc);
+      await refresh();
+      return res;
+    },
+    [service, refresh],
+  );
+  const deleteScript = useCallback(
+    async (id: string) => {
+      await service.deleteScript(id);
+      await refresh();
     },
     [service, refresh],
   );
@@ -1418,8 +1441,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     projects,
     squads,
     statementLines,
+    scripts,
     forms,
     formResponses,
+    saveScript,
+    deleteScript,
     saveForm,
     deleteForm,
     healthWeights,

@@ -29,6 +29,7 @@ import type {
   StatementLine,
   PublicDossier,
   PublicForm,
+  Script,
   Squad,
   Deal,
   Interaction,
@@ -194,6 +195,24 @@ const toInteraction = (r: any): Interaction => ({
   author: r.author ?? undefined,
   content: r.content,
   answered: r.answered ?? undefined,
+});
+const toScript = (r: any): Script => ({
+  id: r.id,
+  postId: r.post_id,
+  kind: r.kind,
+  title: r.title,
+  goal: r.goal ?? undefined,
+  audience: r.audience ?? undefined,
+  tone: r.tone ?? undefined,
+  cta: r.cta ?? undefined,
+  hashtags: r.hashtags ?? undefined,
+  caption: r.caption ?? undefined,
+  scenes: r.scenes ?? [],
+  fields: r.fields ?? [],
+  status: r.status,
+  version: r.version ?? 1,
+  createdAt: r.created_at,
+  updatedAt: r.updated_at,
 });
 const toForm = (r: any): BriefingForm => ({
   id: r.id,
@@ -837,6 +856,7 @@ export class SupabaseService implements DataService {
         projects: [],
         squads: [],
         statementLines: [],
+        scripts: [],
         forms: [],
         formResponses: [],
         blocks: [],
@@ -871,6 +891,7 @@ export class SupabaseService implements DataService {
       projects,
       squads,
       statementLines,
+      scripts,
       forms,
       formResponses,
       agencySettings,
@@ -907,6 +928,7 @@ export class SupabaseService implements DataService {
         this.rest<any[]>("project?select=*&order=created_at.desc"),
         this.rest<any[]>("squad?select=*&order=name.asc"),
         this.rest<any[]>("statement_line?select=*&order=date.desc"),
+        this.rest<any[]>("script?select=*&order=created_at.desc"),
         this.rest<any[]>("briefing_form?select=*&order=created_at.desc"),
         this.rest<any[]>("form_response?select=*&order=at.desc"),
         this.rest<any[]>("agency_settings?select=*&limit=1"),
@@ -941,6 +963,7 @@ export class SupabaseService implements DataService {
       projects: projects.map(toProject),
       squads: squads.map(toSquad),
       statementLines: statementLines.map(toStatementLine),
+      scripts: scripts.map(toScript),
       forms: forms.map(toForm),
       formResponses: formResponses.map(toFormResponse),
       healthWeights: agencySettings[0]?.health_weights ?? undefined,
@@ -1255,6 +1278,38 @@ export class SupabaseService implements DataService {
     });
     return toInteraction(row);
   }
+  async saveScript(script: Script): Promise<Script> {
+    // The version check lives in the database too (a trigger), so a race
+    // between two tabs is refused there and not only here.
+    const [row] = await this.rest<any[]>("script", {
+      method: "POST",
+      headers: { Prefer: "return=representation,resolution=merge-duplicates" },
+      body: JSON.stringify({
+        id: script.id,
+        post_id: script.postId,
+        kind: script.kind,
+        title: script.title.trim(),
+        goal: script.goal ?? null,
+        audience: script.audience ?? null,
+        tone: script.tone ?? null,
+        cta: script.cta ?? null,
+        hashtags: script.hashtags ?? null,
+        caption: script.caption ?? null,
+        scenes: script.scenes,
+        fields: script.fields,
+        status: script.status,
+        version: script.version + 1,
+        created_at: script.createdAt,
+        updated_at: new Date().toISOString(),
+      }),
+    });
+    return toScript(row);
+  }
+
+  async deleteScript(id: string): Promise<void> {
+    await this.rest<void>(`script?id=eq.${encodeURIComponent(id)}`, { method: "DELETE" });
+  }
+
   async saveForm(form: BriefingForm): Promise<BriefingForm> {
     const [row] = await this.rest<any[]>("briefing_form", {
       method: "POST",
