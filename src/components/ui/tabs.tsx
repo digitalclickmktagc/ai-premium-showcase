@@ -12,7 +12,9 @@ const TabsList = React.forwardRef<
   <TabsPrimitive.List
     ref={ref}
     className={cn(
-      "inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground",
+      // max-w-full + scroll: com quatro ou cinco abas a lista estourava a
+      // largura do celular e empurrava a página inteira para o lado.
+      "inline-flex h-10 max-w-full items-center justify-center overflow-x-auto rounded-md bg-muted p-1 text-muted-foreground",
       className,
     )}
     {...props}

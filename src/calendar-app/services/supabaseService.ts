@@ -24,6 +24,7 @@ import type {
   MonthlyPlan,
   PautaItem,
   Project,
+  StatementLine,
   PublicDossier,
   Squad,
   Deal,
@@ -190,6 +191,19 @@ const toInteraction = (r: any): Interaction => ({
   author: r.author ?? undefined,
   content: r.content,
   answered: r.answered ?? undefined,
+});
+const toStatementLine = (r: any): StatementLine => ({
+  id: r.id,
+  accountId: r.account_id,
+  key: r.key,
+  date: r.date,
+  description: r.description ?? "",
+  amount: Number(r.amount_cents),
+  status: r.status,
+  entryId: r.entry_id ?? undefined,
+  settledEntry: r.settled_entry ?? undefined,
+  reconciledAt: r.reconciled_at ?? undefined,
+  createdAt: r.created_at,
 });
 const toProject = (r: any): Project => ({
   id: r.id,
@@ -801,6 +815,7 @@ export class SupabaseService implements DataService {
         dossiers: [],
         projects: [],
         squads: [],
+        statementLines: [],
         blocks: [],
         processes: [],
       };
@@ -832,6 +847,7 @@ export class SupabaseService implements DataService {
       dossiers,
       projects,
       squads,
+      statementLines,
       agencySettings,
       blocks,
       processes,
@@ -865,6 +881,7 @@ export class SupabaseService implements DataService {
         this.rest<any[]>("dossier?select=*"),
         this.rest<any[]>("project?select=*&order=created_at.desc"),
         this.rest<any[]>("squad?select=*&order=name.asc"),
+        this.rest<any[]>("statement_line?select=*&order=date.desc"),
         this.rest<any[]>("agency_settings?select=*&limit=1"),
         this.rest<any[]>("crm_block?select=*"),
         this.rest<any[]>("contracting_process?select=*"),
@@ -896,6 +913,7 @@ export class SupabaseService implements DataService {
       dossiers: dossiers.map(toDossier),
       projects: projects.map(toProject),
       squads: squads.map(toSquad),
+      statementLines: statementLines.map(toStatementLine),
       healthWeights: agencySettings[0]?.health_weights ?? undefined,
       blocks: blocks.map(toBlock),
       processes: processes.map(toProcess),
@@ -1208,6 +1226,34 @@ export class SupabaseService implements DataService {
     });
     return toInteraction(row);
   }
+  async saveStatementLines(lines: StatementLine[]): Promise<StatementLine[]> {
+    if (lines.length === 0) return [];
+    const rows = await this.rest<any[]>("statement_line", {
+      method: "POST",
+      headers: { Prefer: "return=representation,resolution=merge-duplicates" },
+      body: JSON.stringify(
+        lines.map((l) => ({
+          id: l.id,
+          account_id: l.accountId,
+          key: l.key,
+          date: l.date,
+          description: l.description,
+          amount_cents: l.amount,
+          status: l.status,
+          entry_id: l.entryId ?? null,
+          settled_entry: l.settledEntry ?? null,
+          reconciled_at: l.reconciledAt ?? null,
+          created_at: l.createdAt,
+        })),
+      ),
+    });
+    return rows.map(toStatementLine);
+  }
+
+  async deleteStatementLine(id: string): Promise<void> {
+    await this.rest<void>(`statement_line?id=eq.${encodeURIComponent(id)}`, { method: "DELETE" });
+  }
+
   async saveProject(project: Project): Promise<Project> {
     const [row] = await this.rest<any[]>("project", {
       method: "POST",

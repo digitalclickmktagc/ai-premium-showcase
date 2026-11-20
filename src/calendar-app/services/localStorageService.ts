@@ -12,6 +12,7 @@ import type {
   MonthlyPlan,
   PautaItem,
   Project,
+  StatementLine,
   PublicDossier,
   Squad,
   Deal,
@@ -144,6 +145,7 @@ export class LocalStorageService implements DataService {
         parsed.plans ??= [];
         parsed.dossierTemplates ??= [];
         parsed.dossiers ??= [];
+        parsed.statementLines ??= [];
         parsed.projects ??= [];
         parsed.squads ??= [];
         parsed.pautaItems ??= [];
@@ -537,6 +539,22 @@ export class LocalStorageService implements DataService {
     );
     this.write(db);
     return interaction;
+  }
+
+  // ── Conciliação de extrato ────────────────────────────────────
+  async saveStatementLines(lines: StatementLine[]): Promise<StatementLine[]> {
+    const db = this.read();
+    const byId = new Map((db.statementLines ?? []).map((l) => [l.id, l]));
+    for (const line of lines) byId.set(line.id, line);
+    db.statementLines = [...byId.values()];
+    this.write(db);
+    return lines;
+  }
+
+  async deleteStatementLine(id: string): Promise<void> {
+    const db = this.read();
+    db.statementLines = (db.statementLines ?? []).filter((l) => l.id !== id);
+    this.write(db);
   }
 
   // ── Projetos e squads ─────────────────────────────────────────

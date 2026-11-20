@@ -8,6 +8,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Landmark,
+  Link2,
   Plus,
   Repeat,
   RotateCcw,
@@ -20,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import AdminLayout from "../components/AdminLayout";
+import ReconcilePanel from "../components/ReconcilePanel";
 import EntryDialog from "../components/EntryDialog";
 import AccountDialog from "../components/AccountDialog";
 import EmptyState from "../components/EmptyState";
@@ -171,11 +173,19 @@ export default function FinancePage() {
           <TabsTrigger value="lancamentos" className="gap-1.5">
             <Tags className="h-3.5 w-3.5" /> Lançamentos
           </TabsTrigger>
+          <TabsTrigger value="conciliacao" className="gap-1.5">
+            <Link2 className="h-3.5 w-3.5" /> Conciliação
+          </TabsTrigger>
           <TabsTrigger value="contas" className="gap-1.5">
             <Landmark className="h-3.5 w-3.5" /> Contas
             <span className="text-muted-foreground">{accounts.length}</span>
           </TabsTrigger>
         </TabsList>
+
+        {/* ── Conciliação de extrato (ficha 13, F13b) ── */}
+        <TabsContent value="conciliacao" className="mt-4">
+          <ReconcilePanel />
+        </TabsContent>
 
         {/* ── Visão geral ── */}
         <TabsContent value="visao" className="mt-4 space-y-4">

@@ -13,6 +13,7 @@ import type {
   MonthlyPlan,
   PautaItem,
   Project,
+  StatementLine,
   PublicDossier,
   Squad,
   Deal,
@@ -169,6 +170,11 @@ export interface DataService {
   // ── Banco de ideias (ficha 08) ────────────────────────────────
   saveIdea(idea: Idea): Promise<Idea>;
   deleteIdea(id: string): Promise<void>;
+
+  // ── Conciliação de extrato (ficha 13) ─────────────────────────
+  /** Saves imported lines and the ones a reconciliation changed. */
+  saveStatementLines(lines: StatementLine[]): Promise<StatementLine[]>;
+  deleteStatementLine(id: string): Promise<void>;
 
   // ── Projetos e squads (ficha 14) ──────────────────────────────
   saveProject(project: Project): Promise<Project>;

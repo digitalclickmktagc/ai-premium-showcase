@@ -20,6 +20,7 @@ import type {
   HealthWeights,
   Project,
   Squad,
+  StatementLine,
   Idea,
   MonthlyPlan,
   PautaItem,
@@ -98,6 +99,7 @@ interface AppContextValue {
   dossiers: Dossier[];
   projects: Project[];
   squads: Squad[];
+  statementLines: StatementLine[];
   healthWeights?: HealthWeights;
   blocks: ContactBlock[];
   processes: ContractingProcess[];
@@ -151,6 +153,10 @@ interface AppContextValue {
   requestApproval: (id: string, teamMessage?: string) => Promise<Post>;
   deletePost: (id: string) => Promise<Post>;
   restorePost: (id: string, status?: PostStatus) => Promise<Post>;
+
+  // conciliação de extrato
+  saveStatementLines: (lines: StatementLine[]) => Promise<StatementLine[]>;
+  deleteStatementLine: (id: string) => Promise<void>;
 
   // projetos e squads
   saveProject: (p: Project) => Promise<Project>;
@@ -268,6 +274,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [dossiers, setDossiers] = useState<Dossier[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [squads, setSquads] = useState<Squad[]>([]);
+  const [statementLines, setStatementLines] = useState<StatementLine[]>([]);
   const [healthWeights, setHealthWeights] = useState<HealthWeights | undefined>();
   const [blocks, setBlocks] = useState<ContactBlock[]>([]);
   const [processes, setProcesses] = useState<ContractingProcess[]>([]);
@@ -316,6 +323,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setDossiers(db.dossiers ?? []);
     setProjects(db.projects ?? []);
     setSquads(db.squads ?? []);
+    setStatementLines(db.statementLines ?? []);
     setHealthWeights(db.healthWeights);
     setBlocks(db.blocks ?? []);
     setProcesses(db.processes ?? []);
@@ -676,6 +684,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const res = await service.addInteraction(i);
       await refresh();
       return res;
+    },
+    [service, refresh],
+  );
+  const saveStatementLines = useCallback(
+    async (lines: StatementLine[]) => {
+      const res = await service.saveStatementLines(lines);
+      await refresh();
+      return res;
+    },
+    [service, refresh],
+  );
+  const deleteStatementLine = useCallback(
+    async (id: string) => {
+      await service.deleteStatementLine(id);
+      await refresh();
     },
     [service, refresh],
   );
@@ -1367,7 +1390,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     dossiers,
     projects,
     squads,
+    statementLines,
     healthWeights,
+    saveStatementLines,
+    deleteStatementLine,
     saveProject,
     deleteProject,
     saveSquad,

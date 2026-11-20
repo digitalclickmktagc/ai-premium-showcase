@@ -414,7 +414,7 @@ export interface FinanceEntry {
   projectId?: string;
   /** 1-based position in a `parcelada` series. */
   seriesPosition?: number;
-  origin: "manual" | "serie" | "contrato";
+  origin: "manual" | "serie" | "contrato" | "extrato";
   /** Set on the mirror entry that reverses a settled one. */
   reversalOf?: string;
   createdAt: string;
@@ -675,6 +675,30 @@ export interface ApprovalCodeEntry {
   code: string;
   /** Epoch milliseconds. */
   expiresAt: number;
+}
+
+// ── Conciliação de extrato (ficha 13, F13b) ──────────────────
+
+export type StatementLineStatus = "a_conferir" | "conferida" | "ignorada";
+
+/** One line of a bank statement, as imported from CSV or OFX. */
+export interface StatementLine {
+  id: string;
+  accountId: string;
+  /** What identifies this transaction: the bank's id, or date+value+text. */
+  key: string;
+  /** YYYY-MM-DD, the date the bank posted it. */
+  date: string;
+  description: string;
+  /** Signed cents: negative is money leaving the account. */
+  amount: number;
+  status: StatementLineStatus;
+  /** The entry this line was matched to. */
+  entryId?: string;
+  /** True when the reconciliation itself settled that entry. */
+  settledEntry?: boolean;
+  reconciledAt?: string;
+  createdAt: string;
 }
 
 // ── Projetos e squads (ficha 14) ─────────────────────────────
@@ -969,6 +993,8 @@ export interface Database {
   /** Dossiê estratégico (ficha 16). */
   dossierTemplates?: DossierTemplate[];
   dossiers?: Dossier[];
+  /** Conciliação de extrato (ficha 13). */
+  statementLines?: StatementLine[];
   /** Projetos e squads (ficha 14). */
   projects?: Project[];
   squads?: Squad[];
