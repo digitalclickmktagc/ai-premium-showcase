@@ -75,176 +75,102 @@ function NavContent({
         </div>
       </div>
 
-      <div className="px-3">
-        <button
+      {/* Navegação, agrupada: com treze entradas, uma lista corrida vira
+          parede. Os rótulos dizem para que serve cada bloco. */}
+      <nav className="px-3">
+        <NavButton
+          icon={<Sun className="h-4 w-4" />}
+          label="Hoje"
+          active={section === "hoje"}
           onClick={() => go("/app/hoje")}
-          className={cn(
-            "flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-            section === "hoje"
-              ? "bg-primary/15 text-foreground"
-              : "text-muted-foreground hover:bg-foreground/[0.06] hover:text-foreground",
-          )}
-        >
-          <Sun className="h-4 w-4" />
-          Hoje
-        </button>
-        <button
+        />
+        <NavButton
+          icon={<LayoutGrid className="h-4 w-4" />}
+          label="Todos os clientes"
+          active={!activeClientId && !section}
           onClick={() => go("/app")}
-          className={cn(
-            "mt-0.5 flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-            !activeClientId && !section
-              ? "bg-primary/15 text-foreground"
-              : "text-muted-foreground hover:bg-foreground/[0.06] hover:text-foreground",
-          )}
-        >
-          <LayoutGrid className="h-4 w-4" />
-          Todos os clientes
-        </button>
-        <button
-          onClick={() => go("/app/crm")}
-          className={cn(
-            "mt-0.5 flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-            section === "crm"
-              ? "bg-primary/15 text-foreground"
-              : "text-muted-foreground hover:bg-foreground/[0.06] hover:text-foreground",
-          )}
-        >
-          <Target className="h-4 w-4" />
-          CRM
-        </button>
-        <button
-          onClick={() => go("/app/comercial")}
-          className={cn(
-            "mt-0.5 flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-            section === "comercial"
-              ? "bg-primary/15 text-foreground"
-              : "text-muted-foreground hover:bg-foreground/[0.06] hover:text-foreground",
-          )}
-        >
-          <Handshake className="h-4 w-4" />
-          Comercial
-        </button>
-        <button
-          onClick={() => go("/app/financeiro")}
-          className={cn(
-            "mt-0.5 flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-            section === "financeiro"
-              ? "bg-primary/15 text-foreground"
-              : "text-muted-foreground hover:bg-foreground/[0.06] hover:text-foreground",
-          )}
-        >
-          <Wallet className="h-4 w-4" />
-          Financeiro
-        </button>
-        <button
+        />
+
+        <NavGroup label="Produção" />
+        <NavButton
+          icon={<ClipboardList className="h-4 w-4" />}
+          label="Pauta"
+          active={section === "pauta"}
           onClick={() => go("/app/pauta")}
-          className={cn(
-            "mt-0.5 flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-            section === "pauta"
-              ? "bg-primary/15 text-foreground"
-              : "text-muted-foreground hover:bg-foreground/[0.06] hover:text-foreground",
-          )}
-        >
-          <ClipboardList className="h-4 w-4" />
-          Pauta
-        </button>
-        <button
+        />
+        <NavButton
+          icon={<Lightbulb className="h-4 w-4" />}
+          label="Ideias"
+          active={section === "ideias"}
           onClick={() => go("/app/ideias")}
-          className={cn(
-            "mt-0.5 flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-            section === "ideias"
-              ? "bg-primary/15 text-foreground"
-              : "text-muted-foreground hover:bg-foreground/[0.06] hover:text-foreground",
-          )}
-        >
-          <Lightbulb className="h-4 w-4" />
-          Ideias
-        </button>
-        <button
+        />
+        <NavButton
+          icon={<FolderKanban className="h-4 w-4" />}
+          label="Projetos"
+          active={section === "projetos"}
           onClick={() => go("/app/projetos")}
-          className={cn(
-            "mt-0.5 flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-            section === "projetos"
-              ? "bg-primary/15 text-foreground"
-              : "text-muted-foreground hover:bg-foreground/[0.06] hover:text-foreground",
-          )}
-        >
-          <FolderKanban className="h-4 w-4" />
-          Projetos
-        </button>
-        <button
-          onClick={() => go("/app/dossie")}
-          className={cn(
-            "mt-0.5 flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-            section === "dossie"
-              ? "bg-primary/15 text-foreground"
-              : "text-muted-foreground hover:bg-foreground/[0.06] hover:text-foreground",
-          )}
-        >
-          <BookOpen className="h-4 w-4" />
-          Dossiê
-        </button>
-        <button
-          onClick={() => go("/app/analise")}
-          className={cn(
-            "mt-0.5 flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-            section === "analise"
-              ? "bg-primary/15 text-foreground"
-              : "text-muted-foreground hover:bg-foreground/[0.06] hover:text-foreground",
-          )}
-        >
-          <Radar className="h-4 w-4" />
-          Análise
-        </button>
-        <button
-          onClick={() => go("/app/formularios")}
-          className={cn(
-            "mt-0.5 flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-            section === "formularios"
-              ? "bg-primary/15 text-foreground"
-              : "text-muted-foreground hover:bg-foreground/[0.06] hover:text-foreground",
-          )}
-        >
-          <ListChecks className="h-4 w-4" />
-          Formulários
-        </button>
-        <button
-          onClick={() => go("/app/ferramentas")}
-          className={cn(
-            "mt-0.5 flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-            section === "ferramentas"
-              ? "bg-primary/15 text-foreground"
-              : "text-muted-foreground hover:bg-foreground/[0.06] hover:text-foreground",
-          )}
-        >
-          <Wrench className="h-4 w-4" />
-          Ferramentas
-        </button>
-        <button
-          onClick={() => go("/app/integracoes")}
-          className={cn(
-            "mt-0.5 flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-            section === "integracoes"
-              ? "bg-primary/15 text-foreground"
-              : "text-muted-foreground hover:bg-foreground/[0.06] hover:text-foreground",
-          )}
-        >
-          <Plug className="h-4 w-4" />
-          Integrações
-        </button>
-        <button
+        />
+        <NavButton
+          icon={<CalendarRange className="h-4 w-4" />}
+          label="Agenda"
+          active={section === "agenda"}
           onClick={() => go("/app/agenda")}
-          className={cn(
-            "mt-0.5 flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-            section === "agenda"
-              ? "bg-primary/15 text-foreground"
-              : "text-muted-foreground hover:bg-foreground/[0.06] hover:text-foreground",
-          )}
-        >
-          <CalendarRange className="h-4 w-4" />
-          Agenda
-        </button>
-      </div>
+        />
+
+        <NavGroup label="Estratégia" />
+        <NavButton
+          icon={<BookOpen className="h-4 w-4" />}
+          label="Dossiê"
+          active={section === "dossie"}
+          onClick={() => go("/app/dossie")}
+        />
+        <NavButton
+          icon={<Radar className="h-4 w-4" />}
+          label="Análise"
+          active={section === "analise"}
+          onClick={() => go("/app/analise")}
+        />
+        <NavButton
+          icon={<ListChecks className="h-4 w-4" />}
+          label="Formulários"
+          active={section === "formularios"}
+          onClick={() => go("/app/formularios")}
+        />
+
+        <NavGroup label="Negócio" />
+        <NavButton
+          icon={<Target className="h-4 w-4" />}
+          label="CRM"
+          active={section === "crm"}
+          onClick={() => go("/app/crm")}
+        />
+        <NavButton
+          icon={<Handshake className="h-4 w-4" />}
+          label="Comercial"
+          active={section === "comercial"}
+          onClick={() => go("/app/comercial")}
+        />
+        <NavButton
+          icon={<Wallet className="h-4 w-4" />}
+          label="Financeiro"
+          active={section === "financeiro"}
+          onClick={() => go("/app/financeiro")}
+        />
+
+        <NavGroup label="Ferramentas" />
+        <NavButton
+          icon={<Wrench className="h-4 w-4" />}
+          label="Ferramentas"
+          active={section === "ferramentas"}
+          onClick={() => go("/app/ferramentas")}
+        />
+        <NavButton
+          icon={<Plug className="h-4 w-4" />}
+          label="Integrações"
+          active={section === "integracoes"}
+          onClick={() => go("/app/integracoes")}
+        />
+      </nav>
 
       {/* Clients */}
       <div className="mt-4 flex items-center justify-between px-5">
@@ -388,5 +314,40 @@ export default function AdminLayout({
         onCreated={({ calendarId }) => navigate(`/app/calendars/${calendarId}`)}
       />
     </div>
+  );
+}
+
+function NavGroup({ label }: { label: string }) {
+  return (
+    <p className="mt-3 px-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">
+      {label}
+    </p>
+  );
+}
+
+function NavButton({
+  icon,
+  label,
+  active,
+  onClick,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  active: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        "mt-0.5 flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+        active
+          ? "bg-primary/15 text-foreground"
+          : "text-muted-foreground hover:bg-foreground/[0.06] hover:text-foreground",
+      )}
+    >
+      {icon}
+      {label}
+    </button>
   );
 }
