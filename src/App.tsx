@@ -20,6 +20,7 @@ import IdeasPage from "./calendar-app/pages/IdeasPage";
 import PautaPage from "./calendar-app/pages/PautaPage";
 import DossierPage from "./calendar-app/pages/DossierPage";
 import ProjectsPage from "./calendar-app/pages/ProjectsPage";
+import ToolsPage from "./calendar-app/pages/ToolsPage";
 import PublicDossierPage from "./calendar-app/pages/PublicDossierPage";
 import PublicProposalPage from "./calendar-app/pages/PublicProposalPage";
 import PublicContractPage from "./calendar-app/pages/PublicContractPage";
@@ -54,6 +55,14 @@ const AdminApp = () => (
           element={
             <RequireAuth>
               <TodayPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="ferramentas"
+          element={
+            <RequireAuth>
+              <ToolsPage />
             </RequireAuth>
           }
         />
