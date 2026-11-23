@@ -1,5 +1,6 @@
 -- ============================================================================
---  Verificação de segurança — rode depois de aplicar schema.sql + 001 + 003 + 004
+--  Verificação de segurança — rode depois de `supabase/instalacao-completa.sql`
+--  (ou do schema.sql mais as migrações 001 a 019, na ordem)
 --
 --  COMO RODAR (SQL Editor do Supabase, ou psql):
 --      \i supabase/verificacao-seguranca.sql
@@ -18,6 +19,14 @@
 --    8  visão pública → vaza_nota, vaza_checklist, vaza_comentario,
 --                       vaza_anexo e vaza_tempo todos = f
 --    9  histórico    → UPDATE 0 e DELETE 0; chave de evento repetida é recusada
+--   10  dossiê       → seção interna fora da página do cliente; link pausado
+--                      indistinguível de inexistente
+--   11  formulário   → pausado não responde; resposta que não é objeto é recusada
+--   12  roteiro      → observação de cena não aparece na visão pública do card
+--   13  webhooks     → anon não executa o enfileirador (senão forjaria evento
+--                      assinado com o nosso segredo)
+--   14  tabelas novas → anon sem grant em dossiê, roteiro, extrato, webhooks,
+--                       análise, pauta e formulários
 --
 --  Qualquer linha diferente disso é regressão de segurança.
 --
@@ -134,6 +143,71 @@ delete from public.automation_run where event_key = 'zz:evento';
 select count(*) as execucoes_que_sobreviveram
   from public.automation_run where event_key = 'zz:evento';
 reset role;
+
+\echo ''
+\echo '### 10. Dossiê: seção interna não sai, link pausado some'
+insert into public.dossier_template (id, name, sections) values
+  ('00000000-0000-4000-8000-00000000e001', 'ZZ Modelo',
+   '[{"id":"visao","title":"Visão","kind":"texto","defaultVisibility":"cliente"},
+     {"id":"raiox","title":"Raio-X","kind":"texto","defaultVisibility":"interno"}]');
+insert into public.dossier (id, client_id, template_id, share_token, share_enabled, sections) values
+  ('00000000-0000-4000-8000-00000000e002','00000000-0000-4000-8000-00000000c001',
+   '00000000-0000-4000-8000-00000000e001','ZZ_TOKEN_DOSSIE', true,
+   '[{"sectionId":"visao","visibility":"cliente","text":"ZZ_PUBLICO"},
+     {"sectionId":"raiox","visibility":"interno","text":"ZZ_SEGREDO"}]');
+set role anon;
+select public.public_dossier('ZZ_TOKEN_DOSSIE')::text like '%ZZ_PUBLICO%' as mostra_o_que_e_do_cliente,
+       public.public_dossier('ZZ_TOKEN_DOSSIE')::text like '%ZZ_SEGREDO%' as vaza_secao_interna;
+reset role;
+update public.dossier set share_enabled = false where id = '00000000-0000-4000-8000-00000000e002';
+set role anon;
+select public.public_dossier('ZZ_TOKEN_DOSSIE') is null as pausado_some,
+       public.public_dossier('ZZ_NAO_EXISTE')   is null as inexistente_some;
+reset role;
+
+\echo ''
+\echo '### 11. Formulário: pausado não responde, resposta precisa ser objeto'
+insert into public.briefing_form (id, title, questions, share_token, status) values
+  ('00000000-0000-4000-8000-00000000f001','ZZ Briefing',
+   '[{"id":"q1","kind":"texto","label":"ZZ","required":false}]','ZZ_TOKEN_FORM','pausado');
+set role anon;
+select public.public_form('ZZ_TOKEN_FORM') is null as pausado_some;
+savepoint s11;
+select public.public_submit_form('ZZ_TOKEN_FORM', '{"q1":"x"}'::jsonb);
+rollback to s11;
+reset role;
+update public.briefing_form set status = 'ativo' where id = '00000000-0000-4000-8000-00000000f001';
+set role anon;
+savepoint s11b;
+select public.public_submit_form('ZZ_TOKEN_FORM', '"texto solto"'::jsonb);
+rollback to s11b;
+reset role;
+
+\echo ''
+\echo '### 12. Roteiro: observação de cena não atravessa para o cliente'
+insert into public.script (post_id, kind, title, scenes) values
+  ('00000000-0000-4000-8000-00000000b001','video','ZZ Roteiro',
+   '[{"id":"c1","speech":"fala","notes":"ZZ_OBSERVACAO_INTERNA"}]');
+set role anon;
+select public.get_public_calendar('ZZ_TOKEN_A')::text like '%ZZ_OBSERVACAO_INTERNA%' as vaza_roteiro;
+reset role;
+
+\echo ''
+\echo '### 13. Webhooks: o anônimo não enfileira evento nenhum'
+select has_function_privilege('anon','public.enqueue_webhook(text,jsonb)','execute') as anon_enfileira,
+       has_function_privilege('authenticated','public.enqueue_webhook(text,jsonb)','execute') as equipe_enfileira;
+
+\echo ''
+\echo '### 14. Tabelas novas: nenhum grant para o anônimo'
+select table_name,
+       bool_or(grantee = 'anon') as tem_grant_anon
+  from information_schema.role_table_grants
+ where table_name in ('dossier','dossier_template','script','statement_line',
+                      'webhook_subscription','webhook_delivery','assessment',
+                      'assessment_template','pauta_item','monthly_plan',
+                      'briefing_form','form_response','idea','project','squad')
+ group by table_name
+ order by table_name;
 
 rollback;
 \echo ''
