@@ -39,6 +39,8 @@ import { cn } from "@/lib/utils";
 import AdminLayout from "../components/AdminLayout";
 import EmptyState from "../components/EmptyState";
 import MonthNavigator from "../components/MonthNavigator";
+import AiDialog from "../components/AiDialog";
+import { contextSugerirPautas, dossierBrief, readPautaSuggestions } from "../ai";
 import { useApp } from "../store/AppProvider";
 import {
   FUNNEL_LABEL,
@@ -84,6 +86,8 @@ export default function PautaPage() {
     savePautaItems,
     deletePautaItems,
     createPost,
+    dossiers,
+    dossierTemplates,
   } = useApp();
 
   const active = clients.filter((c) => c.status !== "archived");
@@ -192,6 +196,57 @@ export default function PautaPage() {
             >
               <Plus className="h-3.5 w-3.5" /> Nova pauta
             </Button>
+            <AiDialog
+              action="sugerir_pautas"
+              clientId={clientId}
+              applyLabel="Criar as pautas"
+              context={() =>
+                contextSugerirPautas({
+                  clientName: clients.find((c) => c.id === clientId)?.name ?? "",
+                  month,
+                  plan,
+                  items,
+                  quantity: 6,
+                  dossier: {
+                    sections: dossierBrief(
+                      dossiers.find((d) => d.clientId === clientId),
+                      dossierTemplates[0],
+                    ),
+                  },
+                })
+              }
+              onApply={(text) => {
+                const suggestions = readPautaSuggestions(text);
+                if (suggestions.length === 0) {
+                  toast.error("Não consegui ler pautas nessa resposta. Tente perguntar de novo.");
+                  return false;
+                }
+                const now = new Date().toISOString();
+                const fallbackDay = toDayISO(cursor);
+                void savePautaItems(
+                  suggestions.map((s) => ({
+                    id: crypto.randomUUID(),
+                    clientId,
+                    date: s.data?.startsWith(month) ? s.data : fallbackDay,
+                    kind: s.onde === "story" ? "story" : "post",
+                    title: s.titulo,
+                    channels: [],
+                    format: s.formato,
+                    briefing: s.briefing,
+                    pillarId: plan?.pillars.find(
+                      (p) => p.name.toLowerCase() === (s.pilar ?? "").toLowerCase(),
+                    )?.id,
+                    status: "ideia" as const,
+                    createdAt: now,
+                    updatedAt: now,
+                  })),
+                );
+                toast.success(
+                  `${suggestions.length} pauta(s) criada(s) como ideia. Revise antes de converter em card.`,
+                );
+                return true;
+              }}
+            />
             {picked.size > 0 && (
               <>
                 <Button size="sm" variant="outline" className="gap-1.5" onClick={() => setConverting(true)}>
@@ -231,7 +286,7 @@ export default function PautaPage() {
                 return (
                   <li
                     key={item.id}
-                    className="flex items-start gap-3 rounded-xl border border-border bg-card p-3"
+                    className="flex min-w-0 flex-wrap items-start gap-3 rounded-xl border border-border bg-card p-3"
                   >
                     <Checkbox
                       checked={picked.has(item.id)}

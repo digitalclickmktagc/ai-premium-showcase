@@ -173,6 +173,7 @@ export default function ClientFormDialog({
                   type="color"
                   value={color}
                   onChange={(e) => setColor(e.target.value)}
+                  aria-label="Cor personalizada do cliente"
                   className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
                 />
               </label>

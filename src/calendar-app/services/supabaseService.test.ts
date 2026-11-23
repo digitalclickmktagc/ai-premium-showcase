@@ -107,7 +107,7 @@ describe("SupabaseService — authenticated reads", () => {
     mockFetch([{ body: [] }]);
     await svc.getDatabase();
 
-    expect(calls).toHaveLength(38);
+    expect(calls).toHaveLength(39);
     for (const c of calls) {
       expect(c.headers.apikey).toBe(KEY);
       expect(c.headers.Authorization).toBe("Bearer user-access-token");
@@ -149,6 +149,7 @@ describe("SupabaseService — authenticated reads", () => {
       `${URL}/rest/v1/briefing_form?select=*&order=created_at.desc`,
       `${URL}/rest/v1/form_response?select=*&order=at.desc`,
       `${URL}/rest/v1/agency_settings?select=*&limit=1`,
+      `${URL}/rest/v1/ai_settings?select=*&limit=1`,
       `${URL}/rest/v1/crm_block?select=*`,
       `${URL}/rest/v1/contracting_process?select=*`,
     ]);

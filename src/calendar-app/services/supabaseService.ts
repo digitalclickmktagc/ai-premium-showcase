@@ -23,6 +23,7 @@ import type {
   Dossier,
   DossierTemplate,
   FormResponse,
+  AiSettings,
   HealthWeights,
   Idea,
   MonthlyPlan,
@@ -800,6 +801,11 @@ export class SupabaseService implements DataService {
     return this.toSession(this.session);
   }
 
+  /** Used only to call Edge Functions as the signed-in admin. */
+  accessToken(): string | null {
+    return this.session?.access_token ?? null;
+  }
+
   async initSession(): Promise<Session | null> {
     if (!this.session) return null;
     // Refresh if the access token is expired (60s skew).
@@ -951,6 +957,7 @@ export class SupabaseService implements DataService {
       forms,
       formResponses,
       agencySettings,
+      aiSettings,
       blocks,
       processes,
     ] = await Promise.all([
@@ -993,6 +1000,7 @@ export class SupabaseService implements DataService {
         this.rest<any[]>("briefing_form?select=*&order=created_at.desc"),
         this.rest<any[]>("form_response?select=*&order=at.desc"),
         this.rest<any[]>("agency_settings?select=*&limit=1"),
+        this.rest<any[]>("ai_settings?select=*&limit=1"),
         this.rest<any[]>("crm_block?select=*"),
         this.rest<any[]>("contracting_process?select=*"),
       ]);
@@ -1032,6 +1040,15 @@ export class SupabaseService implements DataService {
       forms: forms.map(toForm),
       formResponses: formResponses.map(toFormResponse),
       healthWeights: agencySettings[0]?.health_weights ?? undefined,
+      aiSettings: aiSettings[0]
+        ? {
+            enabled: Boolean(aiSettings[0].enabled),
+            model: aiSettings[0].model ?? "claude-opus-5-5",
+            effort: aiSettings[0].effort ?? "medium",
+            dailyLimit: aiSettings[0].daily_limit ?? 100,
+            allowed: aiSettings[0].allowed ?? [],
+          }
+        : undefined,
       blocks: blocks.map(toBlock),
       processes: processes.map(toProcess),
       availability: cfg[0]
@@ -1592,6 +1609,22 @@ export class SupabaseService implements DataService {
 
   async deleteSquad(id: string): Promise<void> {
     await this.rest<void>(`squad?id=eq.${encodeURIComponent(id)}`, { method: "DELETE" });
+  }
+
+  async saveAiSettings(settings: AiSettings): Promise<void> {
+    await this.rest<void>("ai_settings", {
+      method: "POST",
+      headers: { Prefer: "return=minimal,resolution=merge-duplicates" },
+      body: JSON.stringify({
+        id: 1,
+        enabled: settings.enabled,
+        model: settings.model.trim() || "claude-opus-5-5",
+        effort: settings.effort,
+        daily_limit: Math.min(10_000, Math.max(1, Math.round(settings.dailyLimit))),
+        allowed: settings.allowed,
+        updated_at: new Date().toISOString(),
+      }),
+    });
   }
 
   async saveHealthWeights(weights: HealthWeights): Promise<void> {

@@ -30,6 +30,8 @@ import {
 } from "../crm";
 import { formatMoney, parseMoney } from "../money";
 import { formatShortDay, formatTimestamp, todayISO, uid } from "../utils";
+import AiDialog from "./AiDialog";
+import { contextProximoPasso } from "../ai";
 import { useApp } from "../store/AppProvider";
 
 const KINDS: { id: InteractionKind; label: string }[] = [
@@ -437,6 +439,25 @@ export default function DealDialog({
             </TabsContent>
 
             <TabsContent value="historico" className="mt-4 space-y-3">
+              {deal && (
+                <AiDialog
+                  action="proximo_passo_crm"
+                  context={() =>
+                    contextProximoPasso({
+                      deal: draft,
+                      stageName:
+                        stages.find((st) => st.id === stageId)?.name ?? "",
+                      interactions: history,
+                      daysSinceContact: history[0]
+                        ? Math.round(
+                            (Date.now() - Date.parse(history[0].at)) / 86400000,
+                          )
+                        : null,
+                    })
+                  }
+                />
+              )}
+
               {advice && advice.attempts > 0 && (
                 <div
                   className={cn(

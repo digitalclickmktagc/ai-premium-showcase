@@ -74,6 +74,7 @@ function makeService(updatePost: DataService["updatePost"], db: Database): DataS
     saveSquad: notUsed as unknown as DataService["saveSquad"],
     deleteSquad: notUsed as unknown as DataService["deleteSquad"],
     saveHealthWeights: notUsed as unknown as DataService["saveHealthWeights"],
+    saveAiSettings: notUsed as unknown as DataService["saveAiSettings"],
     saveDossierTemplate: notUsed as unknown as DataService["saveDossierTemplate"],
     saveDossier: notUsed as unknown as DataService["saveDossier"],
     getPublicDossier: notUsed as unknown as DataService["getPublicDossier"],

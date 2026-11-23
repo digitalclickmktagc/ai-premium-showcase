@@ -11,6 +11,7 @@ import type {
   Dossier,
   DossierTemplate,
   FormResponse,
+  AiSettings,
   HealthWeights,
   Idea,
   MonthlyPlan,
@@ -790,6 +791,19 @@ export class LocalStorageService implements DataService {
     if (invalid) throw new Error(invalid);
     const db = this.read();
     db.healthWeights = weights;
+    this.write(db);
+  }
+
+  async saveAiSettings(settings: AiSettings): Promise<void> {
+    const db = this.read();
+    db.aiSettings = {
+      enabled: settings.enabled,
+      model: settings.model.trim() || "claude-opus-5-5",
+      effort: settings.effort,
+      // Um teto fora da faixa é engano de digitação, não intenção.
+      dailyLimit: Math.min(10_000, Math.max(1, Math.round(settings.dailyLimit))),
+      allowed: [...settings.allowed],
+    };
     this.write(db);
   }
 

@@ -24,6 +24,8 @@ import {
 import { cn } from "@/lib/utils";
 import AdminLayout from "../components/AdminLayout";
 import EmptyState from "../components/EmptyState";
+import AiDialog from "../components/AiDialog";
+import { contextConclusoesAnalise } from "../ai";
 import { useApp } from "../store/AppProvider";
 import {
   MAX_COMPETITORS,
@@ -154,7 +156,7 @@ export default function AssessmentPage() {
               description="Escolha um cliente acima para começar."
             />
           ) : (
-            <div className="grid gap-3 lg:grid-cols-[200px,1fr]">
+            <div className="grid min-w-0 gap-3 lg:grid-cols-[200px,minmax(0,1fr)]">
               <ul className="space-y-1">
                 {assessments.map((a) => (
                   <li key={a.id}>
@@ -276,7 +278,7 @@ function AssessmentEditor({
   };
 
   return (
-    <div className="space-y-3">
+    <div className="min-w-0 space-y-3">
       <section className="flex flex-wrap items-center gap-2 rounded-xl border border-border bg-card p-3">
         <Input
           value={draft.title}
@@ -308,7 +310,13 @@ function AssessmentEditor({
         <Button variant="outline" className="gap-1.5" onClick={() => void onToDossier()}>
           <BookOpen className="h-3.5 w-3.5" /> Levar ao dossiê
         </Button>
-        <Button variant="ghost" className="ml-auto text-destructive" onClick={() => void onDelete()}>
+        <Button
+          variant="ghost"
+          className="ml-auto text-destructive"
+          aria-label="Apagar esta análise"
+          title="Apagar esta análise"
+          onClick={() => void onDelete()}
+        >
           <Trash2 className="h-3.5 w-3.5" />
         </Button>
       </section>
@@ -455,7 +463,7 @@ function AssessmentEditor({
 
       {/* Notas */}
       {groups.map((group) => (
-        <section key={group} className="rounded-xl border border-border bg-card p-3">
+        <section key={group} className="min-w-0 rounded-xl border border-border bg-card p-3">
           <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             {group}
           </p>
@@ -490,6 +498,10 @@ function AssessmentEditor({
                                 type="button"
                                 disabled={!editable}
                                 aria-label={`${subject.name}: ${question.label} nota ${n}`}
+                                // Sem isto, quem usa leitor de tela ouve seis
+                                // botões iguais e não sabe qual nota está dada:
+                                // a seleção existia só na cor.
+                                aria-pressed={draft.scores[subject.id]?.[question.id] === n}
                                 onClick={() => rate(subject.id, question.id, n)}
                                 className={cn(
                                   "h-6 w-6 rounded border text-[11px] tabular-nums transition-colors",
@@ -513,9 +525,44 @@ function AssessmentEditor({
       ))}
 
       <section className="rounded-xl border border-border bg-card p-3">
-        <Label htmlFor="an-conclusions" className="text-xs uppercase tracking-wide text-muted-foreground">
-          Conclusões
-        </Label>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <Label
+            htmlFor="an-conclusions"
+            className="text-xs uppercase tracking-wide text-muted-foreground"
+          >
+            Conclusões
+          </Label>
+          {editable && (
+            <AiDialog
+              action="conclusoes_analise"
+              variant="ghost"
+              clientId={draft.clientId}
+              applyLabel="Usar como conclusões"
+              context={() =>
+                contextConclusoesAnalise({
+                  assessment: draft,
+                  template,
+                  scores: scores.map((s) => ({
+                    name: s.name,
+                    kind: s.kind,
+                    score: s.score,
+                    band: s.band,
+                  })),
+                  gaps: behind.map((g) => ({
+                    group: g.group,
+                    ours: g.ours,
+                    theirs: g.theirs,
+                    leader: g.leader,
+                  })),
+                })
+              }
+              onApply={(text) => {
+                set({ conclusions: text });
+                toast.success("Conclusões no campo. Revise e salve.");
+              }}
+            />
+          )}
+        </div>
         <Textarea
           id="an-conclusions"
           value={draft.conclusions ?? ""}

@@ -18,6 +18,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import AdminLayout from "../components/AdminLayout";
+import AiSettingsCard from "../components/AiSettingsCard";
 import EmptyState from "../components/EmptyState";
 import { useApp } from "../store/AppProvider";
 import {
@@ -63,8 +64,8 @@ export default function IntegrationsPage() {
         <div>
           <h1 className="font-display text-xl font-bold sm:text-2xl">Integrações</h1>
           <p className="text-xs text-muted-foreground">
-            Avise outro sistema quando algo acontece aqui: post aprovado, proposta aceita,
-            contrato assinado, conta liquidada.
+            O assistente de IA e os avisos para outros sistemas: post aprovado, proposta
+            aceita, contrato assinado, conta liquidada.
           </p>
         </div>
         <Button
@@ -74,6 +75,8 @@ export default function IntegrationsPage() {
           <Plus className="h-4 w-4" /> Nova integração
         </Button>
       </header>
+
+      <AiSettingsCard />
 
       <section className="mb-4 rounded-xl border border-amber-500/40 bg-amber-500/5 p-3">
         <p className="flex items-start gap-1.5 text-xs">
@@ -141,6 +144,8 @@ export default function IntegrationsPage() {
                     size="sm"
                     variant="ghost"
                     className="h-7 gap-1 px-2 text-[11px] text-destructive"
+                    aria-label={`Apagar a integração ${hook.url}`}
+                    title="Apagar esta integração"
                     onClick={() => {
                       if (!window.confirm("Apagar esta integração e seu histórico de entregas?"))
                         return;

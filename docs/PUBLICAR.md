@@ -32,14 +32,14 @@ O plano gratuito pausa o projeto depois de ~7 dias sem uso.
 2. No **SQL Editor** → **New query**, cole o arquivo
    **`supabase/instalacao-completa.sql`** inteiro e rode uma vez.
 
-   Esse arquivo é a concatenação, na ordem certa, do `schema.sql` e das 18
-   migrações (001 a 019). Rodar de novo é seguro: tudo usa `if not exists`,
+   Esse arquivo é a concatenação, na ordem certa, do `schema.sql` e das 19
+   migrações (001 a 020). Rodar de novo é seguro: tudo usa `if not exists`,
    `create or replace` e `drop policy if exists`, então repetir não duplica
    tabela nem apaga linha. Se parar no meio, o erro diz em qual trecho — foi
    testado em um PostgreSQL 16 limpo, duas vezes seguidas, sem erro.
 
    Prefere arquivo por arquivo? A ordem é `supabase/schema.sql` e depois
-   `supabase/migrations/001 … 019`, do menor para o maior número.
+   `supabase/migrations/001 … 020`, do menor para o maior número.
 
    | Migração | O que entra |
    |---|---|
@@ -61,6 +61,7 @@ O plano gratuito pausa o projeto depois de ~7 dias sem uso.
    | 017 | roteiros de vídeo e stories |
    | 018 | webhooks de saída |
    | 019 | análise de perfil e concorrência |
+   | 020 | assistente de IA (vem desligado) |
 
 3. Em **Authentication → Users**, confirme que existe o usuário administrador
    com **Auto Confirm** marcado. É com ele que você entra em `/app/login`.
@@ -109,6 +110,36 @@ quantas entregas estão paradas.
 O passo a passo completo, com o jeito de conferir a assinatura do lado de
 quem recebe, está em `supabase/functions/README.md`.
 
+## 2c. Assistente de IA — publicar e ligar (opcional)
+
+Só precisa se você quiser a ajuda da inteligência artificial. **Sem esta
+etapa o sistema inteiro funciona** — o assistente fica desligado e os botões
+dele explicam isso em vez de dar erro.
+
+1. Pegue uma chave em <https://console.anthropic.com> → **Settings → API keys**.
+   Ponha um limite de gasto mensal na conta; é a sua rede de proteção.
+2. Guarde a chave no servidor e publique a função:
+
+   ```bash
+   supabase secrets set ANTHROPIC_API_KEY=sk-ant-...
+   supabase functions deploy assistente
+   ```
+
+   Repare que aqui **não** vai `--no-verify-jwt`: só quem está logado no
+   painel pode fazer o assistente gastar.
+3. No painel: **Integrações → Assistente de IA → ligar**. Ali ficam o modelo,
+   o capricho da resposta, o teto de perguntas por dia e quais ações estão
+   liberadas.
+
+A chave nunca entra no site: ela mora no segredo da função. O navegador manda
+a pergunta, a função chama a Claude. Cada chamada fica registrada em
+`ai_call`, com quantos tokens gastou.
+
+**A IA não grava nada sozinha.** Toda resposta é sugestão e só entra no
+sistema quando alguém clica em "aplicar". E antes de cada pergunta a tela
+mostra, em texto, exatamente o que vai ser enviado — e-mail, telefone,
+documento e chave são removidos antes de sair.
+
 ## 3. Gerar o pacote do site
 
 ```bash
@@ -149,6 +180,8 @@ a RLS no servidor. A chave `service_role` **nunca** entra aqui.
 | pelo link, decidir uma aprovação | o código chega no e-mail do cliente |
 | pedir o código duas vezes seguidas | a segunda vez avisa para aguardar |
 | `/app/hoje` | o painel do dia carrega com o que está pendente |
+| `/app/integracoes` | o cartão "Assistente de IA" aparece, desligado |
+| ligar o assistente e clicar em "Resumir meu dia" | a prévia mostra o texto exato; perguntar devolve o resumo (só se você fez o passo 2c) |
 | abrir o link de estratégia de um cliente | só as seções marcadas "o cliente vê" |
 | abrir o link de um formulário pausado | "formulário indisponível", igual a link inexistente |
 

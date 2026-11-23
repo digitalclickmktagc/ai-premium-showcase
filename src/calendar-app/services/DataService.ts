@@ -12,6 +12,7 @@ import type {
   Dossier,
   DossierTemplate,
   FormResponse,
+  AiSettings,
   HealthWeights,
   Idea,
   MonthlyPlan,
@@ -75,6 +76,12 @@ export interface DataService {
    * getSession(). Called once on app mount.
    */
   initSession?(): Promise<Session | null>;
+  /**
+   * The raw access token of the logged-in admin, when the backend has one.
+   * Only the AI client uses it, to call the `assistente` Edge Function as the
+   * signed-in user. The localStorage adapter has no token and returns null.
+   */
+  accessToken?(): string | null;
   login(email: string, password: string): Promise<Session>;
   logout(): void;
 
@@ -220,6 +227,10 @@ export interface DataService {
   saveSquad(squad: Squad): Promise<Squad>;
   deleteSquad(id: string): Promise<void>;
   saveHealthWeights(weights: HealthWeights): Promise<void>;
+
+  // ── Assistente de IA (ficha 22) ───────────────────────────────
+  /** Liga/desliga o assistente e guarda modelo, esforço e teto diário. */
+  saveAiSettings(settings: AiSettings): Promise<void>;
 
   // ── Dossiê estratégico (ficha 16) ─────────────────────────────
   saveDossierTemplate(template: DossierTemplate): Promise<DossierTemplate>;

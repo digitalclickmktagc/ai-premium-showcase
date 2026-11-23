@@ -209,6 +209,28 @@ select table_name,
  group by table_name
  order by table_name;
 
+\echo ''
+\echo '### 15. Assistente de IA: o anônimo não liga, não lê e não gasta'
+select has_function_privilege('anon','public.ai_pode_chamar(text)','execute') as anon_pergunta,
+       has_function_privilege('authenticated','public.ai_pode_chamar(text)','execute') as equipe_pergunta;
+select table_name,
+       bool_or(grantee = 'anon') as tem_grant_anon
+  from information_schema.role_table_grants
+ where table_name in ('ai_settings','ai_call')
+ group by table_name
+ order by table_name;
+
+\echo ''
+\echo '### 16. Assistente de IA: vem desligado e o registro de uso é imutável'
+select enabled as deve_ser_falso from public.ai_settings where id = 1;
+insert into public.ai_call (action, ok) values ('resumo_do_dia', true);
+savepoint s16;
+update public.ai_call set ok = false where action = 'resumo_do_dia';
+rollback to s16;
+savepoint s16b;
+delete from public.ai_call where action = 'resumo_do_dia';
+rollback to s16b;
+
 rollback;
 \echo ''
 \echo '### Fim — transação revertida, nada ficou gravado.'

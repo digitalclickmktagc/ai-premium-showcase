@@ -119,3 +119,80 @@ const esperado = "sha256=" + crypto.createHmac("sha256", SEGREDO)
 
 O corpo precisa ser o **bruto**, byte a byte: reserializar o JSON muda a
 assinatura.
+
+---
+
+## `assistente`
+
+O assistente de IA (ficha 22). É aqui — e só aqui — que a chave da Anthropic
+existe em produção.
+
+### Por que é uma função, e não uma chamada do navegador
+
+Chave de API em código de navegador é chave pública: qualquer pessoa abre o
+inspetor e copia. A função guarda a chave no servidor, exige o token de quem
+está logado, pergunta ao banco se pode gastar e só então chama a Claude.
+
+### O que ela faz
+
+1. Confere se a ação pedida está no catálogo (as oito de `src/calendar-app/ai.ts`).
+2. Chama `public.ai_pode_chamar(acao)` com o token de quem pediu. Essa função
+   responde `desligado`, `acao_nao_liberada`, `limite_diario` ou `ok`, e é ela
+   que carrega o modelo e o capricho configurados em `ai_settings`.
+3. Chama a Claude com `fallbacks: "default"` — quando o primeiro modelo recusa
+   o pedido por política, a própria API repete em outro, dentro da mesma
+   chamada. Sem isso, uma recusa volta vazia para quem perguntou.
+4. Grava uma linha em `ai_call`: quem, qual ação, qual modelo, quantos tokens.
+   Essa tabela não se edita nem se apaga.
+
+**O que ela não faz:** escrever em qualquer tabela do negócio. O único
+`insert` do arquivo é o registro de uso. Toda resposta volta como texto e só
+entra no sistema quando alguém clica em "aplicar", na tela.
+
+### Como publicar
+
+```bash
+# a chave sai em console.anthropic.com → Settings → API keys
+supabase secrets set ANTHROPIC_API_KEY=sk-ant-...
+
+# sem --no-verify-jwt: só quem está logado no painel pode chamar
+supabase functions deploy assistente
+```
+
+Depois, no painel: **Integrações → Assistente de IA → ligar**. Ali também ficam
+o modelo, o capricho da resposta, o teto de perguntas por dia e quais ações
+estão liberadas.
+
+### Conferir
+
+```bash
+curl -i -X POST "https://<projeto>.supabase.co/functions/v1/assistente" \
+  -H "Authorization: Bearer <access_token de um login do painel>" \
+  -H "apikey: <anon key>" \
+  -H "Content-Type: application/json" \
+  --data '{"action":"resumo_do_dia","system":"teste","prompt":"Diga oi.","data":{}}'
+```
+
+- `403 {"reason":"desligado"}` → a função está de pé; falta ligar em Integrações.
+- `503 {"reason":"sem_chave"}` → faltou o `supabase secrets set`.
+- `200 {"ok":true,"text":"…"}` → está funcionando.
+
+### Custo
+
+Cada pergunta é cobrada pela Anthropic, por tamanho de texto. Quem segura a
+conta é o teto diário em `ai_settings.daily_limit` (padrão 100) — e dá para
+conferir o gasto real:
+
+```sql
+select action, count(*), sum(input_tokens), sum(output_tokens)
+  from public.ai_call
+ where at >= date_trunc('month', now())
+ group by action order by 2 desc;
+```
+
+### Sem servidor
+
+Na demonstração em localStorage não há Edge Function. Para experimentar, a tela
+de Integrações aceita uma chave guardada **naquele navegador** — cômodo para
+testar, ruim para produção, e a tela diz isso. O teto diário não vale nesse
+modo: quem conta é a Anthropic.

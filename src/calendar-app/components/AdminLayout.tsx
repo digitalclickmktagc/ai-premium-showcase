@@ -63,8 +63,15 @@ function NavContent({
   };
 
   return (
-    <div className="flex h-full flex-col">
-      {/* Brand */}
+    <div className="flex h-full min-h-0 flex-col">
+      {/*
+        Tudo acima do rodapé rola junto. Antes só a lista de clientes rolava, e
+        numa janela baixa (um notebook de 600px de altura, ou o navegador com o
+        inspetor aberto) os últimos itens do menu ficavam fora da tela, sem
+        jeito de alcançá-los. O rodapé com a conta fica fixo embaixo.
+      */}
+      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+        {/* Brand */}
       <div className="flex items-center gap-2.5 px-5 py-5">
         <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-nexa shadow-[var(--glow-sm)]">
           <CalendarDays className="h-5 w-5 text-white" />
@@ -180,7 +187,7 @@ function NavContent({
         <span className="text-[11px] text-muted-foreground">{clients.length}</span>
       </div>
 
-      <nav className="mt-1 flex-1 space-y-0.5 overflow-y-auto px-3 pb-3">
+      <nav className="mt-1 space-y-0.5 px-3 pb-3">
         {sorted.map((client) => {
           const cal = getCalendarByClient(client.id);
           if (!cal) return null;
@@ -223,8 +230,10 @@ function NavContent({
         </button>
       </nav>
 
+      </div>
+
       {/* Footer / account */}
-      <div className="border-t border-border p-3">
+      <div className="shrink-0 border-t border-border p-3">
         <div className="flex items-center gap-2.5 rounded-lg px-2 py-1.5">
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary text-xs font-semibold">
             {initials(session?.name ?? "A")}

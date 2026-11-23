@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import AdminLayout from "../components/AdminLayout";
+import AiDialog from "../components/AiDialog";
 import { useApp } from "../store/AppProvider";
 import {
   buildDayWork,
@@ -34,6 +35,7 @@ import {
   firstSteps,
   setupComplete,
 } from "../daily";
+import { contextResumoDoDia } from "../ai";
 import { KIND_LABEL } from "../agenda";
 import { formatDuration } from "../cards";
 import { formatMoney } from "../money";
@@ -134,15 +136,39 @@ export default function TodayPage() {
 
   return (
     <AdminLayout section="hoje" title="Hoje">
-      <div className="mb-5">
-        <h1 className="font-display text-xl font-bold first-letter:uppercase sm:text-2xl">
-          {formatLongDay(today)}
-        </h1>
-        <p className="text-xs text-muted-foreground">
-          {total === 0
-            ? "Nada pedindo atenção agora."
-            : `${total} ${total === 1 ? "coisa pedindo atenção" : "coisas pedindo atenção"}`}
-        </p>
+      <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="font-display text-xl font-bold first-letter:uppercase sm:text-2xl">
+            {formatLongDay(today)}
+          </h1>
+          <p className="text-xs text-muted-foreground">
+            {total === 0
+              ? "Nada pedindo atenção agora."
+              : `${total} ${total === 1 ? "coisa pedindo atenção" : "coisas pedindo atenção"}`}
+          </p>
+        </div>
+        <AiDialog
+          action="resumo_do_dia"
+          context={() =>
+            contextResumoDoDia({
+              today,
+              late: work.latePosts,
+              waiting: work.waitingClient,
+              dueToday: work.financeDue.map((e) => ({
+                description: e.description,
+                amount: e.amount,
+                nature: e.nature,
+              })),
+              overdue: work.financeOverdue.map((e) => ({
+                description: e.description,
+                amount: e.amount,
+                nature: e.nature,
+              })),
+              tasks: work.crmTasks.map((t) => ({ title: t.title, dueOn: t.dueOn })),
+              clientOf,
+            })
+          }
+        />
       </div>
 
       {showSteps && (

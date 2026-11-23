@@ -24,6 +24,7 @@ import type {
   Script,
   WebhookDelivery,
   WebhookSubscription,
+  AiSettings,
   HealthWeights,
   Project,
   Squad,
@@ -115,6 +116,7 @@ interface AppContextValue {
   forms: BriefingForm[];
   formResponses: FormResponse[];
   healthWeights?: HealthWeights;
+  aiSettings?: AiSettings;
   blocks: ContactBlock[];
   processes: ContractingProcess[];
   accounts: FinanceAccount[];
@@ -196,6 +198,7 @@ interface AppContextValue {
   saveSquad: (s: Squad) => Promise<Squad>;
   deleteSquad: (id: string) => Promise<void>;
   saveHealthWeights: (w: HealthWeights) => Promise<void>;
+  saveAiSettings: (s: AiSettings) => Promise<void>;
 
   // dossiê estratégico
   saveDossierTemplate: (t: DossierTemplate) => Promise<DossierTemplate>;
@@ -315,6 +318,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [forms, setForms] = useState<BriefingForm[]>([]);
   const [formResponses, setFormResponses] = useState<FormResponse[]>([]);
   const [healthWeights, setHealthWeights] = useState<HealthWeights | undefined>();
+  const [aiSettings, setAiSettings] = useState<AiSettings | undefined>();
   const [blocks, setBlocks] = useState<ContactBlock[]>([]);
   const [processes, setProcesses] = useState<ContractingProcess[]>([]);
   const [accounts, setAccounts] = useState<FinanceAccount[]>([]);
@@ -371,6 +375,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setForms(db.forms ?? []);
     setFormResponses(db.formResponses ?? []);
     setHealthWeights(db.healthWeights);
+    setAiSettings(db.aiSettings);
     setBlocks(db.blocks ?? []);
     setProcesses(db.processes ?? []);
     setAccounts(db.accounts ?? []);
@@ -857,6 +862,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const saveHealthWeights = useCallback(
     async (w: HealthWeights) => {
       await service.saveHealthWeights(w);
+      await refresh();
+    },
+    [service, refresh],
+  );
+  const saveAiSettings = useCallback(
+    async (s: AiSettings) => {
+      await service.saveAiSettings(s);
       await refresh();
     },
     [service, refresh],
@@ -1531,6 +1543,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     saveForm,
     deleteForm,
     healthWeights,
+    aiSettings,
     saveStatementLines,
     deleteStatementLine,
     saveProject,
@@ -1538,6 +1551,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     saveSquad,
     deleteSquad,
     saveHealthWeights,
+    saveAiSettings,
     saveDossierTemplate,
     saveDossier,
     savePlan,

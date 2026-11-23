@@ -16,12 +16,14 @@ import {
 import { cn } from "@/lib/utils";
 import type { Post, PostStatus } from "../types";
 import { statusConfig } from "../status";
+import { contextLegenda, dossierBrief } from "../ai";
 
 const PROJECT_NONE = "__none__";
 import { formatLongDay, formatTimestamp, todayISO } from "../utils";
 import { useApp } from "../store/AppProvider";
 import { StatusPicker } from "./StatusBadge";
 import { RescheduleHistory } from "./PostView";
+import AiDialog from "./AiDialog";
 import ApprovalPanel from "./ApprovalPanel";
 import CardWorkspace from "./CardWorkspace";
 
@@ -65,6 +67,24 @@ export default function PostModal({
     setInternalNotes(post?.internalNotes ?? "");
     setProjectId(post?.projectId ?? PROJECT_NONE);
   }, [open, post, defaultDate]);
+
+  // Quem é o cliente deste card, e o resumo de marca que o dossiê já guarda.
+  // Serve para a legenda sair no tom certo em vez de genérica.
+  const clientOfCard = useMemo(() => {
+    const calId = post?.calendarId ?? calendarId;
+    const cal = app.calendars.find((c) => c.id === calId);
+    return app.clients.find((c) => c.id === cal?.clientId);
+  }, [app.calendars, app.clients, post?.calendarId, calendarId]);
+
+  const brand = useMemo(
+    () =>
+      dossierBrief(
+        app.dossiers.find((d) => d.clientId === clientOfCard?.id),
+        app.dossierTemplates[0],
+        2,
+      ),
+    [app.dossiers, app.dossierTemplates, clientOfCard?.id],
+  );
 
   // Only this client's projects: a card belongs to the client's work, and
   // offering another client's project is how a cost centre gets the wrong card.
@@ -246,7 +266,27 @@ export default function PostModal({
           )}
 
           <div className="space-y-1.5">
-            <Label htmlFor="post-desc">Descrição / legenda</Label>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <Label htmlFor="post-desc">Descrição / legenda</Label>
+              <AiDialog
+                action="escrever_legenda"
+                variant="ghost"
+                clientId={clientOfCard?.id}
+                applyLabel="Usar como legenda"
+                context={() =>
+                  contextLegenda({
+                    post: { title, description, contentType, date },
+                    clientName: clientOfCard?.name ?? "",
+                    tone: brand[0]?.conteudo,
+                    audience: brand[1]?.conteudo,
+                  })
+                }
+                onApply={(text) => {
+                  setDescription(text);
+                  toast.success("Legenda colada no campo. Revise e salve.");
+                }}
+              />
+            </div>
             <Textarea
               id="post-desc"
               value={description}

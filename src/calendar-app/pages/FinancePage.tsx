@@ -21,6 +21,8 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import AdminLayout from "../components/AdminLayout";
+import AiDialog from "../components/AiDialog";
+import { contextFinanceiro } from "../ai";
 import ReconcilePanel from "../components/ReconcilePanel";
 import EntryDialog from "../components/EntryDialog";
 import AccountDialog from "../components/AccountDialog";
@@ -146,7 +148,18 @@ export default function FinancePage() {
             )}
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
+          <AiDialog
+            action="explicar_financeiro"
+            size="default"
+            context={() =>
+              contextFinanceiro({
+                month,
+                entries: monthEntries,
+                categoryName: (id) => categoryName(id) ?? "Sem categoria",
+              })
+            }
+          />
           <Button
             variant="outline"
             className="gap-1.5"

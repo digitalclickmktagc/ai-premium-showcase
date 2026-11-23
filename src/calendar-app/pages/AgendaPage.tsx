@@ -55,7 +55,12 @@ export default function AgendaPage() {
   const navigate = useNavigate();
   const { appointments, bookings, posts, markedDates, clients, calendars } = useApp();
 
-  const [view, setView] = useState<View>("mes");
+  // No celular a grade do mês vira sete colunas de 50px: os compromissos ficam
+  // ilegíveis e difíceis de acertar com o dedo. Quem abre num aparelho estreito
+  // começa na lista, e troca para o mês se quiser.
+  const [view, setView] = useState<View>(() =>
+    typeof window !== "undefined" && window.innerWidth < 640 ? "lista" : "mes",
+  );
   const [cursor, setCursor] = useState(() => new Date());
   const [editing, setEditing] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -190,7 +195,7 @@ export default function AgendaPage() {
               onClick={() => setView(v.key)}
               aria-pressed={view === v.key}
               className={cn(
-                "rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
+                "min-h-6 rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
                 view === v.key
                   ? "bg-primary text-primary-foreground"
                   : "text-muted-foreground hover:text-foreground",
@@ -210,7 +215,7 @@ export default function AgendaPage() {
               onClick={() => toggleKind(kind)}
               aria-pressed={!hidden.has(kind)}
               className={cn(
-                "inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[11px] transition-opacity",
+                "inline-flex min-h-6 items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] transition-opacity",
                 hidden.has(kind) ? "opacity-40" : "opacity-100",
               )}
             >

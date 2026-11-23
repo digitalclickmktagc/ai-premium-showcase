@@ -940,6 +940,23 @@ export interface HealthWeights {
   entrega: number;
 }
 
+/**
+ * Configuração do assistente de IA (ficha 22).
+ *
+ * Vem desligado, e ligar é uma escolha de quem administra. No Supabase isso
+ * mora na tabela `ai_settings` e vale para todo mundo; na demonstração em
+ * localStorage vale só naquele navegador.
+ */
+export interface AiSettings {
+  enabled: boolean;
+  model: string;
+  effort: "low" | "medium" | "high";
+  /** Teto de chamadas por dia. */
+  dailyLimit: number;
+  /** Ações liberadas. Lista vazia = todas as do catálogo. */
+  allowed: string[];
+}
+
 export interface Squad {
   id: string;
   name: string;
@@ -1211,6 +1228,8 @@ export interface Database {
   squads?: Squad[];
   /** Weights of the squad health score, editable by the agency. */
   healthWeights?: HealthWeights;
+  /** Assistente de IA (ficha 22). Ausente = desligado. */
+  aiSettings?: AiSettings;
   /** Stage automations, scoped per calendar. Admin-only. */
   automationRules?: AutomationRule[];
   /** Insert-only execution log for those automations. Admin-only. */

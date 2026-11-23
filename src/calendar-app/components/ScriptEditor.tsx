@@ -32,6 +32,8 @@ import {
   validateScript,
 } from "../scripts";
 import type { Post, Script, ScriptKind, ScriptScene, StoryScreenKind } from "../types";
+import { contextRoteiro, readSceneSuggestions } from "../ai";
+import AiDialog from "./AiDialog";
 
 /** How long each format usually takes, for the warning only. */
 const FORMAT_LIMIT: Record<ScriptKind, number> = { video: 90, stories: 15 * 40 };
@@ -212,6 +214,47 @@ export default function ScriptEditor({ post }: { post: Post }) {
             {field.label}
           </label>
         ))}
+      </div>
+
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <AiDialog
+          action="rascunhar_roteiro"
+          applyLabel={isStories ? "Usar estas telas" : "Usar estas cenas"}
+          context={() =>
+            contextRoteiro({
+              post: {
+                title: post.title,
+                description: post.description,
+                contentType: post.contentType,
+              },
+              clientName: "",
+              kind: draft.kind,
+              seconds: FORMAT_LIMIT[draft.kind],
+              tone: draft.tone,
+            })
+          }
+          onApply={(text) => {
+            const cenas = readSceneSuggestions(text);
+            if (cenas.length === 0) {
+              toast.error("Não consegui ler cenas nessa resposta. Tente perguntar de novo.");
+              return false;
+            }
+            // Substitui o rascunho: as cenas que havia continuam salvas na
+            // versão anterior do roteiro até alguém salvar esta.
+            set({
+              scenes: cenas.slice(0, MAX_SCENES[draft.kind]).map((c) => ({
+                ...newScene(draft.kind),
+                speech: c.fala,
+                onScreen: c.texto_na_tela,
+                shot: c.plano,
+                seconds: c.segundos ?? 5,
+              })),
+            });
+            toast.success(
+              `${cenas.length} ${isStories ? "tela(s)" : "cena(s)"} no rascunho. Revise e salve.`,
+            );
+          }}
+        />
       </div>
 
       <div className="flex flex-wrap items-center gap-3 text-[11px] text-muted-foreground">

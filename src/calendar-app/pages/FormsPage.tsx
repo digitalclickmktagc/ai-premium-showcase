@@ -29,6 +29,8 @@ import { cn } from "@/lib/utils";
 import AdminLayout from "../components/AdminLayout";
 import EmptyState from "../components/EmptyState";
 import ShareLink from "../components/ShareLink";
+import AiDialog from "../components/AiDialog";
+import { contextResumoFormulario } from "../ai";
 import { useApp } from "../store/AppProvider";
 import {
   QUESTION_KIND_LABEL,
@@ -36,7 +38,7 @@ import {
   summariseForm,
   validateForm,
 } from "../forms";
-import type { BriefingForm, FormQuestion, FormQuestionKind } from "../types";
+import type { BriefingForm, FormQuestion, FormQuestionKind, FormResponse } from "../types";
 import { formatTimestamp, shareToken, uid } from "../utils";
 
 const NONE = "__none__";
@@ -123,6 +125,7 @@ export default function FormsPage() {
               clients={clients}
               responseCount={formResponses.filter((r) => r.formId === selected.id).length}
               summary={summariseForm(selected, formResponses)}
+              allResponses={formResponses}
               onSave={saveForm}
               onDelete={async () => {
                 const count = formResponses.filter((r) => r.formId === selected.id).length;
@@ -151,6 +154,7 @@ function FormEditor({
   clients,
   responseCount,
   summary,
+  allResponses,
   onSave,
   onDelete,
 }: {
@@ -158,6 +162,7 @@ function FormEditor({
   clients: { id: string; name: string }[];
   responseCount: number;
   summary: ReturnType<typeof summariseForm>;
+  allResponses: FormResponse[];
   onSave: (f: BriefingForm) => Promise<BriefingForm>;
   onDelete: () => Promise<void>;
 }) {
@@ -445,7 +450,12 @@ function FormEditor({
               description="Mande o link para quem precisa responder."
             />
           ) : (
-            summary.map((item) => (
+            <>
+              <AiDialog
+                action="resumo_formulario"
+                context={() => contextResumoFormulario({ form, responses: allResponses })}
+              />
+              {summary.map((item) => (
               <section
                 key={item.questionId}
                 className={cn(
@@ -512,7 +522,8 @@ function FormEditor({
                   </ul>
                 )}
               </section>
-            ))
+              ))}
+            </>
           )}
         </TabsContent>
       </Tabs>

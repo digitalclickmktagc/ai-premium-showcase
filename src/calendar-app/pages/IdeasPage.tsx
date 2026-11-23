@@ -239,7 +239,7 @@ export default function IdeasPage() {
                 setFilter((f) => ({ ...f, tag: f.tag === tag ? undefined : tag }))
               }
               className={cn(
-                "rounded-full border px-2 py-0.5 text-[11px] transition-colors",
+                "inline-flex min-h-6 items-center rounded-full border px-2.5 py-1 text-[11px] transition-colors",
                 filter.tag === tag
                   ? "border-primary bg-primary/15 text-foreground"
                   : "border-border text-muted-foreground hover:text-foreground",
