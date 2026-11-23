@@ -12,7 +12,17 @@ calendar per client), with per-calendar client sharing.
   the Supabase dashboard. Without those env vars it falls back to a
   browser-local demo mode.
 
-Full documentation: **[`docs/EDITORIAL_CALENDAR.md`](docs/EDITORIAL_CALENDAR.md)**.
+Documentação:
+
+| Arquivo | Para quê |
+|---|---|
+| [`docs/O-QUE-FALTA-VOCE-FAZER.md`](docs/O-QUE-FALTA-VOCE-FAZER.md) | **Comece por aqui.** O passo a passo, em linguagem simples, do que depende só do titular: acordar o banco, rodar o SQL, subir o site, chave da IA. |
+| [`docs/AVALIACAO-FINAL.md`](docs/AVALIACAO-FINAL.md) | O que existe, o que ficou de fora e por quê, e a varredura de botões e rolagem. |
+| [`docs/PUBLICAR.md`](docs/PUBLICAR.md) | O passo a passo técnico de publicação, com os comandos. |
+| [`docs/decisoes-tomadas.md`](docs/decisoes-tomadas.md) | As 31 decisões de escopo já respondidas. |
+| [`docs/EDITORIAL_CALENDAR.md`](docs/EDITORIAL_CALENDAR.md) | Documentação completa do app. |
+| [`supabase/functions/README.md`](supabase/functions/README.md) | As três funções de servidor: e-mail do código, webhooks e assistente de IA. |
+
 Source lives under `src/calendar-app/`. The landing page (`/`) is unchanged.
 
 ## Project info
